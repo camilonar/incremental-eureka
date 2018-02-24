@@ -4,6 +4,7 @@ import numpy as np
 #Imports a dataset from a .csv and then converts it into a numpy.ndarray. It also maps the corresponding tags with the dictionary provided, if any
 def import_from_csv(route, dict = None):
     data = pd.read_csv(route)
+    #muestreoEstratificado(data,3000,"clase")
     if (dict!=None):
         keys_list = list(dict.keys())
         for key in keys_list:
@@ -43,3 +44,20 @@ def getDictIdentity(number):
     for i in range(number):
         dictIdentity[i] = identity[i]
     return dictIdentity;
+
+##realiza  un muestreo estratificado
+# recibe:  dataframe(data), el tamaño de la muestra , la columna donde se encuentra la clase (keyClasColumn)
+# retorna un dataframe ordenado por clase
+def muestreoEstratificado(datos,size,keyClassColumn):
+    clases = datos[keyClassColumn].unique();
+    sizeXClass = int(size/len(clases)) ;
+    frames = []
+    for clase in clases:
+        frames.append(datos.loc[datos[keyClassColumn] == clase].head(sizeXClass ))
+    return pd.concat(frames)
+
+
+
+
+
+
