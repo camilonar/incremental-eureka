@@ -1,10 +1,13 @@
 import pandas as pd
 import numpy as np
 
-#Imports a dataset from a .csv and then converts it into a numpy.ndarray. It also maps the corresponding tags with the dictionary provided, if any
-def import_from_csv(route, dict = None):
+#Imports a dataset from a .csv and then converts it into a numpy.ndarray. 
+#The class_name specifies the name of the column where the class label is located, which by default is "class".
+#It also maps the corresponding tags with the dictionary provided, if any
+def import_from_csv(route, class_name = "class", dict = None):
     data = pd.read_csv(route)
-    #muestreoEstratificado(data,3000,"clase")
+    data = muestreo_estratificado(data,len(data),class_name)
+    print(len(data))
     if (dict!=None):
         keys_list = list(dict.keys())
         for key in keys_list:
@@ -24,7 +27,7 @@ def divide_dataset(data, size):
 
 #Utility function that imports a dataset from a .csv, then shuffles it and finally divides it in training and test dataset	
 def prepare_data_from_csv(route, size, dict = None):
-    data_array = import_from_csv(route, dict)
+    data_array = import_from_csv(route, dict = dict)
     shuffle_data(data_array)
     training, testing = divide_dataset(data_array,size)
     return training, testing
@@ -37,7 +40,7 @@ def divide_x_and_y(data, position):
 
 
 
-##utilidad para crear un diccionario que contiene la matriz idenetidad
+#Utilidad para crear un diccionario que contiene la matriz identidad
 def getDictIdentity(number):
     dictIdentity ={}
     identity = np.identity(number)
@@ -45,12 +48,12 @@ def getDictIdentity(number):
         dictIdentity[i] = identity[i]
     return dictIdentity;
 
-##realiza  un muestreo estratificado
-# recibe:  dataframe(data), el tamaño de la muestra , la columna donde se encuentra la clase (keyClasColumn)
-# retorna un dataframe ordenado por clase
-def muestreoEstratificado(datos,size,keyClassColumn):
+# Realiza  un muestreo estratificado
+# Recibe:  dataframe(data), el tamaño de la muestra, la columna donde se encuentra la clase (keyClasColumn)
+# Retorna un dataframe ordenado por clase
+def muestreo_estratificado(datos,size,keyClassColumn):
     clases = datos[keyClassColumn].unique();
-    sizeXClass = int(size/len(clases)) ;
+    sizeXClass = int(size/len(clases));
     frames = []
     for clase in clases:
         frames.append(datos.loc[datos[keyClassColumn] == clase].head(sizeXClass ))

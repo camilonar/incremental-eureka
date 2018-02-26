@@ -18,14 +18,14 @@ def obtener_datasetMNIST():
 
 def obtener_datasetLetterRe():
     dict = {}
-    dict = ut.add_element_to_dict(dict, 'letter', dt.getDictIdentity(26))
+    dict = ut.add_element_to_dict(dict, 'class', dt.getDictIdentity(26))
     train, test = dt.prepare_data_from_csv("letter-recognition.csv", 15000, dict)
     trainX, trainY = dt.divide_x_and_y(train, 16)
     x_test, y_test = dt.divide_x_and_y(test, 16)
     trainY = np.squeeze(trainY)
     y_test = np.squeeze(y_test)
 
-    # El stack se hace para que no que como array de arrays, sino como matriz (o un array multidimensional)
+    # El stack se hace para que no quede como array de arrays, sino como matriz (o un array multidimensional)
     trainY = np.stack(trainY)
     y_test = np.stack(y_test)
 
@@ -107,16 +107,17 @@ archivo.write("type;seed;first_batch;second_batch\n")
 tf.reset_default_graph()
 tf.set_random_seed(59)
 
-trainX, trainY, x_test, y_test = obtener_datasetSatelite()
-#trainX, trainY, x_test, y_test = obtener_datasetLetterRe()
+#trainX, trainY, x_test, y_test = obtener_datasetSatelite()
+trainX, trainY, x_test, y_test = obtener_datasetLetterRe()
 
 # ------------VALORES-------------
 n_output = trainY.shape[1]
 input_layer = trainX.shape[1]
 
-size_batch = 2400
-size_second_batch = 2000
-n_hidden = 250
+size_batch = 10000
+size_second_batch = 5000
+n_hidden = 70
+n_hidden_2 = 50
 seeds = []
 frontera_x = []
 frontera_y = []
@@ -153,18 +154,17 @@ for k in range(3):
         x_pesos = tf.placeholder(tf.float32, [None, n_output])
         x = tf.placeholder(tf.float32, [None, input_layer])  # representa la entrada
         y_ = tf.placeholder(tf.float32, [None, n_output])  # representa la salida deseada
-        hidden1 = nn.nn_layer(x, input_layer, n_hidden, 'layer1', tf.nn.tanh)
-        y = nn.nn_layer(hidden1, n_hidden, n_output, 'layer2', tf.nn.tanh)
+        y = nn.create_neural_net(x,[input_layer,n_hidden,n_hidden_2,n_output], act=tf.nn.tanh)
         mse = tf.reduce_mean(tf.square(y - y_) * x_pesos)
-        train_step = tf.train.AdamOptimizer(0.0001).minimize(mse)
+        train_step = tf.train.AdamOptimizer(0.004).minimize(mse)
         archivo.write(str(k) + ";" + str(seeds[iteration]) + ';')
         init = tf.global_variables_initializer()
         sess = tf.InteractiveSession()
         sess.run(init)
-        for i in range(1000):
+        for i in range(500):
             _, c = sess.run([train_step, mse], feed_dict={x: trainX_B1, y_: trainY_B1, x_pesos: x_pesosDefault})
             if i % 10 == 0:
-                print(i * 100 / 150, " val->", c)
+                print(i * 100 / 150, " val-> OK")
         print("\n:::PROBANDO:::::::::::\n")
         test_results, _ = probar_dataset(sess, trainX_B1, trainY_B1, x_test, y_test)
         archivo.write(str(test_results) + ';')
@@ -172,11 +172,11 @@ for k in range(3):
             archivo.write('\n')
             continue
         delta_f = 0.2
-        delta_c = 0.6
+        delta_c = 0.55
         x_pesosConRep = np.full((len(trainX_B2), n_output), 1)
         if (k == REPRESENTANTES):
-            _, frontera_x, frontera_y = co.get_fronteras(sess, x, y, y_, trainX_B1, trainY_B1, delta_f, 200)
-            _, centros_x, centros_y = co.get_centros(sess, x, y, y_, trainX_B1, trainY_B1, delta_c, 200)
+            _, frontera_x, frontera_y = co.get_fronteras(sess, x, y, y_, trainX_B1, trainY_B1, delta_f, 250)
+            _, centros_x, centros_y = co.get_centros(sess, x, y, y_, trainX_B1, trainY_B1, delta_c, 20)
             x_pesosConRep = np.append(x_pesosConRep, np.full((len(frontera_x) + len(centros_x), n_output), 3), axis=0)
             trainX_B2_aux = np.concatenate((trainX_B2, np.asanyarray(frontera_x)), axis=0)
             trainX_B2_aux = np.concatenate((trainX_B2_aux, np.asanyarray(centros_x)), axis=0)
@@ -191,10 +191,10 @@ for k in range(3):
             trainY_B2_aux = np.copy(trainY_B2)
         print("\n ::::::ENTRENANDO SEGUNDO LOTE CON :::::::\n")
 
-        for i in range(1000):  # gradiente descendente estocastico
+        for i in range(500):  # gradiente descendente estocastico
             _, c = sess.run([train_step, mse], feed_dict={x: trainX_B2_aux, y_: trainY_B2_aux, x_pesos: x_pesosConRep})
             if i % 500 == 0:
-                print(c)
+                print('OK')
         test_results, _ = probar_dataset(sess, trainX_B2, trainY_B2, x_test, y_test)
         probar_dataset(sess, trainX_B1, trainY_B1, x_test, y_test)
         archivo.write(str(test_results) + '\n')
