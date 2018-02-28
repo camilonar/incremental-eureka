@@ -11,16 +11,14 @@ from tensorflow.examples.tutorials.mnist import input_data
 
 from optparse import OptionParser
 
-
 def obtener_datasetMNIST():
     mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
     return mnist.train.images, mnist.train.labels, mnist.test.images, mnist.test.labels
 
-
-def obtener_datasetLetterRe():
+def obtener_datasetLetterRe(size):
     dict = {}
-    dict = ut.add_element_to_dict(dict, 'class', dt.getDictIdentity(26))
-    train, test = dt.prepare_data_from_csv("letter-recognition.csv", 15000, dict)
+    dict = ut.add_element_to_dict(dict, 'class', dt.get_dict_identity(26))
+    train, test = dt.prepare_data_from_csv("letter-recognition.csv", size, dict)
     trainX, trainY = dt.divide_x_and_y(train, 16)
     x_test, y_test = dt.divide_x_and_y(test, 16)
     trainY = np.squeeze(trainY)
@@ -32,13 +30,12 @@ def obtener_datasetLetterRe():
 
     return trainX, trainY, x_test, y_test
 
-
-def obtener_datasetSatelite():
+def obtener_datasetSatelite(size):
     identity = np.identity(7)
     dict = {}
-    dict = ut.add_element_to_dict(dict, 'clase', dt.getDictIdentity(7))
+    dict = ut.add_element_to_dict(dict, 'clase', dt.get_dict_identity(7))
     ##paso completamente el archivo a entrenamiento
-    train, _ = dt.prepare_data_from_csv("sattrain.csv", 4435, dict)
+    train, _ = dt.prepare_data_from_csv("sattrain.csv", size, dict)
     ##paso completamente el archivo a entrenamiento
     _, test = dt.prepare_data_from_csv("sattest.csv", 0, dict)
     trainX, trainY = dt.divide_x_and_y(train, 36)
@@ -49,11 +46,6 @@ def obtener_datasetSatelite():
     y_test = np.stack(y_test)
     trainY = np.stack(trainY)
     return trainX, trainY, x_test, y_test
-
-
-# Divides a dataset in two parts
-def split_dataset(x, y, offset, size):
-    return x[offset:size], y[offset:size]
 
 # Aux. function for configuring parsing options
 def config_parser():
@@ -66,7 +58,6 @@ def config_parser():
                       help="Doesn't execute the version with the whole batch")
     parser.add_option("-i", "--iterations", type="int", dest="iterations", default=5, help="Number of tests to be done")
     return parser
-
 
 # Aux. function for knowing if a test must be skipped, according to the parameters (options) given by the user
 def skip_test(mode, options):
@@ -90,15 +81,15 @@ parser = config_parser()
 archivo = open("resultados.txt", 'w')
 archivo.write("type;seed;first_batch;second_batch\n")
 
-#trainX, trainY, x_test, y_test = obtener_datasetSatelite()
-trainX, trainY, x_test, y_test = obtener_datasetLetterRe()
+#trainX, trainY, x_test, y_test = obtener_datasetSatelite(4435)
+trainX, trainY, x_test, y_test = obtener_datasetLetterRe(15000)
 
 # ------------VALORES-------------
 n_output = trainY.shape[1]
 input_layer = trainX.shape[1]
 
-size_batch = 10000
-size_second_batch = 5000
+size_batch1 = 10000
+n_extra_batches = 5 #Número de lotes incrementales
 n_hidden = 70
 n_hidden_2 = 50
 seeds = []
@@ -107,17 +98,18 @@ frontera_y = []
 centros_x = []
 centros_y = []
 # ---------------------------------
+trainX_B1, trainX_B2 = dt.divide_dataset(trainX, size_batch1)
+trainY_B1, trainY_B2 = dt.divide_dataset(trainY, size_batch1)
 
-trainX_B1, trainY_B1 = split_dataset(trainX, trainY, 0, size_batch)  # obtenemos los datos para el primer batch
-trainX_B2, trainY_B2 = split_dataset(trainX, trainY, size_batch,
-                                     size_batch + size_second_batch)  # obtenemos los datos para el segundo batch - se obtienen los siguientes 1000 datos
+x_batches = dt.divide_dataset_multiple(trainX_B2,n_extra_batches)
+y_batches = dt.divide_dataset_multiple(trainY_B2,n_extra_batches)
 
 print("Size first batch : ", trainX_B1.shape)
 print("Size second batch : ", trainX_B2.shape)
 
 for j in range(options.iterations):
     seeds = np.append(seeds, random.randint(1, 100))
-seeds = [5]
+
 for k in range(3):
     # Se salta la prueba si corresponde con las opciones
     if skip_test(k, options):
@@ -126,9 +118,10 @@ for k in range(3):
     if (k == COMPLETO):
         trainX_B1 = np.concatenate((trainX_B1, trainX_B2), axis=0)
         trainY_B1 = np.concatenate((trainY_B1, trainY_B2), axis=0)
-        x_pesosDefault = np.append(x_pesosDefault, np.full((size_second_batch, n_output), 1), axis=0)
 
     for iteration in range(options.iterations):
+        #-----------------------------------------------------
+        #TODO Introducir esta parte del código en una función
         tf.reset_default_graph()
         tf.set_random_seed(seeds[iteration])  # fijamos un valor para la semilla de numeros aleatorios de tensor
         x = tf.placeholder(tf.float32, [None, input_layer])  # representa la entrada
@@ -138,6 +131,7 @@ for k in range(3):
         init = tf.global_variables_initializer()
         sess = tf.InteractiveSession()
         sess.run(init)
+        #------------------------------------------------------
         #Se entrena el primer lote
         test_results = configuration.run_basic_test(tf, sess, 500, trainX_B1, trainY_B1)
         archivo.write(str(test_results) + ';')
@@ -146,15 +140,19 @@ for k in range(3):
             continue
         delta_f = 0.2
         delta_c = 0.55
-        print("\n ::::::ENTRENANDO SEGUNDO LOTE CON :::::::\n")
-        #Se entrena el segundo lote
+        
         if (k == REPRESENTANTES):
-            _, frontera_x, frontera_y = co.get_fronteras(sess, configuration.x, configuration.y, configuration.y_, trainX_B1, trainY_B1, delta_f, 250)
-            _, centros_x, centros_y = co.get_centros(sess, configuration.x, configuration.y, configuration.y_, trainX_B1, trainY_B1, delta_c, 20)
-            test_results = configuration.run_prototypes_test(tf, sess, 500, trainX_B2, trainY_B2, frontera_x, frontera_y, centros_x, centros_y)
-        else:
-            test_results = configuration.run_basic_test(tf, sess, 500, trainX_B2, trainY_B2)
-        archivo.write(str(test_results) + '\n')
+                _, frontera_x, frontera_y = co.get_fronteras(sess, configuration.x, configuration.y, configuration.y_, trainX_B1, trainY_B1, delta_f, 100)
+                _, centros_x, centros_y = co.get_centros(sess, configuration.x, configuration.y, configuration.y_, trainX_B1, trainY_B1, delta_c, 10)
+        
+        for b in range(len(x_batches)):
+            print("\n ::::::ENTRENANDO INCREMENTALMENTE :::::::\n")
+            if (k == REPRESENTANTES):
+                test_results = configuration.run_prototypes_test(tf, sess, 500, x_batches[b], y_batches[b], frontera_x, frontera_y, centros_x, centros_y)
+            else:
+                test_results = configuration.run_basic_test(tf, sess, 500, x_batches[b], y_batches[b])
+            archivo.write(str(test_results) + ';')
+        archivo.write('\n')
         sess.close()
 
 archivo.close()
