@@ -11,6 +11,7 @@ def get_fronteras (sess,x,y,y_,x_input,y_input,delta,nFrontera=None):
         prueba_pred  = sess.run(y,feed_dict={x: x_input[i].reshape(1,input_layer), y_:y_input[i].reshape(1,output_layer)})
         aux_= np.sort(prueba_pred)
         diferencia = aux_[0][aux_.shape[1]-1]-aux_[0][aux_.shape[1]-2]
+
         if(diferencia<delta):
             fronteras= np.concatenate((fronteras,[[np.array(x_input[i]),np.array(y_input[i]),diferencia]]),axis=0)
            # frontera_x.append(x_input[i])

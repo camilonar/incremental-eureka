@@ -56,7 +56,7 @@ def prepare_data_from_csv(route, size, dict = None):
     it and finally divides it in training and test dataset
     '''
     data_array = import_from_csv(route, dict = dict)
-    shuffle_data(data_array)
+    #shuffle_data(data_array)
     training, testing = divide_dataset(data_array,size)
     return training, testing
 
