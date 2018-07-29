@@ -4,13 +4,16 @@ Module containing various useful neural networks models
 
 import tensorflow as tf
 from tensorflow.contrib.layers import flatten
-
+from network import Network
 
 # TODO: revisar las funciones de activación
 # TODO: agregar líneas necesarias para los summaries
-def LeNet(input):
+from network import Network
+
+
+def create_LeNet(input):
     """
-    Creates a NeuralNer with LeNet-5 architecture. This code was taken and adapted from:
+    Creates a Neural Net with LeNet-5 architecture. This code was taken and adapted from:
     https://github.com/sujaybabruwad/LeNet-in-Tensorflow
     :param input: the input tensor of the network. It must follow the shape [None,32,32,C], where C is the number
     of color channels of the images, and C>=1. If the images are grayscale then C=1.
@@ -74,3 +77,35 @@ def LeNet(input):
     fc3_b = tf.Variable(tf.zeros(layer_depth['outputs']))
     logits = tf.matmul(fc2, fc3_w) + fc3_b
     return logits
+
+
+# TODO: revisar las funciones de activación
+# TODO: agregar líneas necesarias para los summaries
+# TODO: modificar la red para adaptarla a los valores de los artículos
+class CaffeNet(Network):
+    def setup(self):
+        """
+        Creates a Neural Net with a simplified CaffeNet architecture. The input data must have been previously set in
+         the constructor of the object as 'data'.
+         E.g.:
+            net = CaffeNet({'data': input_tensor})
+
+         This code was taken and adapted from:
+            https://github.com/ethereon/caffe-tensorflow
+        :return: an instance of CaffeNet
+        """
+        (self.feed('data')
+         .conv(11, 11, 96, 4, 4, padding='VALID', name='conv1')
+         .max_pool(3, 3, 2, 2, padding='VALID', name='pool1')
+         .lrn(2, 2e-05, 0.75, name='norm1')
+         .conv(5, 5, 256, 1, 1, group=2, name='conv2')
+         .max_pool(3, 3, 2, 2, padding='VALID', name='pool2')
+         .lrn(2, 2e-05, 0.75, name='norm2')
+         .conv(3, 3, 384, 1, 1, name='conv3')
+         .conv(3, 3, 384, 1, 1, group=2, name='conv4')
+         .conv(3, 3, 256, 1, 1, group=2, name='conv5')
+         .max_pool(3, 3, 2, 2, padding='VALID', name='pool5')
+         .fc(4096, name='fc6')
+         .fc(4096, name='fc7')
+         .fc(1000, relu=False, name='fc8')
+         .softmax(name='prob'))
