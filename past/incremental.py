@@ -1,11 +1,7 @@
-import sys
 import random
-import dataset as dt
-import utils as ut
+from past import dataset as dt, train_conf_past as conf, utils_past as ut, nnet as nn
 import numpy as np
-import nnet as nn
 import core as co
-import train_conf as conf
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 
@@ -18,7 +14,7 @@ def obtener_datasetMNIST():
 def obtener_datasetLetterRe(size):
     dict = {}
     dict = ut.add_element_to_dict(dict, 'class', dt.get_dict_identity(26))
-    train, test = dt.prepare_data_from_csv("letter-recognition.csv", size, dict)
+    train, test = dt.prepare_data_from_csv("datasets/letter-recognition.csv", size, dict)
     trainX, trainY = dt.divide_x_and_y(train, 16)
     x_test, y_test = dt.divide_x_and_y(test, 16)
     trainY = np.squeeze(trainY)
@@ -35,9 +31,9 @@ def obtener_datasetSatelite(size):
     dict = {}
     dict = ut.add_element_to_dict(dict, 'clase', dt.get_dict_identity(7))
     ##paso completamente el archivo a entrenamiento
-    train, _ = dt.prepare_data_from_csv("sattrain.csv", size, dict)
+    train, _ = dt.prepare_data_from_csv("datasets/sattrain.csv", size, dict)
     ##paso completamente el archivo a entrenamiento
-    _, test = dt.prepare_data_from_csv("sattest.csv", 0, dict)
+    _, test = dt.prepare_data_from_csv("datasets/sattest.csv", 0, dict)
     trainX, trainY = dt.divide_x_and_y(train, 36)
     x_test, y_test = dt.divide_x_and_y(test, 36)
     trainY = np.squeeze(trainY)
@@ -140,7 +136,6 @@ for k in range(3):
             continue
         delta_f = 0.2
         delta_c = 0.55
-        
         if (k == REPRESENTANTES):
                 _, frontera_x, frontera_y = co.get_fronteras(sess, configuration.x, configuration.y, configuration.y_, trainX_B1, trainY_B1, delta_f, 100)
                 _, centros_x, centros_y = co.get_centros(sess, configuration.x, configuration.y, configuration.y_, trainX_B1, trainY_B1, delta_c, 10)

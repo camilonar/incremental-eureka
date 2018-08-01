@@ -1,76 +1,62 @@
-import numpy as np
+"""
+Module for the configuration of training that is going to be used.
+There are two classes:
+    1. GeneralConfig, which has the configuration data for the whole training (including the incremental learning)
+    2. TrainConfig, which has the configuration data for a specific increment of data
+"""
 
-class TrainingConfiguration:
-    """A class for the configuration of the training of a 
-    Neural Network
+
+class TrainConfig:
     """
-    
-    def __init__(self, tf, x, y, x_test, y_test):
-        """It allows the creation of a new TrainingConfiguration.
-        tf is the tensorflow module used in the main thread,
-        x is the input placeholder tensor
-        y is the output layer of the network 
-        x_test and y_test are the test dataset inputs and outputs respectively
-        """
-        n_outputs = y.get_shape()[1]
-        self.x = x
-        self.y_ = tf.placeholder(tf.float32, [None, n_outputs]) #Represents the desired output
-        self.x_weights = tf.placeholder(tf.float32, [None, n_outputs]) #Represents the weights of the instances
-        self.y = y
-        self.mse = tf.reduce_mean(tf.square(self.y - self.y_) * self.x_weights)
-        self.train_step = tf.train.AdamOptimizer(0.004).minimize(self.mse)
-        self.x_test = x_test
-        self.y_test = y_test
-    
-    def __train_net(self, tf, sess, iterations, x_batch, y_batch, x_weights_values):
-        """It trains the net with the previously configured parameters and also
-        test the performance of the net against the test dataset
-        """
-        for i in range(iterations):
-            _, c = sess.run([self.train_step, self.mse], feed_dict={self.x: x_batch, self.y_: y_batch, self.x_weights: x_weights_values})
-            if i % 10 == 0:
-                print(i * 100 / iterations, " val-> OK")
-        
-        test_results, _ = self.test_dataset(tf, sess, x_batch, y_batch, self.x_test, self.y_test)
-        return test_results
-    
-    def run_basic_test(self, tf, sess, iterations, x_batch, y_batch):
-        """It will run a test with the defined session, iterations and batch.
-        The test runs a basic version of a training algorithm, i.e. there's no
-        special method of training
-        """
-        x_weights_values = np.full((len(x_batch), self.y.get_shape()[1]), 1)
-        
-        print("\n:::PROBANDO:::::::::::\n")
-        return self.__train_net(tf, sess, iterations, x_batch, y_batch, x_weights_values)
-        
-    def run_prototypes_test(self, tf, sess, iterations, x_batch, y_batch, x_frontiers, y_frontiers, x_kernels, y_kernels):
-        """It will run a test with the defined session, iterations and batch.
-        The test runs a a version of the algorithm with prototype selections
-        The frontiers should be instances where the neural net is unsure
-        of the classification, while the kernels should be the opposite
-        """
-        x_weights_values = np.full((len(x_batch), self.y.get_shape()[1]), 1)
-        x_weights_values = np.append(x_weights_values, np.full((len(x_frontiers) + len(x_kernels), self.y.get_shape()[1]), 3), axis=0)
-        x_batch_aux = np.concatenate((x_batch, np.asanyarray(x_frontiers)), axis=0)
-        x_batch_aux = np.concatenate((x_batch_aux, np.asanyarray(x_kernels)), axis=0)
-        y_batch_aux = np.concatenate((y_batch, np.asanyarray(y_frontiers)), axis=0)
-        y_batch_aux = np.concatenate((y_batch_aux, np.asanyarray(y_kernels)), axis=0)
-        
-        print("\n:::PROBANDO PROTOTIPOS:::::::::::\n")
-        return self.__train_net(tf, sess, iterations, x_batch_aux, y_batch_aux, x_weights_values)
-    
-    def test_dataset(self, tf, sess, x_input_v, y_input_v, x_test_v, y_test_v):
-        """Test the neural network against the training dataset and a test 
-        dataset to review performance
-        """
-        correct_prediction = tf.equal(tf.argmax(self.y, 1), tf.argmax(self.y_, 1))
-        accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+    Configuration for training based on a batch of data. This is used for a specific increment of data
+    """
 
-        test_result = 1.0 - sess.run(accuracy, feed_dict={self.x: x_test_v, self.y_: y_test_v})
-        train_result = 1.0 - sess.run(accuracy, feed_dict={self.x: x_input_v, self.y_: y_input_v})
+    def __init__(self, epochs: int, batch_size=100):
+        """
+        Creates a TrainConfig object
+        :param epochs: number of epochs for the training
+        :param batch_size: the sizes of the batches that are going to be used in training. This is different from the
+        number of instances of each incremental training. E.g. An incremental training may be of a total of 1000
+        samples using batches with batch_size 100
+        """
+        self.epochs = epochs
+        self.batch_size = batch_size
 
-        print("Resultados Test: " + str(test_result))
-        print("Resultados Training: " + str(train_result))
 
-        return test_result, train_result
+class GeneralConfig:
+    """
+    General configuration that it's used for the whole training. E.g. if the training is composed of 5 different batches
+    of data, then this part of the configuration is used for ALL of them
+    """
+
+    def __init__(self, learn_rate: float, momentum: float,
+                 summary_interval=100, eval_interval=200, config_name='default', model_name='dataset_default'):
+        """
+        Creates a GeneralConfig object
+        :param learn_rate: the learning rate to be used in the training
+        :param momentum: the momentum to be used in the training
+        :param summary_interval: the interval of iterations at which the summaries are going to be performed
+        :param eval_interval: the interval of iterations at which the evaluations are going to be performed. Must be an
+        integer multiple of summary_interval
+        :param config_name: a descriptive name for the training configuration
+        :param model_name: a descriptive name for the model
+        """
+        self.learn_rate = learn_rate
+        self.momentum = momentum
+        self.summary_interval = summary_interval
+        self.eval_interval = eval_interval
+        self.config_name = config_name
+        self.model_name = model_name
+        self.train_configurations = []  # It stores the configurations for each mega batch of training data
+        # model_name = 'vgg_16'  # choose model
+        # model = staticmethod(globals()[model_name])  # gets model by name
+
+    def add_train_conf(self, train_conf: TrainConfig):
+        """
+        Adds a TrainConfig object to the list of mega-batch-specific configurations. The objects must be added in
+        the same order as how they are going to be used (i.e. the configuration for the first batch must be added first,
+        for the second batch must be added second, ...)
+        :param train_conf: a configuration for a mega batch of data
+        :return: None
+        """
+        self.train_configurations.append(train_conf)
