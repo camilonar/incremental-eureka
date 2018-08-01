@@ -60,3 +60,55 @@ class CaffeNet(Network):
          .fc(512, name='fc6')
          .fc(200, relu=False, name='fc8')
          .softmax(name='prob'))
+
+
+# TODO: revisar las funciones de activación
+# TODO: agregar líneas necesarias para los summaries
+# TODO: modificar la red para adaptarla a los valores de los artículos
+class VGGNet(Network):
+    def setup(self):
+        """
+        Creates a Neural Net with a VGG16 architecture. The input data must have been previously set in
+         the constructor of the object as 'data'.
+         E.g.:
+            net = VGGNet({'data': input_tensor})
+        :return: None
+        """
+        (self.feed('data')
+         .conv(3, 3, 64, 1, 1, padding='SAME', name='conv1_1')
+         .conv(3, 3, 64, 1, 1, padding='SAME', name='conv1_2')
+         .max_pool(2, 2, 2, 2, padding='SAME', name='pool1')
+         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv2_1')
+         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv2_2')
+         .max_pool(2, 2, 2, 2, padding='SAME', name='pool2')
+         .conv(3, 3, 256, 1, 1, padding='SAME', name='conv3_1')
+         .conv(3, 3, 256, 1, 1, padding='SAME', name='conv3_2')
+         .conv(3, 3, 256, 1, 1, padding='SAME', name='conv3_3')
+         .max_pool(2, 2, 2, 2, padding='SAME', name='pool3')
+         .conv(3, 3, 512, 1, 1, padding='SAME', name='conv4_1')
+         .conv(3, 3, 512, 1, 1, padding='SAME', name='conv4_2')
+         .conv(3, 3, 512, 1, 1, padding='SAME', name='conv4_3')
+         .max_pool(2, 2, 2, 2, padding='SAME', name='pool4')
+         .conv(3, 3, 512, 1, 1, padding='SAME', name='conv5_1')
+         .conv(3, 3, 512, 1, 1, padding='SAME', name='conv5_2')
+         .conv(3, 3, 512, 1, 1, padding='SAME', name='conv5_3')
+         .max_pool(2, 2, 2, 2, padding='SAME', name='pool5')
+         .fc(4096, name='fc6')
+         .fc(4096, name='fc7')
+         .fc(101, name='fc8')
+         .softmax(name='prob'))
+
+
+# TODO: revisar las funciones de activación
+# TODO: agregar líneas necesarias para los summaries
+# TODO: modificar la red para adaptarla a los valores de los artículos
+class AlexsNet(Network):
+    def setup(self):
+        """
+        Creates a Neural Net with a Alex's Net architecture. The input data must have been previously set in
+         the constructor of the object as 'data'.
+         E.g.:
+            net = AlexsNet({'data': input_tensor})
+        :return: None
+        """
+        pass
