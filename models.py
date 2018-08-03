@@ -2,12 +2,9 @@
 Module containing various useful neural networks models
 """
 
-import tensorflow as tf
-from tensorflow.contrib.layers import flatten
 from network import Network
 
 
-# TODO: revisar las funciones de activación
 # TODO: agregar líneas necesarias para los summaries
 class LeNet(Network):
     def setup(self):
@@ -31,9 +28,7 @@ class LeNet(Network):
          .fc(10, relu=False, name='fc3'))
 
 
-# TODO: revisar las funciones de activación
 # TODO: agregar líneas necesarias para los summaries
-# TODO: modificar la red para adaptarla a los valores de los artículos
 class CaffeNet(Network):
     def setup(self):
         """
@@ -62,9 +57,7 @@ class CaffeNet(Network):
          .softmax(name='prob'))
 
 
-# TODO: revisar las funciones de activación
 # TODO: agregar líneas necesarias para los summaries
-# TODO: modificar la red para adaptarla a los valores de los artículos
 class VGGNet(Network):
     def setup(self):
         """
@@ -99,7 +92,6 @@ class VGGNet(Network):
          .softmax(name='prob'))
 
 
-# TODO: revisar las funciones de activación
 # TODO: agregar líneas necesarias para los summaries
 # TODO: modificar la red para adaptarla a los valores de los artículos
 class AlexsNet(Network):

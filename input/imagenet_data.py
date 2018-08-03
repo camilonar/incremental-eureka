@@ -6,6 +6,12 @@
 #
 # TODO: 23 images are not jpeg and should be used with the according decoder.
 
+###############################################################################
+# NOTE: this code has been modified from the original version of Imanol Schlag
+# to be in line with the architecture of this program
+#
+
+
 """ Usage:
 import tensorflow as tf
 sess = tf.Session()
@@ -24,10 +30,11 @@ import tensorflow as tf
 import numpy as np
 import threading
 
-from input import imagenet as imagenet
+from input import imagenet_reader as imagenet
+from input.data import Data
 
 
-class imagenet_data:
+class ImagenetData(Data):
     """
     Downloads the imagenet dataset and creates an input pipeline ready to be fed into a model.
 
@@ -49,8 +56,8 @@ class imagenet_data:
     NUMBER_OF_CLASSES = 200
     TRAIN_SET_SIZE = len(imagenet.data.train_filenames)  # 1281167 # ~250MB for string with paths
     TEST_SET_SIZE = len(imagenet.data.val_filenames)  # 50000
-    IMAGE_HEIGHT = 299
-    IMAGE_WIDTH = 299
+    IMAGE_HEIGHT = 256
+    IMAGE_WIDTH = 256
     NUM_OF_CHANNELS = 3
 
     def __init__(self, batch_size, sess,
@@ -62,22 +69,20 @@ class imagenet_data:
                  image_width=IMAGE_WIDTH):
         """ Downloads the data if necessary. """
         print("Loading imagenet data")
-        self.batch_size = batch_size
+        my_imagenet = imagenet.ImagenetReader()
+        super().__init__(batch_size, sess, my_imagenet, image_height, image_width)
         self.filename_feed_size = filename_feed_size
         self.filename_queue_capacity = filename_queue_capacity
         self.batch_queue_capacity = batch_queue_capacity + 3 * batch_size
         self.min_after_dequeue = min_after_dequeue
-        self.sess = sess
-        self.IMAGE_HEIGHT = image_height
-        self.IMAGE_WIDTH = image_width
-        imagenet.check_if_downloaded()
+        self.data_reader.check_if_downloaded()
 
     def build_train_data_tensor(self, shuffle=False, augmentation=False):
-        img_path, cls = imagenet.load_training_data()
+        img_path, cls = self.data_reader.load_training_data()
         return self.__build_generic_data_tensor(img_path, cls, shuffle, augmentation)
 
     def build_test_data_tensor(self, shuffle=False, augmentation=False):
-        img_path, cls = imagenet.load_test_data()
+        img_path, cls = self.data_reader.load_test_data()
         return self.__build_generic_data_tensor(img_path, cls, shuffle, augmentation)
 
     def __build_generic_data_tensor(self, all_img_paths, all_targets, shuffle, augmentation):
@@ -158,9 +163,6 @@ class imagenet_data:
         enqueue_thread.start()
 
         return images_batch, target_batch
-
-    def __del__(self):
-        self.close()
 
     def close(self):
         self.filename_queue.close(cancel_pending_enqueues=True)

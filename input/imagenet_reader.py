@@ -7,15 +7,18 @@
 #  utils/imagenet_download/run_me.sh
 #
 
+# TODO Adaptar al formato con múltiples mega-batches
 import tensorflow as tf
 import random
 import os
 
-train_dir = "../../datasets/tiny-imagenet-200/train/"
-validation_dir = "../../datasets/tiny-imagenet-200/val/"
-labels_file = "../../datasets/tiny-imagenet-200/wnids.txt"
-metadata_file = "../../datasets/tiny-imagenet-200/words.txt"
-bounding_box_file = "../../datasets/tiny-imagenet-200/bounding_boxes.xml"
+from input.reader import Reader
+
+train_dir = "../datasets/tiny-imagenet-200/train/"
+validation_dir = "../datasets/tiny-imagenet-200/val/"
+labels_file = "../datasets/tiny-imagenet-200/wnids.txt"
+metadata_file = "../datasets/tiny-imagenet-200/words.txt"
+bounding_box_file = "../datasets/tiny-imagenet-200/bounding_boxes.xml"
 
 
 ###############################################################################
@@ -200,37 +203,35 @@ def _build_bounding_box_lookup(bounding_box_file):
 
 ###############################################################################
 
-class imagenet_data:
-    synset_to_human = _build_synset_lookup(metadata_file)
-    image_to_bboxes = _build_bounding_box_lookup(bounding_box_file)
+class ImagenetReader(Reader):
 
-    val_filenames, val_synsets, val_labels = _find_image_files(validation_dir, labels_file)
-    train_filenames, train_synsets, train_labels = _find_image_files(train_dir, labels_file)
-    humans = _find_human_readable_labels(val_synsets, synset_to_human)
+    def __init__(self):
+        self.synset_to_human = _build_synset_lookup(metadata_file)
+        self.image_to_bboxes = _build_bounding_box_lookup(bounding_box_file)
 
+        self.val_filenames, self.val_synsets, self.val_labels = _find_image_files(validation_dir, labels_file)
+        self.train_filenames, self.train_synsets, self.train_labels = _find_image_files(train_dir, labels_file)
+        self.humans = _find_human_readable_labels(self.val_synsets, self.synset_to_human)
 
-def check_if_downloaded():
-    if os.path.exists(train_dir):
-        print("Train directory seems to exist")
-    else:
-        raise Exception("Train directory doesn't seem to exist.")
+    def check_if_downloaded(self):
+        if os.path.exists(train_dir):
+            print("Train directory seems to exist")
+        else:
+            raise Exception("Train directory doesn't seem to exist.")
 
-    if os.path.exists(validation_dir):
-        print("Validation directory seems to exist")
-    else:
-        raise Exception("Validation directory doesn't seem to exist.")
+        if os.path.exists(validation_dir):
+            print("Validation directory seems to exist")
+        else:
+            raise Exception("Validation directory doesn't seem to exist.")
 
+    def load_class_names(self):
+        return data.humans
 
-def load_class_names():
-    return data.humans
+    def load_training_data(self):
+        return data.train_filenames, data.train_labels
 
-
-def load_training_data():
-    return data.train_filenames, data.train_labels
-
-
-def load_test_data():
-    return data.val_filenames, data.val_labels
+    def load_test_data(self):
+        return data.val_filenames, data.val_labels
 
 
-data = imagenet_data()
+data = ImagenetReader()
