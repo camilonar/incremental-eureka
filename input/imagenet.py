@@ -11,11 +11,12 @@ import tensorflow as tf
 import random
 import os
 
-train_dir = "C:/Users/camil/Downloads/tiny-imagenet-200/tiny-imagenet-200/train/"
-validation_dir = "C:/Users/camil/Downloads/tiny-imagenet-200/tiny-imagenet-200/val/"
-labels_file = "C:/Users/camil/Downloads/tiny-imagenet-200/tiny-imagenet-200/wnids.txt"
-metadata_file = "C:/Users/camil/Downloads/tiny-imagenet-200/tiny-imagenet-200/words.txt"
-bounding_box_file = "C:/Users/camil/Downloads/tiny-imagenet-200/tiny-imagenet-200/bounding_boxes.xml"
+train_dir = "../../datasets/tiny-imagenet-200/train/"
+validation_dir = "../../datasets/tiny-imagenet-200/val/"
+labels_file = "../../datasets/tiny-imagenet-200/wnids.txt"
+metadata_file = "../../datasets/tiny-imagenet-200/words.txt"
+bounding_box_file = "../../datasets/tiny-imagenet-200/bounding_boxes.xml"
+
 
 ###############################################################################
 # Some TensorFlow Inception functions (ported to python3)

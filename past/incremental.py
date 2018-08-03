@@ -8,7 +8,7 @@ from tensorflow.examples.tutorials.mnist import input_data
 from optparse import OptionParser
 
 def obtener_datasetMNIST():
-    mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
+    mnist = input_data.read_data_sets("../../datasets/MNIST_data/", one_hot=True)
     return mnist.train.images, mnist.train.labels, mnist.test.images, mnist.test.labels
 
 def obtener_datasetLetterRe(size):

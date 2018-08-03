@@ -6,7 +6,7 @@ There are two classes:
 """
 
 
-class TrainConfig:
+class TrainConfig(object):
     """
     Configuration for training based on a batch of data. This is used for a specific increment of data
     """
@@ -23,7 +23,7 @@ class TrainConfig:
         self.batch_size = batch_size
 
 
-class GeneralConfig:
+class GeneralConfig(object):
     """
     General configuration that it's used for the whole training. E.g. if the training is composed of 5 different batches
     of data, then this part of the configuration is used for ALL of them
