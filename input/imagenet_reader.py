@@ -206,23 +206,13 @@ def _build_bounding_box_lookup(bounding_box_file):
 class ImagenetReader(Reader):
 
     def __init__(self):
+        super().__init__(validation_dir, [train_dir])
         self.synset_to_human = _build_synset_lookup(metadata_file)
         self.image_to_bboxes = _build_bounding_box_lookup(bounding_box_file)
 
         self.val_filenames, self.val_synsets, self.val_labels = _find_image_files(validation_dir, labels_file)
         self.train_filenames, self.train_synsets, self.train_labels = _find_image_files(train_dir, labels_file)
         self.humans = _find_human_readable_labels(self.val_synsets, self.synset_to_human)
-
-    def check_if_downloaded(self):
-        if os.path.exists(train_dir):
-            print("Train directory seems to exist")
-        else:
-            raise Exception("Train directory doesn't seem to exist.")
-
-        if os.path.exists(validation_dir):
-            print("Validation directory seems to exist")
-        else:
-            raise Exception("Validation directory doesn't seem to exist.")
 
     def load_class_names(self):
         return data.humans

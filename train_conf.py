@@ -29,22 +29,20 @@ class GeneralConfig(object):
     of data, then this part of the configuration is used for ALL of them
     """
 
-    def __init__(self, learn_rate: float, momentum: float,
-                 summary_interval=100, eval_interval=200, config_name='default', model_name='dataset_default'):
+    def __init__(self, learn_rate: float,
+                 summary_interval=100, check_interval=200, config_name='default', model_name='dataset_default'):
         """
         Creates a GeneralConfig object
         :param learn_rate: the learning rate to be used in the training
-        :param momentum: the momentum to be used in the training
         :param summary_interval: the interval of iterations at which the summaries are going to be performed
-        :param eval_interval: the interval of iterations at which the evaluations are going to be performed. Must be an
-        integer multiple of summary_interval
+        :param check_interval: the interval of iterations at which the evaluations and checkpoints are going to be
+        performed. Must be an integer multiple of summary_interval
         :param config_name: a descriptive name for the training configuration
         :param model_name: a descriptive name for the model
         """
         self.learn_rate = learn_rate
-        self.momentum = momentum
         self.summary_interval = summary_interval
-        self.eval_interval = eval_interval
+        self.eval_interval = check_interval
         self.config_name = config_name
         self.model_name = model_name
         self.train_configurations = []  # It stores the configurations for each mega batch of training data

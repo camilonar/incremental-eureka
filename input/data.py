@@ -13,7 +13,7 @@ class Data(object):
         https://github.com/ischlag/tensorflow-input-pipelines
     """
 
-    def __init__(self, batch_size: int, sess: tf.Session, data_reader: Reader,
+    def __init__(self, batch_size: int, sess: tf.InteractiveSession, data_reader: Reader,
                  image_height, image_width):
         """
         Creates a Data pipeline object for a dataset composed of images
@@ -57,6 +57,7 @@ class Data(object):
         :return: None
         """
         self.data_reader.change_dataset_part(index)
+        # TODO agregar otras operaciones que se realizan al cambiar un dataset
 
     def __del__(self):
         """

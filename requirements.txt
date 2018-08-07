@@ -1,2 +1,2 @@
-tensorflow-gpu
-numpy
+tensorflow-gpu == 1.8.0
+numpy == 1.14.5
