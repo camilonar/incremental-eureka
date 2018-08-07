@@ -54,8 +54,8 @@ class ImagenetData(Data):
     """
     NUM_THREADS = 8
     NUMBER_OF_CLASSES = 200
-    TRAIN_SET_SIZE = len(imagenet.data.train_filenames)  # 1281167 # ~250MB for string with paths
-    TEST_SET_SIZE = len(imagenet.data.val_filenames)  # 50000
+    TRAIN_SET_SIZE = len(imagenet.ImagenetReader.get_data().train_filenames)  # 1281167 # ~250MB for string with paths
+    TEST_SET_SIZE = len(imagenet.ImagenetReader.get_data().val_filenames)  # 50000
     IMAGE_HEIGHT = 256
     IMAGE_WIDTH = 256
     NUM_OF_CHANNELS = 3
@@ -69,7 +69,7 @@ class ImagenetData(Data):
                  image_width=IMAGE_WIDTH):
         """ Downloads the data if necessary. """
         print("Loading imagenet data")
-        my_imagenet = imagenet.ImagenetReader()
+        my_imagenet = imagenet.ImagenetReader.get_data()
         super().__init__(batch_size, sess, my_imagenet, image_height, image_width)
         self.filename_feed_size = filename_feed_size
         self.filename_queue_capacity = filename_queue_capacity

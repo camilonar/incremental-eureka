@@ -204,6 +204,7 @@ def _build_bounding_box_lookup(bounding_box_file):
 ###############################################################################
 
 class ImagenetReader(Reader):
+    data = None
 
     def __init__(self):
         super().__init__(validation_dir, [train_dir])
@@ -215,13 +216,20 @@ class ImagenetReader(Reader):
         self.humans = _find_human_readable_labels(self.val_synsets, self.synset_to_human)
 
     def load_class_names(self):
-        return data.humans
+        return self.humans
 
     def load_training_data(self):
-        return data.train_filenames, data.train_labels
+        return self.train_filenames, self.train_labels
 
     def load_test_data(self):
-        return data.val_filenames, data.val_labels
+        return self.val_filenames, self.val_labels
 
-
-data = ImagenetReader()
+    @classmethod
+    def get_data(cls):
+        """
+        Gets the data of Imagenet
+        :return: a Singleton of ImagenetReader object
+        """
+        if not cls.data:
+            cls.data = ImagenetReader()
+        return cls.data
