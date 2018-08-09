@@ -1,6 +1,7 @@
 """
 Module for data input.
 """
+from abc import ABC, abstractmethod
 import tensorflow as tf
 from input.reader import Reader
 
@@ -29,6 +30,7 @@ class Data(object):
         self.image_height = image_height
         self.image_width = image_width
 
+    @abstractmethod
     def build_train_data_tensor(self, shuffle=False, augmentation=False):
         """
         Builds the training data tensor
@@ -39,6 +41,7 @@ class Data(object):
         """
         raise NotImplementedError("The subclass hasn't implemented the build_train_data_tensor method")
 
+    @abstractmethod
     def build_test_data_tensor(self, shuffle=False, augmentation=False):
         """
         Builds the test data tensor
@@ -66,6 +69,7 @@ class Data(object):
         """
         self.close()
 
+    @abstractmethod
     def close(self):
         """
         Closes the pipeline

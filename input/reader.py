@@ -1,11 +1,12 @@
 """
 This module is used to abstract the reading of the data from disk
 """
+from abc import ABC, abstractmethod
 from typing import List
 import os
 
 
-class Reader(object):
+class Reader(ABC):
     """Interface for the reading of data (of a dataset) from disk.
 
     This structure is based in the pipelines from:
@@ -22,6 +23,7 @@ class Reader(object):
         self.tr_paths = tr_paths
         self.curr_path = self.tr_paths[0]
 
+    @abstractmethod
     def load_training_data(self):
         """
         It loads and prepares the training data to be fed to the input pipeline
@@ -29,6 +31,7 @@ class Reader(object):
         """
         raise NotImplementedError("The subclass hasn't implemented the load_training_data method")
 
+    @abstractmethod
     def load_test_data(self):
         """
         It loads and prepares the test data to be fed to the input pipeline

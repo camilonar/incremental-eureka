@@ -228,7 +228,7 @@ class ImagenetReader(Reader):
     def get_data(cls):
         """
         Gets the data of Imagenet
-        :return: a Singleton of ImagenetReader object
+        :return: a Singleton object of ImagenetReader
         """
         if not cls.data:
             cls.data = ImagenetReader()
