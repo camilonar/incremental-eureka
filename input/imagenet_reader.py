@@ -7,14 +7,14 @@
 #  utils/imagenet_download/run_me.sh
 #
 
-# TODO Adaptar al formato con múltiples mega-batches
 import tensorflow as tf
 import random
 import os
 
 from input.reader import Reader
 
-train_dir = "../datasets/tiny-imagenet-200/train/"
+# TODO poner los directorios definitivos para los 5 mega-lotes de entrenamiento
+train_dirs = ["../datasets/tiny-imagenet-200/train/", "../datasets/tiny-imagenet-200/val/"]
 validation_dir = "../datasets/tiny-imagenet-200/val/"
 labels_file = "../datasets/tiny-imagenet-200/wnids.txt"
 metadata_file = "../datasets/tiny-imagenet-200/words.txt"
@@ -204,15 +204,19 @@ def _build_bounding_box_lookup(bounding_box_file):
 ###############################################################################
 
 class ImagenetReader(Reader):
+    """
+    Reader for Tiny Imagenet dataset
+    """
+
     data = None
 
     def __init__(self):
-        super().__init__(validation_dir, [train_dir])
+        super().__init__(validation_dir, train_dirs)
         self.synset_to_human = _build_synset_lookup(metadata_file)
         self.image_to_bboxes = _build_bounding_box_lookup(bounding_box_file)
 
-        self.val_filenames, self.val_synsets, self.val_labels = _find_image_files(validation_dir, labels_file)
-        self.train_filenames, self.train_synsets, self.train_labels = _find_image_files(train_dir, labels_file)
+        self.val_filenames, self.val_synsets, self.val_labels = _find_image_files(self.test_path, labels_file)
+        self.train_filenames, self.train_synsets, self.train_labels = _find_image_files(self.curr_path, labels_file)
         self.humans = _find_human_readable_labels(self.val_synsets, self.synset_to_human)
 
     def load_class_names(self):
@@ -233,3 +237,6 @@ class ImagenetReader(Reader):
         if not cls.data:
             cls.data = ImagenetReader()
         return cls.data
+
+    def reload_training_data(self):
+        self.train_filenames, self.train_synsets, self.train_labels = _find_image_files(self.curr_path, labels_file)

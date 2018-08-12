@@ -1,61 +1,17 @@
-###############################################################################
-# Author:       Imanol Schlag (more info on ischlag.github.io)
-# Description:  imagenet input pipeline
-# Date:         11.2016
-#
-#
-# TODO: 23 images are not jpeg and should be used with the according decoder.
-
-###############################################################################
-# NOTE: this code has been modified from the original version of Imanol Schlag
-# to be in line with the architecture of this program
-#
-
-
-""" Usage:
 import tensorflow as tf
-sess = tf.Session()
 
-with tf.device('/cpu:0'):
-  from datasets.imagenet import imagenet_data
-  d = imagenet_data(batch_size=64, sess=sess)
-  image_batch_tensor, target_batch_tensor = d.build_train_data_tensor()
-
-image_batch, target_batch = sess.run([image_batch_tensor, target_batch_tensor])
-print(image_batch.shape)
-print(target_batch.shape)
-"""
-
-import tensorflow as tf
-import numpy as np
-import threading
-
-from input import imagenet_reader as imagenet
+from input import caltech_reader as caltech
 from input.data import Data
 
 
-class ImagenetData(Data):
+class CaltechData(Data):
     """
-    Downloads the imagenet dataset and creates an input pipeline ready to be fed into a model.
-
-    memory calculation:
-      1 image is 299*299*3*4 bytes = ~1MB
-      1024MB RAM = ~1000 images
-
-    empirical memory usage with default config:
-      TensorFlow +500MB
-      imagenet_utils (loading all paths and labels) +400MB
-      build input pipeline and fill queues +2.2GB
-
-    - decodes jpg images
-    - scales images into a uniform size
-    - shuffles the input if specified
-    - builds batches
+    Data pipeline for Caltech101 dataset
     """
     NUM_THREADS = 8
     NUMBER_OF_CLASSES = 200
-    TRAIN_SET_SIZE = len(imagenet.ImagenetReader.get_data().train_filenames)  # 1281167 # ~250MB for string with paths
-    TEST_SET_SIZE = len(imagenet.ImagenetReader.get_data().val_filenames)  # 50000
+    TRAIN_SET_SIZE = len(caltech.CaltechReader.get_data().train_filenames)  # 1281167 # ~250MB for string with paths
+    TEST_SET_SIZE = len(caltech.CaltechReader.get_data().val_filenames)  # 50000
     IMAGE_HEIGHT = 256
     IMAGE_WIDTH = 256
     NUM_OF_CHANNELS = 3
@@ -64,10 +20,11 @@ class ImagenetData(Data):
                  batch_queue_capacity=1000,
                  image_height=IMAGE_HEIGHT,
                  image_width=IMAGE_WIDTH):
+
         """ Downloads the data if necessary. """
-        print("Loading imagenet data")
-        my_imagenet = imagenet.ImagenetReader.get_data()
-        super().__init__(batch_size, sess, my_imagenet, image_height, image_width)
+        print("Loading caltech data...")
+        my_caltech = caltech.CaltechReader.get_data()
+        super().__init__(batch_size, sess, my_caltech, image_height, image_width)
         self.batch_queue_capacity = batch_queue_capacity + 3 * batch_size
         self.data_reader.check_if_downloaded()
 
@@ -134,5 +91,4 @@ class ImagenetData(Data):
         return images_batch, target_batch
 
     def close(self):
-        print("Closing Data pipeline...")
         return

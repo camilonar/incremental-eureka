@@ -59,8 +59,9 @@ class Data(object):
         :param index: the number of the mega-batch, starting from 0. I.e. for the first batch, this would be 0
         :return: None
         """
+        print("Changing dataset part to part {} in the Data object...".format(index))
         self.data_reader.change_dataset_part(index)
-        # TODO agregar otras operaciones que se realizan al cambiar un dataset
+        self.close()
 
     def __del__(self):
         """

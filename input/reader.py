@@ -63,4 +63,16 @@ class Reader(ABC):
         :param index: the number of the mega-batch, starting from 0. I.e. for the first batch, this would be 0
         :return: None
         """
+        print("Changing dataset part to part {} in the Reader object...".format(index))
         self.curr_path = self.tr_paths[index]
+        self.reload_training_data()
+
+    @abstractmethod
+    def reload_training_data(self):
+        """
+        Reloads the training data. It should be invoked after a change in the training data.
+        In case the data is being stored as a class attribute, then that class attribute should be updated within this
+        method.
+        :return: None
+        """
+        raise NotImplementedError("The subclass hasn't implemented the recreate method")
