@@ -75,6 +75,7 @@ class CifarReader(Reader):
     	return _get_human_readable_labels()
 
     def load_training_data(self):
+        
     	return 
 
     def load_test_data(self):
