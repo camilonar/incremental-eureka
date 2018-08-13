@@ -47,7 +47,6 @@ class CaltechReader(Reader):
     """
     Reader for Caltech101 dataset
     """
-
     data = None
 
     def __init__(self):

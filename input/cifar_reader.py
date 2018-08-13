@@ -10,7 +10,7 @@ from input.reader import Reader
 size_image = 32
 numero_canales = 3
 
-base_folder="cifar-10-batches-py"
+base_folder="../datasets/cifar-10-batches-py"
 
 base = base_folder+"/data_batch_"
 tr_paths = [base+"1",base+"2",base+"3",base+"4",base+"5"]
