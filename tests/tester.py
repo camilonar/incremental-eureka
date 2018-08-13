@@ -3,6 +3,7 @@ Module that helps with the execution of tests.
 """
 from abc import ABC, abstractmethod
 from errors import OptimizerNotSupportedError, TestNotPreparedError
+from trainer import Trainer
 
 
 class Tester(ABC):
@@ -103,13 +104,12 @@ class Tester(ABC):
         If there is no checkpoint to be loaded then its value should be None. The default value is None.
         :return:
         """
+        self._prepare_config()
         self._prepare_data_pipeline()
         self._prepare_neural_network()
         self._prepare_optimizer(str_optimizer)
-        self._prepare_config()
         self._prepare_checkpoint_if_required(ckp_path)
 
-    # TODO implementar execute_test
     def execute_test(self):
         """
         Calls the trainer to perform the test with the given configuration. It should raise an exception if the _prepare
@@ -118,6 +118,8 @@ class Tester(ABC):
         :raises TestNotPreparedError: if the Tester hasn't been prepared before the execution of this method
         """
         self.__check_conditions_for_test()
+        trainer = Trainer(self.general_config, self.neural_net, self.data_input, self.input_tensor, self.output_tensor)
+        trainer.train()
 
     def __check_conditions_for_test(self):
         """
@@ -133,13 +135,14 @@ class Tester(ABC):
         """
         print("Checking conditions for test...")
         message = ""
-        if not self.data_input_loaded:
+        if not self.data_input:
             message += '-Data pipeline missing\n'
-        if not self.neural_net_loaded:
+        if not self.neural_net:
             message += '-Neural Network missing\n'
         if not self.optimizer:
-            message += '-Optimizer missing\n'
-        if not self.train_config_loaded:
+            # message += '-Optimizer missing\n'
+            message = message
+        if not self.general_config:
             message += '-Training Configuration missing\n'
         if not self.checkpoint_loaded:
             message += '-Checkpoint required by user, but not loaded'
@@ -150,32 +153,28 @@ class Tester(ABC):
 
     @property
     @abstractmethod
-    def data_input_loaded(self):
+    def data_input(self):
         """
-        It tells whether or not the Data input object has been properly created and established into the Tester
-        :return: True if the Data input object has been properly created, and False in case that it hasn't been created
-        at all
-        """
-        pass
-
-    @property
-    @abstractmethod
-    def neural_net_loaded(self):
-        """
-        It tells whether or not the neural net object has been properly created and established into the Tester
-        :return: True if the Network object has been properly created, and False in case that it hasn't been created
-        at all
+        Getter for the Data pipeline object
+        :return: the data pipeline object of the Tester
         """
         pass
 
     @property
     @abstractmethod
-    def train_config_loaded(self):
+    def neural_net(self):
         """
-        It tells whether or not the training configuration object has been properly created and established into the
-        Tester
-        :return: True if the Trainer object has been properly created, and False in case that it hasn't been created
-        at all
+        Getter for the Neural network object
+        :return: the Neural network object of the Tester
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def general_config(self):
+        """
+        Getter for the GeneralTraining object
+        :return: the GeneralTraining object of the Testers
         """
         pass
 
@@ -188,5 +187,26 @@ class Tester(ABC):
         :return: it should return True if the checkpoint has been properly loaded into the neural net or if no
         checkpoint has been requested. It should return false if a checkpoint has been requested but hasn't been loaded
         into the net
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def input_tensor(self):
+        """
+        Getter for the input tensor of the neural network used by the Tester
+        :return: a Tensor that was assigned as 'data' when the network was created
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def output_tensor(self):
+        """
+        Getter for the output tensor of the training
+        :return: the Tensor associated to the labels of supervised learning.
+        E.g. if the tensor is used for calculating the mse, as follows, then 'data_y' should be the returned Tensor
+        of this function:
+            mse = tf.reduce_mean(tf.square(data_y - neural_net.get_output()))
         """
         pass

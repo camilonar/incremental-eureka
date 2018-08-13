@@ -4,6 +4,7 @@ Module for data input.
 from abc import ABC, abstractmethod
 import tensorflow as tf
 from input.reader import Reader
+from train_conf import GeneralConfig
 
 
 class Data(object):
@@ -14,18 +15,18 @@ class Data(object):
         https://github.com/ischlag/tensorflow-input-pipelines
     """
 
-    def __init__(self, batch_size: int, sess: tf.InteractiveSession, data_reader: Reader,
+    def __init__(self, general_config: GeneralConfig, data_reader: Reader,
                  image_height, image_width):
         """
-        Creates a Data pipeline object for a dataset composed of images
-        :param batch_size: size of the batches of data
-        :param sess: the Tensorflow Session
+        Creates a Data pipeline object for a dataset composed of images. It also sets the current configuration for
+        training as the configuration for the first mega-batch
+        :param general_config: the configuration for the whole training
         :param data_reader: the corresponding Reader of the data of the dataset
         :param image_height: the height at which the images are going to be rescaled
         :param image_width: the width at which the images are going to be rescaled
         """
-        self.batch_size = batch_size
-        self.sess = sess
+        self.general_config = general_config
+        self.curr_config = self.general_config.train_configurations[0]
         self.data_reader = data_reader
         self.image_height = image_height
         self.image_width = image_width
@@ -61,6 +62,7 @@ class Data(object):
         """
         print("Changing dataset part to part {} in the Data object...".format(index))
         self.data_reader.change_dataset_part(index)
+        self.curr_config = self.general_config.train_configurations[index]
         self.close()
 
     def __del__(self):

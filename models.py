@@ -5,7 +5,6 @@ Module containing various useful neural networks models
 from network import Network
 
 
-# TODO: agregar líneas necesarias para los summaries
 class LeNet(Network):
     def setup(self):
         """
@@ -28,7 +27,6 @@ class LeNet(Network):
          .fc(10, relu=False, name='fc3'))
 
 
-# TODO: agregar líneas necesarias para los summaries
 class CaffeNet(Network):
     def setup(self):
         """
@@ -57,7 +55,6 @@ class CaffeNet(Network):
          .softmax(name='prob'))
 
 
-# TODO: agregar líneas necesarias para los summaries
 class VGGNet(Network):
     def setup(self):
         """
@@ -91,12 +88,19 @@ class VGGNet(Network):
          .fc(101, name='fc8')
          .softmax(name='prob'))
 
-# TODO: agregar líneas necesarias para los summaries
-#alexnet :http://vision.stanford.edu/teaching/cs231b_spring1415/slides/alexnet_tugce_kyunghee.pdf
-#TODO: EL NUMERO DE CLASES DEBE SER UNA VARIABLE ?
 
 class AlexNet(Network):
     def setup(self):
+        """
+        Creates a Neural Net with a AlexNet architecture. The input data must have been previously set in
+         the constructor of the object as 'data'.
+         E.g.:
+            net = AlexNet({'data': input_tensor})
+
+         Architecture taken from:
+            http://vision.stanford.edu/teaching/cs231b_spring1415/slides/alexnet_tugce_kyunghee.pdf
+        :return: None
+        """
         (self.feed('data')
          .conv(11, 11, 96, 4, 4, padding='VALID', name='conv1')
          .lrn(2, 2e-05, 0.75, name='norm1')
@@ -111,4 +115,3 @@ class AlexNet(Network):
          .fc(4096, name='fc7')
          .fc(10, relu=False, name='fc8')
          .softmax(name='prob'))
-

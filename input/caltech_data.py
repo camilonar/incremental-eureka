@@ -16,7 +16,7 @@ class CaltechData(Data):
     IMAGE_WIDTH = 256
     NUM_OF_CHANNELS = 3
 
-    def __init__(self, batch_size, sess,
+    def __init__(self, general_config,
                  batch_queue_capacity=1000,
                  image_height=IMAGE_HEIGHT,
                  image_width=IMAGE_WIDTH):
@@ -24,19 +24,19 @@ class CaltechData(Data):
         """ Downloads the data if necessary. """
         print("Loading caltech data...")
         my_caltech = caltech.CaltechReader.get_data()
-        super().__init__(batch_size, sess, my_caltech, image_height, image_width)
-        self.batch_queue_capacity = batch_queue_capacity + 3 * batch_size
+        super().__init__(general_config, my_caltech, image_height, image_width)
+        self.batch_queue_capacity = batch_queue_capacity + 3 * self.curr_config.batch_size
         self.data_reader.check_if_downloaded()
 
     def build_train_data_tensor(self, shuffle=False, augmentation=False):
         img_path, cls = self.data_reader.load_training_data()
-        return self.__build_generic_data_tensor(img_path, cls, shuffle, augmentation)
+        return self.__build_generic_data_tensor(img_path, cls, shuffle, augmentation, testing=False)
 
     def build_test_data_tensor(self, shuffle=False, augmentation=False):
         img_path, cls = self.data_reader.load_test_data()
-        return self.__build_generic_data_tensor(img_path, cls, shuffle, augmentation)
+        return self.__build_generic_data_tensor(img_path, cls, shuffle, augmentation, testing=True)
 
-    def __build_generic_data_tensor(self, all_img_paths, all_targets, shuffle, augmentation):
+    def __build_generic_data_tensor(self, all_img_paths, all_targets, shuffle, augmentation, testing):
         """
         Creates the input pipeline and performs some preprocessing.
         The full dataset needs to fit into memory for this version.
@@ -82,9 +82,14 @@ class CaltechData(Data):
 
         dataset = tf.data.Dataset.from_tensor_slices((filenames, labels))
         dataset = dataset.map(load_images)
+
         if shuffle:
             dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=12345)
-        dataset = dataset.batch(self.batch_size)
+        dataset = dataset.batch(self.curr_config.batch_size)
+
+        # Only does multiple epochs if the dataset is going to be used for training
+        if testing:
+            dataset = dataset.repeat(self.curr_config.epochs)
         iterator = dataset.make_one_shot_iterator()
         images_batch, target_batch = iterator.get_next()
 
