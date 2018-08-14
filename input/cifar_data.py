@@ -30,7 +30,7 @@ class CifarData(Data):
         return self.__build_generic_data_tensor(imgs_raw, cls_raw, shuffle, augmentation)
 
     def build_test_data_tensor(self, shuffle=False, augmentation=False):
-        imgs_raw,  cls_raw = self.data_reader.load_test_data()
+        imgs_raw, _,cls_raw = self.data_reader.load_test_data()
         return self.__build_generic_data_tensor(imgs_raw, cls_raw, shuffle, augmentation)
 
     def change_dataset_part(self, index: int):
