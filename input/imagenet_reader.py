@@ -13,13 +13,6 @@ import os
 
 from input.reader import Reader
 
-# TODO poner los directorios definitivos para los 5 mega-lotes de entrenamiento
-train_dirs = ["../datasets/tiny-imagenet-200/train/", "../datasets/tiny-imagenet-200/val/"]
-validation_dir = "../datasets/tiny-imagenet-200/val/"
-labels_file = "../datasets/tiny-imagenet-200/wnids.txt"
-metadata_file = "../datasets/tiny-imagenet-200/words.txt"
-bounding_box_file = "../datasets/tiny-imagenet-200/bounding_boxes.xml"
-
 
 ###############################################################################
 # Some TensorFlow Inception functions (ported to python3)
@@ -207,16 +200,25 @@ class ImagenetReader(Reader):
     """
     Reader for Tiny Imagenet dataset
     """
-
+    __train_dirs, __validation_dir, __extras = None, None, None
     data = None
 
-    def __init__(self):
+    def __init__(self, train_dirs: [str], validation_dir: str, extras: [str]):
+        """
+        Creates an ImagenetReader object
+        :param train_dirs: the paths to the training data
+        :param validation_dir: the path to the testing data
+        :param extras: an array with extra paths, must be of this form:
+                        [labels_file_path, metadata_file_path, bounding_box_file]
+        """
         super().__init__(train_dirs, validation_dir)
-        self.synset_to_human = _build_synset_lookup(metadata_file)
-        self.image_to_bboxes = _build_bounding_box_lookup(bounding_box_file)
+        self.synset_to_human = _build_synset_lookup(extras[1])
+        self.image_to_bboxes = _build_bounding_box_lookup(extras[2])
+        self.labels_file = extras[0]
 
-        self.val_filenames, self.val_synsets, self.val_labels = _find_image_files(self.test_path, labels_file)
-        self.train_filenames, self.train_synsets, self.train_labels = _find_image_files(self.curr_path, labels_file)
+        self.val_filenames, self.val_synsets, self.val_labels = _find_image_files(self.test_path, self.labels_file)
+        self.train_filenames, self.train_synsets, self.train_labels = _find_image_files(self.curr_path,
+                                                                                        self.labels_file)
         self.humans = _find_human_readable_labels(self.val_synsets, self.synset_to_human)
 
     def load_class_names(self):
@@ -231,12 +233,26 @@ class ImagenetReader(Reader):
     @classmethod
     def get_data(cls):
         """
-        Gets the data of Imagenet
+        Gets the data of Imagenet. set_parameters must be called before this method or an Exception may be raised.
         :return: a Singleton object of ImagenetReader
         """
         if not cls.data:
-            cls.data = ImagenetReader()
+            cls.data = ImagenetReader(cls.__train_dirs, cls.__validation_dir, cls.__extras)
         return cls.data
 
+    @classmethod
+    def set_parameters(cls, train_dirs: [str], validation_dir: str, extras: [str]):
+        """
+        Sets the parameters for the Singleton reader
+        :param train_dirs: the paths to the training data
+        :param validation_dir: the path to the testing data
+        :param extras: an array with extra paths, must be of this form:
+                        [labels_file_path, metadata_file_path, bounding_box_file]
+        """
+        cls.__train_dirs = train_dirs
+        cls.__validation_dir = validation_dir
+        cls.__extras = extras
+
     def reload_training_data(self):
-        self.train_filenames, self.train_synsets, self.train_labels = _find_image_files(self.curr_path, labels_file)
+        self.train_filenames, self.train_synsets, self.train_labels = _find_image_files(self.curr_path,
+                                                                                        self.labels_file)

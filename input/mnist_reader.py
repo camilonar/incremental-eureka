@@ -17,7 +17,7 @@ class MnistReader(Reader):
     data = None
 
     def __init__(self):
-        self.mnist = input_data.read_data_sets("datasets/MNIST_data/", one_hot=True)
+        self.mnist = input_data.read_data_sets("../datasets/MNIST_data/", one_hot=True)
 
     def load_training_data(self):
         return self.mnist.train.images, self.mnist.train.labels

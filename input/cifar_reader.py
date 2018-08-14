@@ -6,14 +6,7 @@ from input.reader import Reader
 size_image = 32
 numero_canales = 3
 
-base_folder = "../datasets/cifar-10-batches-py"
-
-base = base_folder + "/data_batch_"
-tr_paths = [base + "1", base + "2", base + "3", base + "4", base + "5"]
-test_path = base_folder + "/test_batch"
-metadata_file = base_folder + "/batches.meta"
-
-number_of_class = 10
+number_of_classes = 10
 
 
 def _convert_raw_to_image(raw):
@@ -49,7 +42,7 @@ def _unpickle(filename):
 
 
 def _get_human_readable_labels():
-    raw = _unpickle(filename=metadata_file)[b'label_names']
+    raw = _unpickle(filename=CifarReader._metadata_file)[b'label_names']
     humans = [x.decode('utf-8') for x in raw]
     return humans
 
@@ -70,18 +63,21 @@ def _load_batch(filename):
 
 def _load_data(filename):
     images, cls = _load_batch(filename)
-    return images, cls, _to_one_hot(class_numbers=cls, num_classes=number_of_class)
+    return images, cls, _to_one_hot(class_numbers=cls, num_classes=number_of_classes)
 
 
 class CifarReader(Reader):
 
+    __train_dirs, __validation_dir, _metadata_file = None, None, None
+    data = None
+
     def reload_training_data(self):
         self.imgs_raw, _, self.cls_raw = _load_data(self.curr_path)
 
-    def __init__(self):
-        super().__init__(tr_paths, test_path)
-        print("TEST PATH ", test_path)
-        print("TRAIN PATHs ", tr_paths)
+    def __init__(self, train_dirs: [str], validation_dir: str):
+        super().__init__(train_dirs, validation_dir)
+        print("TEST PATH ", validation_dir)
+        print("TRAIN PATHs ", train_dirs)
         self.imgs_raw, _, self.cls_raw = _load_data(self.curr_path)
 
     def load_class_names(self):
@@ -96,9 +92,22 @@ class CifarReader(Reader):
     @classmethod
     def get_data(cls):
         """
-        Gets the data of CIFAR-10
+        Gets the data of CIFAR-10. set_parameters must be called before this method or an Exception may be raised.
         :return: a Singleton object of CifarReader
         """
         if not cls.data:
-            cls.data = CifarReader()
+            cls.data = CifarReader(cls.__train_dirs, cls.__validation_dir)
         return cls.data
+
+    @classmethod
+    def set_parameters(cls, train_dirs: [str], validation_dir: str, extras: [str]):
+        """
+        Sets the parameters for the Singleton reader
+        :param train_dirs: the paths to the training data
+        :param validation_dir: the path to the testing data
+        :param extras: an array with extra paths, must be of this form:
+                        [metadata_file_path]
+        """
+        cls.__train_dirs = train_dirs
+        cls.__validation_dir = validation_dir
+        cls._metadata_file = extras[0]

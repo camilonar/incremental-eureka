@@ -52,20 +52,21 @@ class ImagenetData(Data):
     - shuffles the input if specified
     - builds batches
     """
-    NUM_THREADS = 8
     NUMBER_OF_CLASSES = 200
-    TRAIN_SET_SIZE = len(imagenet.ImagenetReader.get_data().train_filenames)  # 1281167 # ~250MB for string with paths
-    TEST_SET_SIZE = len(imagenet.ImagenetReader.get_data().val_filenames)  # 50000
     IMAGE_HEIGHT = 256
     IMAGE_WIDTH = 256
     NUM_OF_CHANNELS = 3
 
     def __init__(self, general_config,
+                 train_dirs: [str],
+                 validation_dir: str,
+                 extras: [str],
                  batch_queue_capacity=1000,
                  image_height=IMAGE_HEIGHT,
                  image_width=IMAGE_WIDTH):
         """ Downloads the data if necessary. """
         print("Loading imagenet data")
+        imagenet.ImagenetReader.set_parameters(train_dirs, validation_dir, extras)
         my_imagenet = imagenet.ImagenetReader.get_data()
         super().__init__(general_config, my_imagenet, image_height, image_width)
         self.batch_queue_capacity = batch_queue_capacity + 3 * self.curr_config.batch_size
