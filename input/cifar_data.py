@@ -18,19 +18,19 @@ class CifarData(Data):
                  image_height=IMAGE_HEIGHT,
                  image_width=IMAGE_WIDTH):
         """ Downloads the data if necessary. """
-        print("Loading Cifar10 data...")
-        cifar.CifarReader().set_parameters(train_dirs, validation_dir, extras)
-        my_cifar = cifar.CifarReader().get_data()
+        print("Loading Cifar 1 0 data...")
+        cifar.CifarReader.set_parameters(train_dirs, validation_dir, extras)
+        my_cifar = cifar.CifarReader.get_data()
         super().__init__(general_config, my_cifar, image_height, image_width)
         self.data_reader.check_if_downloaded()
         self.batch_queue_capacity = batch_queue_capacity
 
     def build_train_data_tensor(self, shuffle=False, augmentation=False):
-        imgs_raw, _, cls_raw = self.data_reader.load_training_data()
+        imgs_raw,  cls_raw = self.data_reader.load_training_data()
         return self.__build_generic_data_tensor(imgs_raw, cls_raw, shuffle, augmentation)
 
     def build_test_data_tensor(self, shuffle=False, augmentation=False):
-        imgs_raw, _, cls_raw = self.data_reader.load_test_data()
+        imgs_raw,  cls_raw = self.data_reader.load_test_data()
         return self.__build_generic_data_tensor(imgs_raw, cls_raw, shuffle, augmentation)
 
     def change_dataset_part(self, index: int):
