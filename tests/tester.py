@@ -2,8 +2,9 @@
 Module that helps with the execution of tests.
 """
 from abc import ABC, abstractmethod
-from errors import OptimizerNotSupportedError, TestNotPreparedError
+from errors import OptionNotSupportedError, TestNotPreparedError
 from training.trainer import Trainer
+import utils.constants as const
 
 
 class Tester(ABC):
@@ -50,23 +51,23 @@ class Tester(ABC):
         """
         Prepares the optimizer that is required by the User
         :param str_optimizer: a string that represents the chosen Optimizer. Currently supported strings are.
-            -BASE: for a simple RMSProp
-            -CEAL: for the CEAL algorithm (See: Keze Wang, Dongyu Zhang, Ya Li, Ruimao Zhang, and Liang Lin.
+            -OPT_BASE: for a simple RMSProp
+            -OPT_CEAL: for the OPT_CEAL algorithm (See: Keze Wang, Dongyu Zhang, Ya Li, Ruimao Zhang, and Liang Lin.
                     Cost-effective active learning for deep image classification.
                     IEEE Transactions on Circuits and Systems for Video Technology, 2016)
-            -REPRESENTATIVES: for the proposed approach of this work, i.e. an incremental algorithm that uses RMSProp
+            -OPT_REPRESENTATIVES: for the proposed approach of this work, i.e. an incremental algorithm that uses RMSProp
                     and select samples based in clustering
         :return: None
         :raises OptimizerNotSupportedError: if the required Optimizer isn't supported yet
         """
-        if str_optimizer == 'BASE':
+        if str_optimizer == const.OPT_BASE:
             pass  # Base Optimizer (basic RMSProp)
-        elif str_optimizer == 'CEAL':
-            pass  # CEAL Optimizer
-        elif str_optimizer == 'REPRESENTATIVES':
+        elif str_optimizer == const.OPT_CEAL:
+            pass  # OPT_CEAL Optimizer
+        elif str_optimizer == const.OPT_REPRESENTATIVES:
             pass  # Our Optimizer
         else:
-            raise OptimizerNotSupportedError("The required Optimizer '{}' isn't supported".format(str_optimizer))
+            raise OptionNotSupportedError("The required Optimizer '{}' isn't supported".format(str_optimizer))
 
     @abstractmethod
     def _prepare_config(self):
@@ -95,11 +96,11 @@ class Tester(ABC):
         It prepares the Tester object for the test, according to the various parameters given up to this point and
         also according to the corresponding dataset to which the concrete Tester is associated.
         :param str_optimizer: str_optimizer: a string that represents the chosen Optimizer. Currently supported strings are.
-            -BASE: for a simple RMSProp
-            -CEAL: for the CEAL algorithm (See: Keze Wang, Dongyu Zhang, Ya Li, Ruimao Zhang, and Liang Lin.
+            -OPT_BASE: for a simple RMSProp
+            -OPT_CEAL: for the OPT_CEAL algorithm (See: Keze Wang, Dongyu Zhang, Ya Li, Ruimao Zhang, and Liang Lin.
                     Cost-effective active learning for deep image classification.
                     IEEE Transactions on Circuits and Systems for Video Technology, 2016)
-            -REPRESENTATIVES: for the proposed approach of this work, i.e. an incremental algorithm that uses RMSProp
+            -OPT_REPRESENTATIVES: for the proposed approach of this work, i.e. an incremental algorithm that uses RMSProp
                     and select samples based in clustering
         :param ckp_path: the checkpoint path if it's required to start the training from a checkpoint. A data path with
         the following structure is expected: ./checkpoints/dataset_name/neural_net_name/checkpoint_name.ckpt.

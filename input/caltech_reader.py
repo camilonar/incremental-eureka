@@ -51,7 +51,7 @@ class CaltechReader(Reader):
 
     def __init__(self):
         # TODO Que pasa si no tiene test validation
-        super().__init__(path, [path])
+        super().__init__([path], path)
         self.categories = sorted(os.listdir(path))
         self.val_filenames, self.val_labels = _find_image_files(path, self.categories)
         self.train_filenames, self.train_labels = _find_image_files(path, self.categories)
@@ -68,8 +68,8 @@ class CaltechReader(Reader):
     @classmethod
     def get_data(cls):
         """
-        Gets the data of Imagenet
-        :return: a Singleton object of ImagenetReader
+        Gets the data of Caltech-101
+        :return: a Singleton object of CaltechReader
         """
         if not cls.data:
             cls.data = CaltechReader()

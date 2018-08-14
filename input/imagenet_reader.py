@@ -211,7 +211,7 @@ class ImagenetReader(Reader):
     data = None
 
     def __init__(self):
-        super().__init__(validation_dir, train_dirs)
+        super().__init__(train_dirs, validation_dir)
         self.synset_to_human = _build_synset_lookup(metadata_file)
         self.image_to_bboxes = _build_bounding_box_lookup(bounding_box_file)
 

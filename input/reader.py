@@ -12,12 +12,12 @@ class Reader(ABC):
     This structure is based in the pipelines from:
         https://github.com/ischlag/tensorflow-input-pipelines"""
 
-    def __init__(self, test_path: str, tr_paths: List[str]):
+    def __init__(self, tr_paths: List[str], test_path: str):
         """
         Creates a Reader object and points the current training data path to the first one of the list provided
-        :param test_path: the path where the test/validation data is located
         :param tr_paths: a list of paths, where each one corresponds with the location of one part of the dataset,
         which means, that it has the location of each one of the mega-batches
+        :param test_path: the path where the test/validation data is located
 
         This must be called by the constructors of the subclasses.
         """

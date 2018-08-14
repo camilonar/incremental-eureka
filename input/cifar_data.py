@@ -1,7 +1,5 @@
 
 import tensorflow as tf
-import numpy as np
-import threading
 
 from input import cifar_reader as cifar
 from input.data import Data
