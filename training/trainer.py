@@ -2,12 +2,11 @@
 Module for training a neural network
 """
 import tensorflow as tf
-import numpy
 
 from input.data import Data
 from network import Network
-from train_conf import GeneralConfig, TrainConfig
-import utils
+from training.train_conf import GeneralConfig
+import utils.dir_utils as utils
 
 
 class Trainer(object):
@@ -51,7 +50,7 @@ class Trainer(object):
         for i, _ in enumerate(self.config.train_configurations):
             data_x, data_y = self.pipeline.build_train_data_tensor()
             self.train_increment(self.config, data_x, data_y)
-            if i < len(self.config.train_configurations):
+            if i + 1 < len(self.config.train_configurations):
                 self.pipeline.change_dataset_part(i + 1)
 
     # TODO hacerlo genérico para cualquier Optimizer

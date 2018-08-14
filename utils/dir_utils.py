@@ -1,10 +1,10 @@
 """
-Module with utility functions
+Module with utility functions for directory management
 """
 from datetime import datetime
 import os
 import utils as utils
-from train_conf import TrainConfig, GeneralConfig
+from training.train_conf import GeneralConfig
 
 
 def get_unique_logdir():
@@ -30,7 +30,7 @@ def prepare_directories(config: GeneralConfig):
     :return: a tuple containing a path for a checkpoint directory and a path for a summaries directory
     """
     ckpt_path = os.path.join('checkpoints', config.model_name, config.config_name)
-    summaries_path = os.path.join('summaries', config.model_name, config.config_name, utils.get_unique_logdir())
+    summaries_path = os.path.join('summaries', config.model_name, config.config_name, get_unique_logdir())
 
     if not os.path.isdir(ckpt_path):
         os.makedirs(ckpt_path)

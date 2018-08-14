@@ -3,7 +3,7 @@ Module that helps with the execution of tests.
 """
 from abc import ABC, abstractmethod
 from errors import OptimizerNotSupportedError, TestNotPreparedError
-from trainer import Trainer
+from training.trainer import Trainer
 
 
 class Tester(ABC):
@@ -18,6 +18,8 @@ class Tester(ABC):
         :param summary_interval: the interval of iterations at which the summaries are going to be performed
         :param check_interval: the interval of iterations at which the evaluations and checkpoints are going to be
         performed. Must be an integer multiple of summary_interval
+
+        This must be called by the constructors of the subclasses.
         """
         self.lr = lr
         self.summary_interval = summary_interval

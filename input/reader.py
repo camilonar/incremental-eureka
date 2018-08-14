@@ -18,6 +18,8 @@ class Reader(ABC):
         :param test_path: the path where the test/validation data is located
         :param tr_paths: a list of paths, where each one corresponds with the location of one part of the dataset,
         which means, that it has the location of each one of the mega-batches
+
+        This must be called by the constructors of the subclasses.
         """
         self.test_path = test_path
         self.tr_paths = tr_paths

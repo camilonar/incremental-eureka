@@ -5,7 +5,7 @@ import tensorflow as tf
 
 from tests.tester import Tester
 from models import CaffeNet
-from train_conf import GeneralConfig, TrainConfig
+from training.train_conf import GeneralConfig, TrainConfig
 from input.imagenet_data import ImagenetData
 
 

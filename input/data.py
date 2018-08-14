@@ -1,10 +1,9 @@
 """
 Module for data input.
 """
-from abc import ABC, abstractmethod
-import tensorflow as tf
+from abc import abstractmethod
 from input.reader import Reader
-from train_conf import GeneralConfig
+from training.train_conf import GeneralConfig
 
 
 class Data(object):
@@ -19,7 +18,9 @@ class Data(object):
                  image_height, image_width):
         """
         Creates a Data pipeline object for a dataset composed of images. It also sets the current configuration for
-        training as the configuration for the first mega-batch
+        training as the configuration for the first mega-batch.
+
+        This must be called by the constructors of the subclasses.
         :param general_config: the configuration for the whole training
         :param data_reader: the corresponding Reader of the data of the dataset
         :param image_height: the height at which the images are going to be rescaled
