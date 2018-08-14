@@ -16,7 +16,7 @@ class ImagenetTester(Tester):
     """
 
     def _prepare_data_pipeline(self):
-        self.data_pipeline = ImagenetData(self.general_config)
+        self.data_pipeline = ImagenetData(self.general_config, self.train_dirs, self.validation_dir, self.extras)
 
     def _prepare_neural_network(self):
         self.__input_tensor = tf.placeholder(tf.float32, [None, 256, 256, 3])
