@@ -131,9 +131,11 @@ class ImagenetData(Data):
             dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=12345)
         dataset = dataset.batch(self.curr_config.batch_size)
 
-        # Only does multiple epochs if the dataset is going to be used for training
         if testing:
+            dataset = dataset.repeat()
+        else:
             dataset = dataset.repeat(self.curr_config.epochs)
+
         iterator = dataset.make_one_shot_iterator()
         images_batch, target_batch = iterator.get_next()
 

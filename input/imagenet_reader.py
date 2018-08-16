@@ -101,31 +101,6 @@ def _find_human_readable_labels(synsets, synset_to_human):
     return humans
 
 
-def _find_image_bounding_boxes(filenames, image_to_bboxes):
-    """Find the bounding boxes for a given image file.
-    Args:
-      filenames: list of strings; each string is a path to an image file.
-      image_to_bboxes: dictionary mapping image file names to a list of
-        bounding boxes. This list contains 0+ bounding boxes.
-    Returns:
-      List of bounding boxes for each image. Note that each entry in this
-      list might contain from 0+ entries corresponding to the number of bounding
-      box annotations for the image.
-    """
-    num_image_bbox = 0
-    bboxes = []
-    for f in filenames:
-        basename = os.path.basename(f)
-        if basename in image_to_bboxes:
-            bboxes.append(image_to_bboxes[basename])
-            num_image_bbox += 1
-        else:
-            bboxes.append([])
-    print('Found %d images with bboxes out of %d images' % (
-        num_image_bbox, len(filenames)))
-    return bboxes
-
-
 def _build_synset_lookup(imagenet_metadata_file):
     """Build lookup for synset to human-readable label.
     Args:
@@ -153,47 +128,6 @@ def _build_synset_lookup(imagenet_metadata_file):
     return synset_to_human
 
 
-def _build_bounding_box_lookup(bounding_box_file):
-    """Build a lookup from image file to bounding boxes.
-    Args:
-      bounding_box_file: string, path to file with bounding boxes annotations.
-        Assumes each line of the file looks like:
-          n00007846_64193.JPEG,0.0060,0.2620,0.7545,0.9940
-        where each line corresponds to one bounding box annotation associated
-        with an image. Each line can be parsed as:
-          <JPEG file name>, <xmin>, <ymin>, <xmax>, <ymax>
-        Note that there might exist mulitple bounding box annotations associated
-        with an image file. This file is the output of process_bounding_boxes.py.
-    Returns:
-      Dictionary mapping image file names to a list of bounding boxes. This list
-      contains 0+ bounding boxes.
-    """
-    lines = tf.gfile.FastGFile(bounding_box_file, 'r').readlines()
-    images_to_bboxes = {}
-    num_bbox = 0
-    num_image = 0
-    for l in lines:
-        if l:
-            parts = l.split(',')
-            assert len(parts) == 5, ('Failed to parse: %s' % l)
-            filename = parts[0]
-            xmin = float(parts[1])
-            ymin = float(parts[2])
-            xmax = float(parts[3])
-            ymax = float(parts[4])
-            box = [xmin, ymin, xmax, ymax]
-
-            if filename not in images_to_bboxes:
-                images_to_bboxes[filename] = []
-                num_image += 1
-            images_to_bboxes[filename].append(box)
-            num_bbox += 1
-
-    print('Successfully read %d bounding boxes '
-          'across %d images.' % (num_bbox, num_image))
-    return images_to_bboxes
-
-
 ###############################################################################
 
 class ImagenetReader(Reader):
@@ -209,11 +143,10 @@ class ImagenetReader(Reader):
         :param train_dirs: the paths to the training data
         :param validation_dir: the path to the testing data
         :param extras: an array with extra paths, must be of this form:
-                        [labels_file_path, metadata_file_path, bounding_box_file]
+                        [labels_file_path, metadata_file_path]
         """
         super().__init__(train_dirs, validation_dir)
         self.synset_to_human = _build_synset_lookup(extras[1])
-        self.image_to_bboxes = _build_bounding_box_lookup(extras[2])
         self.labels_file = extras[0]
 
         self.val_filenames, self.val_synsets, self.val_labels = _find_image_files(self.test_path, self.labels_file)
@@ -247,7 +180,7 @@ class ImagenetReader(Reader):
         :param train_dirs: the paths to the training data
         :param validation_dir: the path to the testing data
         :param extras: an array with extra paths, must be of this form:
-                        [labels_file_path, metadata_file_path, bounding_box_file]
+                        [labels_file_path, metadata_file_path]
         """
         cls.__train_dirs = train_dirs
         cls.__validation_dir = validation_dir

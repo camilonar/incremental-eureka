@@ -72,22 +72,22 @@ class CifarReader(Reader):
     data = None
 
     def reload_training_data(self):
-        self.imgs_raw, _, self.cls_raw = _load_data(self.curr_path)
+        pass
 
     def __init__(self, train_dirs: [str], validation_dir: str):
         super().__init__(train_dirs, validation_dir)
         print("TEST PATH ", validation_dir)
         print("TRAIN PATHs ", train_dirs)
-        self.imgs_raw, _, self.cls_raw = _load_data(self.curr_path)
+        
 
     def load_class_names(self):
         return _get_human_readable_labels()
 
     def load_training_data(self):
-        return self.imgs_raw, self.cls_raw
+        return self.curr_path, None
 
     def load_test_data(self):
-        return _load_data(self.test_path)
+        return  self.test_path,None
 
     @classmethod
     def get_data(cls):

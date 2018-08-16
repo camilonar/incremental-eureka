@@ -3,14 +3,17 @@ import tensorflow as tf
 from input import caltech_reader as caltech
 from input.data import Data
 
+import os
+import psutil
+
 
 class CaltechData(Data):
     """
     Data pipeline for Caltech101 dataset
     """
     NUMBER_OF_CLASSES = 200
-    IMAGE_HEIGHT = 256
-    IMAGE_WIDTH = 256
+    IMAGE_HEIGHT = 224
+    IMAGE_WIDTH = 224
     NUM_OF_CHANNELS = 3
 
     def __init__(self, general_config,
@@ -51,6 +54,8 @@ class CaltechData(Data):
             the label.
             """
             # one hot encode the target
+            process = psutil.Process(os.getpid())
+            print("memory before build ",process.memory_info().rss)
             single_target = tf.cast(tf.subtract(single_target, tf.constant(1)), tf.int32)
             single_target = tf.one_hot(single_target, depth=self.NUMBER_OF_CLASSES)
 
@@ -73,7 +78,7 @@ class CaltechData(Data):
                 single_image = tf.image.random_flip_left_right(single_image)
 
                 single_image = tf.image.per_image_standardization(single_image)
-
+            print("memory after build ",process.memory_info().rss)
             return single_image, single_target
 
         # Creates the dataset
