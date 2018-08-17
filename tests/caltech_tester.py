@@ -1,5 +1,5 @@
 """
-Module for performing tests over Imagenet
+Module for performing tests over Caltech-101
 """
 import tensorflow as tf
 
@@ -12,7 +12,7 @@ from input.caltech_data import CaltechData
 # TODO carga de checkpoints
 class CaltechTester(Tester):
     """
-    Performs tests over Imagenet according to the User input and pre-established configurations
+    Performs tests over Caltech according to the User input and pre-established configurations
     """
 
     def _prepare_data_pipeline(self):
@@ -23,9 +23,9 @@ class CaltechTester(Tester):
         self.__output_tensor = tf.placeholder(tf.float32, [None, 101])
         self.__neural_net = VGGNet({'data': self.input_tensor})
 
-    def _prepare_config(self):
+    def _prepare_config(self, str_optimizer: str):
         self.__general_config = GeneralConfig(self.lr, self.summary_interval, self.check_interval,
-                                              config_name='VGGNet', model_name='Caltech')
+                                              config_name=str_optimizer, model_name='Caltech')
         # Creates configuration for 5 mega-batches
         for i in range(1):
             train_conf = TrainConfig(1, batch_size=128)

@@ -3,13 +3,11 @@ import os
 import psutil
 import matplotlib.pyplot as plt
 
-
 from input import cifar_reader as cifar
 from input.data import Data
 
 
 class CifarData(Data):
-
     NUMBER_OF_CLASSES = 10
     IMAGE_HEIGHT = 32
     IMAGE_WIDTH = 32
@@ -30,18 +28,17 @@ class CifarData(Data):
         self.batch_queue_capacity = batch_queue_capacity
 
     def build_train_data_tensor(self, shuffle=False, augmentation=False):
-        filename,_= self.data_reader.load_training_data()
-        return self.__build_generic_data_tensor(filename,shuffle, augmentation)
+        filename, _ = self.data_reader.load_training_data()
+        return self.__build_generic_data_tensor(filename, shuffle, augmentation, testing=False)
 
     def build_test_data_tensor(self, shuffle=False, augmentation=False):
         filename, _ = self.data_reader.load_test_data()
-        return self.__build_generic_data_tensor(filename, shuffle, augmentation)
+        return self.__build_generic_data_tensor(filename, shuffle, augmentation, testing=True)
 
     def change_dataset_part(self, index: int):
         pass
 
-    def __build_generic_data_tensor(self, filename, shuffle, augmentation):
-        
+    def __build_generic_data_tensor(self, filename, shuffle, augmentation, testing):
         def parser(serialized_example):
             """Parses a single tf.Example into image and label tensors."""
             features = tf.parse_single_example(
@@ -49,44 +46,44 @@ class CifarData(Data):
                 features={
                     'image': tf.FixedLenFeature([], tf.string),
                     'label': tf.FixedLenFeature([], tf.int64)
-                }) 
-            
+                })
 
             image = tf.decode_raw(features['image'], tf.uint8)
             image.set_shape([3 * self.IMAGE_HEIGHT * self.IMAGE_WIDTH])
 
             # Reshape from [depth * height * width] to [depth, height, width].
             image = tf.cast(
-            tf.transpose(tf.reshape(image, [3, self.IMAGE_HEIGHT,  self.IMAGE_WIDTH]), [1, 2, 0]),
-            tf.float32)
+                tf.transpose(tf.reshape(image, [3, self.IMAGE_HEIGHT, self.IMAGE_WIDTH]), [1, 2, 0]),
+                tf.float32)
             label = tf.cast(features['label'], tf.int32)
 
-            # TODO: prepocesing custom 
-            
+            # TODO: preprocessing custom
 
             return image, label
 
-
         process = psutil.Process(os.getpid())
-        #TODO: BORRAR LOS TENSORES 
-        print("memory before build ",process.memory_info().rss)
-        
+        # TODO: BORRAR LOS TENSORES
+        print("memory before build ", process.memory_info().rss)
 
         # Creates the dataset
         dataset = tf.data.TFRecordDataset(filename)
-        dataset = dataset.map(parser,num_parallel_calls=self.batch_queue_capacity)
+        dataset = dataset.map(parser, num_parallel_calls=self.batch_queue_capacity)
         print(dataset)
 
-        print(" Memory after build ",process.memory_info().rss)
+        print(" Memory after build ", process.memory_info().rss)
         ##filenames = tf.convert_to_tensor(raw_images)
         ##labels = tf.convert_to_tensor(raw_targets)
         # dataset = tf.data.Dataset.from_tensor_slices((filenames, labels))
         if shuffle:
             dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=12345)
+
         dataset = dataset.batch(self.curr_config.batch_size)
+        # Only does multiple epochs if the dataset is going to be used for training
+        if not testing:
+            dataset = dataset.repeat(self.curr_config.epochs)
         iterator = dataset.make_one_shot_iterator()
         images_batch, target_batch = iterator.get_next()
-        
+
         return images_batch, target_batch
 
     def __del__(self):

@@ -52,14 +52,13 @@ def __get_tiny_imagenet_paths():
     It gives the default paths to the training and testing data of TINY IMAGENET
     :return: a tuple, where the first value is an array of strings corresponding to the paths of each one of the
     mega-batches for training, the second value is a string corresponding to the path of the testing data and the third
-    value is an array of this form: [labels_file_path, metadata_file_path, bounding_box_file]
+    value is an array of this form: [labels_file_path, metadata_file_path]
     """
     train_dirs = ["../datasets/tiny-imagenet-200/train/", "../datasets/tiny-imagenet-200/val/"]
     validation_dir = "../datasets/tiny-imagenet-200/val/"
     labels_file = "../datasets/tiny-imagenet-200/wnids.txt"
     metadata_file = "../datasets/tiny-imagenet-200/words.txt"
-    bounding_box_file = "../datasets/tiny-imagenet-200/bounding_boxes.xml"
-    return train_dirs, validation_dir, [labels_file, metadata_file, bounding_box_file]
+    return train_dirs, validation_dir, [labels_file, metadata_file]
 
 
 def __get_not_supported_dataset():

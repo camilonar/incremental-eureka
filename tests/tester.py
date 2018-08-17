@@ -57,7 +57,7 @@ class Tester(ABC):
 
         """
         Prepares the optimizer that is required by the User
-        :param str_optimizer: a string that represents the chosen Optimizer. Currently supported strings are.
+        :param str_optimizer: a string that represents the chosen Optimizer. Currently supported strings are:
             -OPT_BASE: for a simple RMSProp
             -OPT_CEAL: for the OPT_CEAL algorithm (See: Keze Wang, Dongyu Zhang, Ya Li, Ruimao Zhang, and Liang Lin.
                     Cost-effective active learning for deep image classification.
@@ -67,6 +67,8 @@ class Tester(ABC):
         :return: None
         :raises OptimizerNotSupportedError: if the required Optimizer isn't supported yet
         """
+        self.optimizer = str_optimizer  # TODO cambiarlo cuando existan los Optimizer
+
         if str_optimizer == const.OPT_BASE:
             pass  # Base Optimizer (basic RMSProp)
         elif str_optimizer == const.OPT_CEAL:
@@ -77,10 +79,11 @@ class Tester(ABC):
             raise OptionNotSupportedError("The required Optimizer '{}' isn't supported".format(str_optimizer))
 
     @abstractmethod
-    def _prepare_config(self):
+    def _prepare_config(self, str_optimizer: str):
         """
         This method creates and saves the proper Configuration for the training according to the pre-established
         conditions of each dataset
+        :type str_optimizer: a string that represents the chosen Optimizer.
         :return: None
         """
         raise NotImplementedError("The subclass hasn't implemented the _prepare_config method")
@@ -114,7 +117,7 @@ class Tester(ABC):
         If there is no checkpoint to be loaded then its value should be None. The default value is None.
         :return:
         """
-        self._prepare_config()
+        self._prepare_config(str_optimizer)
         self._prepare_data_pipeline()
         self._prepare_neural_network()
         self._prepare_optimizer(str_optimizer)
@@ -150,8 +153,7 @@ class Tester(ABC):
         if not self.neural_net:
             message += '-Neural Network missing\n'
         if not self.optimizer:
-            # message += '-Optimizer missing\n'
-            message = message
+            message += '-Optimizer missing\n'
         if not self.general_config:
             message += '-Training Configuration missing\n'
         if not self.checkpoint_loaded:
@@ -160,6 +162,8 @@ class Tester(ABC):
         if message:
             raise TestNotPreparedError("There has been some problems when checking the requirements for the execution"
                                        " of the test:\n {}".format(message))
+
+        print("The test has been properly prepared...")
 
     @property
     @abstractmethod

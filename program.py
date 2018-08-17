@@ -44,7 +44,8 @@ def ask_for_configuration():
 
     # Creation of variables
     response = "s"
-    dataset, optimizer, checkpoint, learning_rate, summary_interval, ckp_interval = None, None, None, 0.1, 100, 200
+    dataset, optimizer, checkpoint = None, None, None
+    learning_rate, summary_interval, ckp_interval = const.LEARNING_RATE, const.SUMMARY_INTERVAL, const.CKP_INTERVAL
 
     while response:
         response = print_menu()
@@ -124,7 +125,7 @@ def configure_optimizer(curr_optimizer: str):
 
     while True:
         print("[B] Simple RMSProp (Base optimizer)")
-        print("[C] OPT_CEAL Algorithm (Active Learning)")
+        print("[C] CEAL Algorithm (Active Learning)")
         print("[R] Incremental Representative Sampling (The proposed method)")  # TODO cambiar a un nombre más apropiado
         print("[X] Cancel Operation and return to Main Menu")
         response = input("Select an optimizer: ").upper()
@@ -240,6 +241,30 @@ def get_checkpoint_multiplier():
             print("Invalid value for the summary interval. Must be an int")
 
 
+def print_config(dataset: str, optimizer: str, checkpoint: str, lr: float, s_interval: int, ckp_interval: int):
+    """
+        Prints the configuration selected by the user
+        :param dataset: a string representing the dataset that has been configured by the user
+        :param optimizer: a string representing the optimizer that has been configured by the user
+        :param checkpoint: a string representing a checkpoint. Must be None if no checkpoint has been configured
+        :param lr: the learning rate that has been configured by the user
+        :param s_interval: the summary interval that has been configured by the user
+        :param ckp_interval: the checkpoint interval that has been configured by the user
+        if the dataset doesn't have any dataset-specific path.
+    """
+    print("--------------------------------------------------------")
+    print("\n\nStarting test with the following configuration:\n")
+    print("Dataset: {}".format(dataset))
+    print("Optimizer: {}".format(optimizer))
+    print("Checkpoint: {}".format(checkpoint))
+    print("Learning rate: {}".format(lr))
+    print("Summary interval: {} iterations".format(s_interval))
+    print("Checkpoint interval: {} iterations".format(ckp_interval))
+    print("\n")
+
+    input("To continue with the test press any key...")
+
+
 def perform_test(dataset: str, optimizer: str, checkpoint: str, lr: float, s_interval: int, ckp_interval: int,
                  train_dirs: [str], validation_dir: str, extras: [str]):
     """
@@ -275,6 +300,7 @@ def perform_test(dataset: str, optimizer: str, checkpoint: str, lr: float, s_int
 def main():
     dataset, optimizer, checkpoint, lr, s_interval, ckp_interval = ask_for_configuration()
     train_dirs, validation_dir, extras = paths.get_paths_from_dataset(dataset)
+    print_config(dataset, optimizer, checkpoint, lr, s_interval, ckp_interval)
     perform_test(dataset, optimizer, checkpoint, lr, s_interval, ckp_interval, train_dirs, validation_dir, extras)
 
 
