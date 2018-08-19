@@ -38,15 +38,16 @@ class MnistData(Data):
         self.batch_queue_capacity = batch_queue_capacity + 3 * self.curr_config.batch_size
         self.data_reader.check_if_downloaded()
 
-    def build_train_data_tensor(self, shuffle=False, augmentation=False):
+    def build_train_data_tensor(self, shuffle=False, augmentation=False, skip_count=0):
         raw_images, raw_labels = self.data_reader.load_training_data()
-        return self.__build_generic_data_tensor(raw_images, raw_labels, shuffle, augmentation)
+        return self.__build_generic_data_tensor(raw_images, raw_labels, shuffle, augmentation,
+                                                skip_count=skip_count)
 
     def build_test_data_tensor(self, shuffle=False, augmentation=False):
         raw_images_test, raw_labels_test = self.data_reader.load_test_data()
         return self.__build_generic_data_tensor(raw_images_test, raw_labels_test, shuffle, augmentation)
 
-    def __build_generic_data_tensor(self, images_raw, labels_raw, shuffle, augmentation):
+    def __build_generic_data_tensor(self, images_raw, labels_raw, shuffle, augmentation, skip_count=0):
         images_tensor = tf.convert_to_tensor(images_raw)
         targets_tensor = tf.convert_to_tensor(labels_raw)
         images_tensor = tf.reshape(images_tensor, [images_raw.shape[0], 28, 28, 1])

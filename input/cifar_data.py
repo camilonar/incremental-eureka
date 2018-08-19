@@ -1,7 +1,6 @@
 import tensorflow as tf
 import os
 import psutil
-import matplotlib.pyplot as plt
 
 from input import cifar_reader as cifar
 from input.data import Data
@@ -27,9 +26,10 @@ class CifarData(Data):
         self.data_reader.check_if_downloaded()
         self.batch_queue_capacity = batch_queue_capacity
 
-    def build_train_data_tensor(self, shuffle=False, augmentation=False):
+    def build_train_data_tensor(self, shuffle=False, augmentation=False, skip_count=0):
         filename, _ = self.data_reader.load_training_data()
-        return self.__build_generic_data_tensor(filename, shuffle, augmentation, testing=False)
+        return self.__build_generic_data_tensor(filename, shuffle, augmentation, testing=False,
+                                                skip_count=skip_count)
 
     def build_test_data_tensor(self, shuffle=False, augmentation=False):
         filename, _ = self.data_reader.load_test_data()
@@ -38,7 +38,7 @@ class CifarData(Data):
     def change_dataset_part(self, index: int):
         pass
 
-    def __build_generic_data_tensor(self, filename, shuffle, augmentation, testing):
+    def __build_generic_data_tensor(self, filename, shuffle, augmentation, testing, skip_count=0):
         def parser(serialized_example):
             """Parses a single tf.Example into image and label tensors."""
             features = tf.parse_single_example(
@@ -81,6 +81,9 @@ class CifarData(Data):
         # Only does multiple epochs if the dataset is going to be used for training
         if not testing:
             dataset = dataset.repeat(self.curr_config.epochs)
+
+        dataset.skip(skip_count)
+
         iterator = dataset.make_one_shot_iterator()
         images_batch, target_batch = iterator.get_next()
 

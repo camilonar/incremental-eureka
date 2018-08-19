@@ -31,15 +31,16 @@ class CaltechData(Data):
         self.batch_queue_capacity = batch_queue_capacity + 3 * self.curr_config.batch_size
         self.data_reader.check_if_downloaded()
 
-    def build_train_data_tensor(self, shuffle=False, augmentation=False):
+    def build_train_data_tensor(self, shuffle=False, augmentation=False, skip_count=0):
         img_path, cls = self.data_reader.load_training_data()
-        return self.__build_generic_data_tensor(img_path, cls, shuffle, augmentation, testing=False)
+        return self.__build_generic_data_tensor(img_path, cls, shuffle, augmentation, testing=False,
+                                                skip_count=skip_count)
 
     def build_test_data_tensor(self, shuffle=False, augmentation=False):
         img_path, cls = self.data_reader.load_test_data()
         return self.__build_generic_data_tensor(img_path, cls, shuffle, augmentation, testing=True)
 
-    def __build_generic_data_tensor(self, all_img_paths, all_targets, shuffle, augmentation, testing):
+    def __build_generic_data_tensor(self, all_img_paths, all_targets, shuffle, augmentation, testing, skip_count=0):
         """
         Creates the input pipeline and performs some preprocessing.
         The full dataset needs to fit into memory for this version.
@@ -55,7 +56,7 @@ class CaltechData(Data):
             """
             # one hot encode the target
             process = psutil.Process(os.getpid())
-            print("memory before build ",process.memory_info().rss)
+            print("memory before build ", process.memory_info().rss)
             single_target = tf.cast(tf.subtract(single_target, tf.constant(1)), tf.int32)
             single_target = tf.one_hot(single_target, depth=self.NUMBER_OF_CLASSES)
 
@@ -78,7 +79,7 @@ class CaltechData(Data):
                 single_image = tf.image.random_flip_left_right(single_image)
 
                 single_image = tf.image.per_image_standardization(single_image)
-            print("memory after build ",process.memory_info().rss)
+            print("memory after build ", process.memory_info().rss)
             return single_image, single_target
 
         # Creates the dataset
@@ -95,6 +96,9 @@ class CaltechData(Data):
         # Only does multiple epochs if the dataset is going to be used for training
         if not testing:
             dataset = dataset.repeat(self.curr_config.epochs)
+
+        dataset.skip(skip_count)
+
         iterator = dataset.make_one_shot_iterator()
         images_batch, target_batch = iterator.get_next()
 

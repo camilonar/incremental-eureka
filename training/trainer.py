@@ -1,6 +1,8 @@
 """
 Module for training a neural network
 """
+import os
+
 import tensorflow as tf
 from tensorflow.python.framework.errors_impl import OutOfRangeError
 
@@ -10,30 +12,39 @@ from training.train_conf import GeneralConfig
 import utils.dir_utils as utils
 
 
+# TODO reducir el número de atributos de objeto
 class Trainer(object):
     """
     Has the purpose of training a generic net, with a generic configuration and optimizer
     """
 
-    def __init__(self, config: GeneralConfig, model: Network, pipeline: Data, tensor_x: tf.Tensor, tensor_y: tf.Tensor):
+    def __init__(self, config: GeneralConfig, model: Network, pipeline: Data, tensor_x: tf.Tensor, tensor_y: tf.Tensor,
+                 checkpoint: str = None):
         """
         It creates a Trainer object
         :param config: the configuration for the whole training
         :param model: the neural net that is going to be trained
         :param pipeline: the data pipeline for the training
+        :param checkpoint: the checkpoint path if it's required to start the training from a checkpoint. A data path with
+        the following structure is expected: ./checkpoints/dataset_name/config_net_name/checkpoint_name.ckpt.
+        If there is no checkpoint to be loaded then its value should be None. The default value is None.
         """
         self.config = config
         self.model = model
         self.pipeline = pipeline
         self.tensor_x = tensor_x
         self.tensor_y = tensor_y
+        self.checkpoint = checkpoint
 
         # Creation of aditional attributes for training
         self.sess = None
         self.writer = None
-        self.ck_path, self.summaries_path = None, None
+        self.ckp_path, self.summaries_path = None, None
         self.streaming_accuracy_update, self.streaming_accuracy_scalar = None, None
         self.train_step = None
+        self.iteration_variable, self.mega_batch_variable = None, None
+        self.iteration, self.mega_batch, self.aux_tensor = None, None, None
+        self.saver = None
 
     def __prepare(self):
         """
@@ -42,7 +53,7 @@ class Trainer(object):
         """
         print("Preparing training...")
 
-        self.ck_path, self.summaries_path = utils.prepare_directories(self.config)
+        self.ckp_path, self.summaries_path = utils.prepare_directories(self.config)
 
         # Creates the session
         sess = tf.get_default_session()
@@ -58,28 +69,38 @@ class Trainer(object):
         self.streaming_accuracy_scalar = tf.summary.scalar('accuracy', streaming_accuracy)
 
         # TODO cambiar para poder crear un Optimizer genérico
-        self.train_step = tf.train.RMSPropOptimizer(0.01).minimize(self.mse)
+        self.train_step = tf.train.RMSPropOptimizer(self.config.learn_rate).minimize(self.mse)
 
-        # TODO carga de checkpoints
+        # Prepares variables and op for checkpoints
+        self.iteration_variable = tf.get_variable("iteration", shape=[1], initializer=tf.zeros_initializer)
+        self.mega_batch_variable = tf.get_variable("megabatch", shape=[1], initializer=tf.zeros_initializer)
+        self.aux_tensor = tf.placeholder(dtype=tf.float32, shape=[None])
+        self.iteration = self.iteration_variable.assign(self.aux_tensor)
+        self.mega_batch = self.mega_batch_variable.assign(self.aux_tensor)
+
+        self.saver = tf.train.Saver()
+
         self.sess.run(tf.local_variables_initializer())
         self.sess.run(tf.global_variables_initializer())
+
         print("Finished preparations for training...")
 
     # TODO hacerlo genérico para cualquier Optimizer
-    # TODO si hay checkpoint, cómo se va a manejar el restablecimiento del batch correcto de datos? Es decir, se debe reestablecer el mega batch correcto
     def train(self):
         """
         Trains a neural network with the appropriate configuration.
         :return: None
         """
         self.__prepare()
+        inc, skip_count = self.__maybe_load_model(self.checkpoint)
 
         self.writer = tf.summary.FileWriter(self.summaries_path, tf.get_default_graph())
         test_x, test_y = self.pipeline.build_test_data_tensor()
 
-        for i, _ in enumerate(self.config.train_configurations):
-            data_x, data_y = self.pipeline.build_train_data_tensor()
-            self.train_increment(self.config, self.writer, data_x, data_y, test_x, test_y)
+        for i in range(inc, len(self.config.train_configurations)):
+            data_x, data_y = self.pipeline.build_train_data_tensor(skip_count)
+            self.train_increment(i, skip_count, self.config, self.writer, data_x, data_y, test_x, test_y)
+            skip_count = 0  # Reestablishes the skip_count to zero after the first mega-batch
             print("Finished training of increment {}...".format(i))
             if i + 1 < len(self.config.train_configurations):
                 self.pipeline.change_dataset_part(i + 1)
@@ -87,12 +108,15 @@ class Trainer(object):
         self.__finish()
 
     # TODO mensajes con porcentajes de avance
-    def train_increment(self, config: GeneralConfig, writer: tf.summary.FileWriter,
+    def train_increment(self, increment: int, iteration: int, config: GeneralConfig, writer: tf.summary.FileWriter,
                         data_x: tf.Tensor, data_y: tf.Tensor,
                         test_x: tf.Tensor, test_y: tf.Tensor):
         """
         Trains a neural network over an increment of data, with the given configuration and model, over the data that is
         provided. It also saves summaries for TensorBoard and creates checkpoints according to the given configuration.
+        :param increment: the number of the mega-batch
+        :param iteration: the current iteration number over the training data. It should be zero if no checkpoint has
+        been loaded or if the mega-batch at which the restored checkpoint is different from the current mega-batch
         :param config: the configuration for the whole training
         :param writer: a FileWriter properly configured
         :param data_x: the tensor associated with the training data
@@ -101,7 +125,7 @@ class Trainer(object):
         :param test_y: the tensor that has the corresponding labels of the testing/validation data
         :return: None
         """
-        i = 0
+        i = iteration
         while True:
             try:
                 image_batch, target_batch = self.sess.run([data_x, data_y])
@@ -110,6 +134,8 @@ class Trainer(object):
                 if i % config.summary_interval == 0:
                     print("Performing validation at iteration number: {}. Mse is: {}".format(i, c))
                     self.__perform_validation(i, writer, test_x, test_y)
+                if i % config.eval_interval == 0:
+                    self.__save_model(i, increment)
 
             except OutOfRangeError:
                 break
@@ -119,8 +145,8 @@ class Trainer(object):
         """
         Performs validation over the test data and register the results in the form of summaries that can be interpreted
         by Tensorboard
-        :type iteration: the current iteration number over the training data
-        :type writer: a FileWriter properly configured
+        :param iteration: the current iteration number over the training data
+        :param writer: a FileWriter properly configured
         :param test_x: the tensor associated with the testing/validation data
         :param test_y: the tensor that has the corresponding labels of the data
         :return: None
@@ -136,6 +162,42 @@ class Trainer(object):
 
         summary = self.sess.run(self.streaming_accuracy_scalar)
         writer.add_summary(summary, iteration)
+
+    def __maybe_load_model(self, ckp_path: str):
+        """
+        This method prepares the previously created neural network with the checkpoint data if a checkpoint is
+        provided. It also loads any kind of additional Variable that is need for the training (like Data or Optimizer's
+        variables).
+        :param ckp_path: the checkpoint path if it's required to start the training from a checkpoint. A data path with
+        the following structure is expected: ./checkpoints/dataset_name/config_name/checkpoint_name.ckpt.
+        If there is no checkpoint to be loaded then its value should be None.
+        :return:  if a checkpoint has been successfully loaded then this method returns a tuple containing the number of
+        the current mega-batch (increment) and iteration in that order. It returns a tuple of zeros if no checkpoint is
+        loaded.
+        """
+        if not ckp_path:
+            print("No checkpoint has been loaded.")
+            return 0, 0
+        else:
+            print("Loading checkpoint from {}.".format(ckp_path))
+
+        self.saver.restore(self.sess, ckp_path)
+        inc, it = self.sess.run([self.mega_batch_variable, self.iteration_variable])
+        print("Loaded checkpoint at iteration {} of increment {}".format(it, inc))
+        return int(inc[0]), int(it[0])
+
+    def __save_model(self, iteration: int, increment: int):
+        """
+        Saves all the variables of the model
+        :param iteration: the current iteration number over the training data
+        :param increment: the number of the mega-batch
+        """
+        filename = "model-{}-{}.ckpt".format(increment, iteration)
+        self.sess.run(self.mega_batch, feed_dict={self.aux_tensor: [increment]})
+        self.sess.run(self.iteration, feed_dict={self.aux_tensor: [iteration]})
+        save_path = self.saver.save(self.sess, os.path.join(self.ckp_path, filename))
+        print("Model saved in path: {}".format(save_path))
+        return save_path
 
     def __finish(self):
         """

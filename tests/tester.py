@@ -13,7 +13,7 @@ class Tester(ABC):
     """
 
     def __init__(self, lr: float, train_dirs: [str], validation_dir: str, extras: [str],
-                 summary_interval=100, check_interval=200):
+                 summary_interval=100, ckp_interval=200, ckp_path: str = None):
         """
         It creates a Tester object
         :param train_dirs: array of strings corresponding to the paths of each one of the mega-batches for training
@@ -21,8 +21,11 @@ class Tester(ABC):
         :param extras: an array of strings corresponding to paths specific for each dataset. It should be an empty array
         :param lr: the learning rate to be used in the training
         :param summary_interval: the interval of iterations at which the summaries are going to be performed
-        :param check_interval: the interval of iterations at which the evaluations and checkpoints are going to be
+        :param ckp_interval: the interval of iterations at which the evaluations and checkpoints are going to be
         performed. Must be an integer multiple of summary_interval
+        :param ckp_path: the checkpoint path if it's required to start the training from a checkpoint. A data path with
+        the following structure is expected: ./checkpoints/dataset_name/config_net_name/checkpoint_name.ckpt.
+        If there is no checkpoint to be loaded then its value should be None. The default value is None.
 
         This must be called by the constructors of the subclasses.
         """
@@ -31,7 +34,8 @@ class Tester(ABC):
         self.validation_dir = validation_dir
         self.extras = extras
         self.summary_interval = summary_interval
-        self.check_interval = check_interval
+        self.ckp_interval = ckp_interval
+        self.ckp_path = ckp_path
         self.optimizer = None
 
     @abstractmethod
@@ -88,20 +92,7 @@ class Tester(ABC):
         """
         raise NotImplementedError("The subclass hasn't implemented the _prepare_config method")
 
-    @abstractmethod
-    def _prepare_checkpoint_if_required(self, ckp_path: str):
-        """
-        This method should prepare the previously created neural network with the checkpoint data if a checkpoint is
-        provided, otherwise, this method shouldn't do any kind of modification over the network data. It should also
-        check if the checkpoint path is a VALID path.
-        :param ckp_path: the checkpoint path if it's required to start the training from a checkpoint. A data path with
-        the following structure is expected: ./checkpoints/dataset_name/neural_net_name/checkpoint_name.ckpt.
-        If there is no checkpoint to be loaded then its value should be None.
-        :return: None
-        """
-        raise NotImplementedError("The subclass hasn't implemented the _prepare_checkpoint_if_required method")
-
-    def prepare_all(self, str_optimizer: str, ckp_path: str = None):
+    def prepare_all(self, str_optimizer: str):
         """
         It prepares the Tester object for the test, according to the various parameters given up to this point and
         also according to the corresponding dataset to which the concrete Tester is associated.
@@ -112,16 +103,12 @@ class Tester(ABC):
                     IEEE Transactions on Circuits and Systems for Video Technology, 2016)
             -OPT_REPRESENTATIVES: for the proposed approach of this work, i.e. an incremental algorithm that uses RMSProp
                     and select samples based in clustering
-        :param ckp_path: the checkpoint path if it's required to start the training from a checkpoint. A data path with
-        the following structure is expected: ./checkpoints/dataset_name/neural_net_name/checkpoint_name.ckpt.
-        If there is no checkpoint to be loaded then its value should be None. The default value is None.
-        :return:
+        :return: None
         """
         self._prepare_config(str_optimizer)
         self._prepare_data_pipeline()
         self._prepare_neural_network()
         self._prepare_optimizer(str_optimizer)
-        self._prepare_checkpoint_if_required(ckp_path)
 
     def execute_test(self):
         """
@@ -131,7 +118,8 @@ class Tester(ABC):
         :raises TestNotPreparedError: if the Tester hasn't been prepared before the execution of this method
         """
         self.__check_conditions_for_test()
-        trainer = Trainer(self.general_config, self.neural_net, self.data_input, self.input_tensor, self.output_tensor)
+        trainer = Trainer(self.general_config, self.neural_net, self.data_input, self.input_tensor, self.output_tensor,
+                          self.ckp_path)
         trainer.train()
 
     def __check_conditions_for_test(self):

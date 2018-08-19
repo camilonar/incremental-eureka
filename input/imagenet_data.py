@@ -72,15 +72,16 @@ class ImagenetData(Data):
         self.batch_queue_capacity = batch_queue_capacity + 3 * self.curr_config.batch_size
         self.data_reader.check_if_downloaded()
 
-    def build_train_data_tensor(self, shuffle=False, augmentation=False):
+    def build_train_data_tensor(self, shuffle=False, augmentation=False, skip_count=0):
         img_path, cls = self.data_reader.load_training_data()
-        return self.__build_generic_data_tensor(img_path, cls, shuffle, augmentation, testing=False)
+        return self.__build_generic_data_tensor(img_path, cls, shuffle, augmentation, testing=False,
+                                                skip_count=skip_count)
 
     def build_test_data_tensor(self, shuffle=False, augmentation=False):
         img_path, cls = self.data_reader.load_test_data()
         return self.__build_generic_data_tensor(img_path, cls, shuffle, augmentation, testing=True)
 
-    def __build_generic_data_tensor(self, all_img_paths, all_targets, shuffle, augmentation, testing):
+    def __build_generic_data_tensor(self, all_img_paths, all_targets, shuffle, augmentation, testing, skip_count=0):
         """
         Creates the input pipeline and performs some preprocessing.
         The full dataset needs to fit into memory for this version.
@@ -133,6 +134,8 @@ class ImagenetData(Data):
 
         if not testing:
             dataset = dataset.repeat(self.curr_config.epochs)
+
+        dataset.skip(skip_count)
 
         iterator = dataset.make_one_shot_iterator()
         images_batch, target_batch = iterator.get_next()

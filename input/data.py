@@ -33,11 +33,14 @@ class Data(object):
         self.image_width = image_width
 
     @abstractmethod
-    def build_train_data_tensor(self, shuffle=False, augmentation=False):
+    def build_train_data_tensor(self, shuffle=False, augmentation=False, skip_count=0):
         """
         Builds the training data tensor
         :param shuffle: specifies whether the data is going to be randomly shuffled or not
         :param augmentation: specifies if there is going to be performed a data augmentation process
+        :param skip_count: number of elements to be skipped from the Dataset. If the dataset.batch is applied, then each
+        batch is treated as 1 element, so in that case, skip_count is the number of batches to be skipped from the
+        Dataset.
         :return: a tuple of Tensors, where the first value corresponds with the tensor of training data and the second
         is the tensor with the corresponding labels of the data
         """

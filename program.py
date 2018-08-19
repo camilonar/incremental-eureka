@@ -288,11 +288,11 @@ def perform_test(dataset: str, optimizer: str, checkpoint: str, lr: float, s_int
     if dataset == const.DATA_CIFAR_10:
         pass
     if dataset == const.DATA_CALTECH_101:
-        tester = CaltechTester(lr, train_dirs, validation_dir, extras, s_interval, ckp_interval)
+        tester = CaltechTester(lr, train_dirs, validation_dir, extras, s_interval, ckp_interval, checkpoint)
     if dataset == const.DATA_TINY_IMAGENET:
-        tester = ImagenetTester(lr, train_dirs, validation_dir, extras, s_interval, ckp_interval)
+        tester = ImagenetTester(lr, train_dirs, validation_dir, extras, s_interval, ckp_interval, checkpoint)
 
-    tester.prepare_all(optimizer, checkpoint)
+    tester.prepare_all(optimizer)
     tester.execute_test()
 
 

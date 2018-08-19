@@ -24,7 +24,7 @@ class CaltechTester(Tester):
         self.__neural_net = VGGNet({'data': self.input_tensor})
 
     def _prepare_config(self, str_optimizer: str):
-        self.__general_config = GeneralConfig(self.lr, self.summary_interval, self.check_interval,
+        self.__general_config = GeneralConfig(self.lr, self.summary_interval, self.ckp_interval,
                                               config_name=str_optimizer, model_name='Caltech')
         # Creates configuration for 5 mega-batches
         for i in range(1):
