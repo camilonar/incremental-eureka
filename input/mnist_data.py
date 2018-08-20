@@ -1,18 +1,5 @@
-###############################################################################
-# Author:       Imanol Schlag (more info on ischlag.github.io)
-# Description:  imagenet input pipeline
-# Date:         11.2016
-#
-#
-
-###############################################################################
-# NOTE: this code has been modified from the original version of Imanol Schlag
-# to be in line with the architecture of this program
-#
-
-
 import tensorflow as tf
-import input.mnist_reader as mnist
+from input import mnist_reader as  mnist
 
 from input.data import Data
 
@@ -22,48 +9,80 @@ class MnistData(Data):
     """
     Data pipeline for MNIST dataset
     """
+    NUMBER_OF_CLASSES = 10
     IMAGE_HEIGHT = 28
     IMAGE_WIDTH = 28
-    NUM_THREADS = 8
-    NUM_OF_CHANNELS = 3
 
     def __init__(self, general_config,
+                 train_dirs: [str],
+                 validation_dir: str,
+                 extras: [str],
                  batch_queue_capacity=1000,
                  image_height=IMAGE_HEIGHT,
                  image_width=IMAGE_WIDTH):
         """ Downloads the data if necessary. """
         print("Loading mnist data...")
+        mnist.MnistReader.set_parameters(train_dirs, validation_dir, extras)
         my_mnist = mnist.MnistReader.get_data()
         super().__init__(general_config, my_mnist, image_height, image_width)
-        self.batch_queue_capacity = batch_queue_capacity + 3 * self.curr_config.batch_size
+        self.batch_queue_capacity = batch_queue_capacity
         self.data_reader.check_if_downloaded()
 
     def build_train_data_tensor(self, shuffle=False, augmentation=False, skip_count=0):
-        raw_images, raw_labels = self.data_reader.load_training_data()
-        return self.__build_generic_data_tensor(raw_images, raw_labels, shuffle, augmentation,
+        filename, _ = self.data_reader.load_training_data()
+        return self.__build_generic_data_tensor(filename, shuffle, augmentation, testing=False,
                                                 skip_count=skip_count)
 
     def build_test_data_tensor(self, shuffle=False, augmentation=False):
-        raw_images_test, raw_labels_test = self.data_reader.load_test_data()
-        return self.__build_generic_data_tensor(raw_images_test, raw_labels_test, shuffle, augmentation)
+        filename, _ = self.data_reader.load_test_data()
+        return self.__build_generic_data_tensor(filename, shuffle, augmentation, testing=True)
 
-    def __build_generic_data_tensor(self, images_raw, labels_raw, shuffle, augmentation, skip_count=0):
-        images_tensor = tf.convert_to_tensor(images_raw)
-        targets_tensor = tf.convert_to_tensor(labels_raw)
-        images_tensor = tf.reshape(images_tensor, [images_raw.shape[0], 28, 28, 1])
-        image, label = tf.train.slice_input_producer([images_tensor, targets_tensor], shuffle=shuffle)
+    def __build_generic_data_tensor(self, filename, shuffle, augmentation, testing, skip_count=0):
+        
 
-        if augmentation:
-            image = tf.image.resize_image_with_crop_or_pad(image, self.IMAGE_HEIGHT + 4, self.IMAGE_WIDTH + 4)
-            image = tf.random_crop(image, [self.IMAGE_HEIGHT, self.IMAGE_WIDTH, self.NUM_OF_CHANNELS])
-            image = tf.image.random_flip_left_right(image)
+        def parser(serialized_example):
+          """Parses a single tf.Example into image and label tensors."""
+          features = tf.parse_single_example(
+              serialized_example,
+              features={
+                  'height': tf.FixedLenFeature([], tf.int64),
+                  'width': tf.FixedLenFeature([], tf.int64),
+                  'depth': tf.FixedLenFeature([], tf.int64),
+                  'label': tf.FixedLenFeature([], tf.int64),
+                  'image_raw': tf.FixedLenFeature([], tf.string)
+              })
 
-        image = tf.image.per_image_standardization(image)
-        images_batch, labels_batch = tf.train.batch([image, label], batch_size=self.curr_config.batch_size,
-                                                    num_threads=self.NUM_THREADS)
+          image = tf.decode_raw(features['image_raw'], tf.uint8) 
+          image.set_shape((self.IMAGE_WIDTH*self.IMAGE_HEIGHT))
+          # Reshape from [depth * height * width] to [depth, height, width].
+        
+          label = tf.cast(features['label'], tf.int32) 
+          label = tf.one_hot(label, depth=self.NUMBER_OF_CLASSES)
+          # TODO: preprocessing custom
+          return image, label
 
-        return images_batch, labels_batch
+
+        # Creates the dataset
+        dataset = tf.data.TFRecordDataset(filename)
+        dataset = dataset.map(parser, num_parallel_calls=self.batch_queue_capacity)
+        
+        if shuffle:
+            dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=12345)
+        dataset = dataset.batch(self.curr_config.batch_size)
+        
+        # Only does multiple epochs if the dataset is going to be used for training
+        if not testing:
+            dataset = dataset.repeat(self.curr_config.epochs)
+
+        dataset.skip(skip_count)
+        iterator = dataset.make_one_shot_iterator()
+        images_batch, target_batch = iterator.get_next()
+        return images_batch, target_batch
+
+
+
+    def __del__(self):
+        pass
 
     def close(self):
-        print("Closing Data pipeline...")
-        return
+        pass

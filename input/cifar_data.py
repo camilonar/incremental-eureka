@@ -67,19 +67,12 @@ class CifarData(Data):
 
             return image, label
 
-        process = psutil.Process(os.getpid())
-        # TODO: BORRAR LOS TENSORES
-        print("memory before build ", process.memory_info().rss)
-
+       
         # Creates the dataset
         dataset = tf.data.TFRecordDataset(filename)
         dataset = dataset.map(parser, num_parallel_calls=self.batch_queue_capacity)
         print(dataset)
 
-        print(" Memory after build ", process.memory_info().rss)
-        ##filenames = tf.convert_to_tensor(raw_images)
-        ##labels = tf.convert_to_tensor(raw_targets)
-        # dataset = tf.data.Dataset.from_tensor_slices((filenames, labels))
         if shuffle:
             dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=12345)
 

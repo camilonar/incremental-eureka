@@ -18,7 +18,12 @@ def __get_mnist_paths():
     value is an empty array
     """
     path = "../datasets/MNIST_data/"
-    return path, path, []
+    base = "train-"
+    ext="tfrecords"
+    name_tr=path+base
+    tr_paths=[name_tr+"1."+ext,name_tr+"2."+ext,name_tr+"3."+ext,name_tr+"4."+ext,name_tr+"5."+ext]
+    test_path=path+'test.'+ext
+    return tr_paths,test_path,[]
 
 
 def __get_cifar_paths():
