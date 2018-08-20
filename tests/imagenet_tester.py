@@ -7,6 +7,7 @@ from tests.tester import Tester
 from models import CaffeNet
 from training.train_conf import GeneralConfig, TrainConfig
 from input.imagenet_data import ImagenetData
+import utils.constants as const
 
 
 # TODO carga de checkpoints
@@ -25,14 +26,15 @@ class ImagenetTester(Tester):
 
     def _prepare_config(self, str_optimizer: str):
         self.__general_config = GeneralConfig(self.lr, self.summary_interval, self.ckp_interval,
-                                              config_name=str_optimizer, model_name='Imagenet')
+                                              config_name=str_optimizer, model_name=self.dataset_name)
         # Creates configuration for 5 mega-batches
         for i in range(5):
             train_conf = TrainConfig(1, batch_size=128)
             self.general_config.add_train_conf(train_conf)
 
-    def _prepare_checkpoint_if_required(self, ckp_path: str):
-        pass
+    @property
+    def dataset_name(self):
+        return const.DATA_TINY_IMAGENET
 
     @property
     def data_input(self):
@@ -45,10 +47,6 @@ class ImagenetTester(Tester):
     @property
     def general_config(self):
         return self.__general_config
-
-    @property
-    def checkpoint_loaded(self):
-        return True
 
     @property
     def input_tensor(self):

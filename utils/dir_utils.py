@@ -39,3 +39,22 @@ def prepare_directories(config: GeneralConfig):
         os.makedirs(summaries_path)
 
     return ckpt_path, summaries_path
+
+
+def create_full_checkpoint_path(model_name: str, config_name: str, inc_ckp_path: str, root='checkpoints', ext='.ckpt'):
+    """
+    Creates the full relative path to a checkpoint. It also checks if the path exists
+    :param model_name: the name of the dataset corresponding to the checkpoint (e.g. Imagenet)
+    :param config_name: the name of the Optimizer corresponding to the checkpoint (e.g. CEAL)
+    :param inc_ckp_path: a string representing the mega-batch and iteration corresponding to the checkpoint. It is
+    expected to follow the format "[mega-batch]-[iteration]", e.g. "0-50".
+    :param root: the root directory where checkpoints are being stored
+    :param ext: the extension of checkpoint files
+    :return: a tuple containing the generated path (str) and a boolean that says whether or not the generated path is
+    a file that actually exists
+    """
+    filename = "model-" + inc_ckp_path + ext
+    ckpt_path = os.path.join(root, model_name, config_name, filename)
+    return ckpt_path, os.path.isfile(ckpt_path + ".index") and os.path.isfile(ckpt_path + ".meta")
+
+

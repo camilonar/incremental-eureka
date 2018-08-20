@@ -7,6 +7,7 @@ from tests.tester import Tester
 from models import VGGNet
 from training.train_conf import GeneralConfig, TrainConfig
 from input.caltech_data import CaltechData
+import utils.constants as const
 
 
 # TODO carga de checkpoints
@@ -25,14 +26,15 @@ class CaltechTester(Tester):
 
     def _prepare_config(self, str_optimizer: str):
         self.__general_config = GeneralConfig(self.lr, self.summary_interval, self.ckp_interval,
-                                              config_name=str_optimizer, model_name='Caltech')
+                                              config_name=str_optimizer, model_name=self.dataset_name)
         # Creates configuration for 5 mega-batches
         for i in range(1):
             train_conf = TrainConfig(1, batch_size=128)
             self.general_config.add_train_conf(train_conf)
 
-    def _prepare_checkpoint_if_required(self, ckp_path: str):
-        pass
+    @property
+    def dataset_name(self):
+        return const.DATA_CALTECH_101
 
     @property
     def data_input(self):
@@ -45,10 +47,6 @@ class CaltechTester(Tester):
     @property
     def general_config(self):
         return self.__general_config
-
-    @property
-    def checkpoint_loaded(self):
-        return True
 
     @property
     def input_tensor(self):

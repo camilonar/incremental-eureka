@@ -98,12 +98,11 @@ class Trainer(object):
         test_x, test_y = self.pipeline.build_test_data_tensor()
 
         for i in range(inc, len(self.config.train_configurations)):
+            self.pipeline.change_dataset_part(i)
             data_x, data_y = self.pipeline.build_train_data_tensor(skip_count)
             self.train_increment(i, skip_count, self.config, self.writer, data_x, data_y, test_x, test_y)
             skip_count = 0  # Reestablishes the skip_count to zero after the first mega-batch
             print("Finished training of increment {}...".format(i))
-            if i + 1 < len(self.config.train_configurations):
-                self.pipeline.change_dataset_part(i + 1)
 
         self.__finish()
 
@@ -184,7 +183,7 @@ class Trainer(object):
         self.saver.restore(self.sess, ckp_path)
         inc, it = self.sess.run([self.mega_batch_variable, self.iteration_variable])
         print("Loaded checkpoint at iteration {} of increment {}".format(it, inc))
-        return int(inc[0]), int(it[0])
+        return int(inc[0]), int(it[0] + 1)
 
     def __save_model(self, iteration: int, increment: int):
         """

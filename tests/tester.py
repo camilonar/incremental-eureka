@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 from errors import OptionNotSupportedError, TestNotPreparedError
 from training.trainer import Trainer
 import utils.constants as const
+import utils.dir_utils as dir
 
 
 class Tester(ABC):
@@ -13,7 +14,7 @@ class Tester(ABC):
     """
 
     def __init__(self, lr: float, train_dirs: [str], validation_dir: str, extras: [str],
-                 summary_interval=100, ckp_interval=200, ckp_path: str = None):
+                 summary_interval=100, ckp_interval=200, inc_ckp_path: str = None):
         """
         It creates a Tester object
         :param train_dirs: array of strings corresponding to the paths of each one of the mega-batches for training
@@ -23,8 +24,9 @@ class Tester(ABC):
         :param summary_interval: the interval of iterations at which the summaries are going to be performed
         :param ckp_interval: the interval of iterations at which the evaluations and checkpoints are going to be
         performed. Must be an integer multiple of summary_interval
-        :param ckp_path: the checkpoint path if it's required to start the training from a checkpoint. A data path with
-        the following structure is expected: ./checkpoints/dataset_name/config_net_name/checkpoint_name.ckpt.
+        :param inc_ckp_path: a string contsining the checkpoint's corresponding mega-batch and iteration if it's
+        required to start the training from a checkpoint. It is expected to follow the format
+        "[mega-batch]-[iteration]", e.g. "0-50".
         If there is no checkpoint to be loaded then its value should be None. The default value is None.
 
         This must be called by the constructors of the subclasses.
@@ -35,7 +37,8 @@ class Tester(ABC):
         self.extras = extras
         self.summary_interval = summary_interval
         self.ckp_interval = ckp_interval
-        self.ckp_path = ckp_path
+        self.inc_ckp_path = inc_ckp_path
+        self.ckp_path = None
         self.optimizer = None
 
     @abstractmethod
@@ -92,6 +95,25 @@ class Tester(ABC):
         """
         raise NotImplementedError("The subclass hasn't implemented the _prepare_config method")
 
+    def _prepare_checkpoint_if_required(self, inc_ckp_path: str):
+        """
+        This method prepares the checkpoint path given an incomplete checkpoint path. It also checks if the created
+        checkpoint path is a valid path.
+        :param inc_ckp_path: the checkpoint path if it's required to start the training from a checkpoint. It is
+         expected to follow the format "[increment]-[iteration]", e.g. "0-50".
+        If there is no checkpoint to be loaded then its value should be None.
+        :return: if a checkpoint has been successfully loaded then this method returns a string representing the full
+        path to the checkpoint. If no checkpoint has been requested or if the generated path doesn't exists
+        then this method returns None
+        """
+        if inc_ckp_path:
+            path, valid = dir.create_full_checkpoint_path(self.dataset_name, self.optimizer, self.inc_ckp_path)
+            if valid:
+                print("The checkpoint will be loaded from: {}".format(path))
+                return path
+        print("No checkpoint has been loaded...")
+        return None
+
     def prepare_all(self, str_optimizer: str):
         """
         It prepares the Tester object for the test, according to the various parameters given up to this point and
@@ -109,6 +131,7 @@ class Tester(ABC):
         self._prepare_data_pipeline()
         self._prepare_neural_network()
         self._prepare_optimizer(str_optimizer)
+        self.ckp_path = self._prepare_checkpoint_if_required(self.inc_ckp_path)
 
     def execute_test(self):
         """
@@ -155,6 +178,15 @@ class Tester(ABC):
 
     @property
     @abstractmethod
+    def dataset_name(self):
+        """
+        Getter for the name of the dataset associated with the Tester
+        :return: the name of the dataset of the Tester
+        """
+        pass
+
+    @property
+    @abstractmethod
     def data_input(self):
         """
         Getter for the Data pipeline object
@@ -181,7 +213,6 @@ class Tester(ABC):
         pass
 
     @property
-    @abstractmethod
     def checkpoint_loaded(self):
         """
         It tells whether or not a checkpoint for the training has been loaded, in case that a checkpoint has been
@@ -190,7 +221,9 @@ class Tester(ABC):
         checkpoint has been requested. It should return false if a checkpoint has been requested but hasn't been loaded
         into the net
         """
-        pass
+        if self.inc_ckp_path is None:
+            return True
+        return self.ckp_path
 
     @property
     @abstractmethod

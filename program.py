@@ -148,8 +148,89 @@ def configure_optimizer(curr_optimizer: str):
 
 
 def configure_checkpoint(curr_ckp: str):
-    # TODO configurar checkpoint
+    """
+    Configures a representation of a checkpoint based in the corresponding increment (mega-batch) and iteration given
+    by the user. Notice that this function DOES NOT check if the given checkpoint is valid. Also, the full checkpoint
+    path must be created at a later moment, since that path is heavily dependent of other parameters like Dataset and
+    Optimizer that may change during configuration time.
+    :param curr_ckp: a string representing the increment and iteration of a checkpoint. It must be in the form:
+    "[increment]-[iteration]", e.g. "1-20"
+    :return: a string representing the new checkpoint if the user has changed it, otherwise, the current checkpoint will
+     be returned. A value of None will be returned if there was a checkpoint already configured and the user decided to
+     not load a checkpoint anymore.
+    """
+    print()
+    print("----------------------------Configure the Checkpoint----------------------------")
+    while True:
+        print("[1] Select a checkpoint to be loaded")
+        print("[2] Reset checkpoint")
+        print("[X] Cancel Operation and return to Main Menu")
+        response = input("Select an option: ").upper()
+        if response == '1':
+            response = get_checkpoint()
+        elif response == '2':
+            response = reset_checkpoint(curr_ckp)
+            return response
+        elif response == 'X':
+            break
+        else:
+            print("Option '{}' is not recognized.".format(response))
+            continue
+        print("The checkpoint has been changed and corresponds to increment {} and iteration {}."
+              .format(response.split("-")[0], response.split("-")[1]))
+        return response
+
+    if curr_ckp:
+        print("The checkpoint hasn't been changed and currently corresponds to increment {} and iteration {}."
+              .format(curr_ckp.split("-")[0], curr_ckp.split("-")[1]))
+    else:
+        print("No checkpoint has been selected at this moment.")
+
     return curr_ckp
+
+
+def get_checkpoint():
+    """
+    Ask the user for the values of increment and iteration for the checkpoint
+    :return: a string representing the increment and iteration, with the format "[increment]-[iteration]", e.g. "0-50"
+    """
+    print()
+    while True:
+        response = input("Please enter the mega-batch and iteration corresponding to the desired checkpoint with the"
+                         "format [mega-batch]-[iteration], e.g. '0-50' (both must be ints equal or greater than 0): ")
+        if len(response.split("-")) == 2:
+            if 0 <= int(response.split("-")[0]):
+                if 0 <= int(response.split("-")[1]):
+                    return response
+                else:
+                    print("Invalid value for the iteration. Must be a int greater or equal than 0")
+            else:
+                print("Invalid value for the mega-batch. Must be a int greater or equal than 0")
+        else:
+            print("The format of the checkpoint is [mega-batch]-[iteration], e.g. '0-50', '1-0'")
+
+
+def reset_checkpoint(curr_ckp: str):
+    """
+    Resets the checkpoint
+    :param curr_ckp: a string representing the increment and iteration of a checkpoint.
+    :return: None if the checkpoint is reset, otherwise, the current checkpoint will be returned
+    """
+    print()
+
+    while True:
+        response = input(
+            "Are you sure you want to reset the checkpoint? This will mean that no checkpoint will be loaded"
+            "when the training starts [Y/N]: ").upper()
+        if response == 'Y':
+            print("The checkpoint has been reset")
+            return None
+        elif response == 'N':
+            print("The checkpoint has NOT been reset")
+            return curr_ckp
+        else:
+            print("Option '{}' is not recognized.".format(response))
+            continue
 
 
 def configure_learning_rate(curr_lr: float):
@@ -236,9 +317,9 @@ def get_checkpoint_multiplier():
             if 0 < ckp_multiplier:
                 return ckp_multiplier
             else:
-                print("Invalid value for the checkpoint interval. Must be a int greater than 0")
+                print("Invalid value for the checkpoint interval multiplier. Must be a int greater than 0")
         except ValueError:
-            print("Invalid value for the summary interval. Must be an int")
+            print("Invalid value for the checkpoint interval multiplier. Must be an int")
 
 
 def print_config(dataset: str, optimizer: str, checkpoint: str, lr: float, s_interval: int, ckp_interval: int):
@@ -298,6 +379,10 @@ def perform_test(dataset: str, optimizer: str, checkpoint: str, lr: float, s_int
 
 # TODO permitir que el usuario escoja los paths para el dataset
 def main():
+    """
+    Executes the program
+    :return: None
+    """
     dataset, optimizer, checkpoint, lr, s_interval, ckp_interval = ask_for_configuration()
     train_dirs, validation_dir, extras = paths.get_paths_from_dataset(dataset)
     print_config(dataset, optimizer, checkpoint, lr, s_interval, ckp_interval)
