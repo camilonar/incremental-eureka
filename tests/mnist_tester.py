@@ -1,5 +1,5 @@
 """
-Module for performing tests over Imagenet
+Module for performing tests over MNIST
 """
 import tensorflow as tf
 
@@ -10,10 +10,9 @@ from input.mnist_data import MnistData
 import utils.constants as const
 
 
-# TODO carga de checkpoints
 class MnistTester(Tester):
     """
-    Performs tests over mnist according to the User input and pre-established configurations
+    Performs tests over MNIST according to the User input and pre-established configurations
     """
 
     def _prepare_data_pipeline(self):

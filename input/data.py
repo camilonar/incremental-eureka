@@ -1,12 +1,17 @@
 """
-Module for data input.
+Module for data input pipelines.
+Features:
+1. Can load training and testing data separately
+2. Adaptable for multiple mega-batches (changing the mega-batch and reloading data). This is useful for incremental
+training
+3. The pipeline retrieves tensors that can be feed to the training module as needed
 """
-from abc import abstractmethod
+from abc import abstractmethod, ABC
 from input.reader import Reader
 from training.train_conf import GeneralConfig
 
 
-class Data(object):
+class Data(ABC):
     """
     This class acts as an interface for data pipelines.
 

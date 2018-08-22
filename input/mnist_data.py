@@ -1,10 +1,12 @@
+"""
+Module for the data pipeline of MNIST dataset.
+"""
 import tensorflow as tf
-from input import mnist_reader as  mnist
+from input import mnist_reader as mnist
 
 from input.data import Data
 
 
-# TODO adaptar al modelo de Dataset
 class MnistData(Data):
     """
     Data pipeline for MNIST dataset
@@ -38,38 +40,36 @@ class MnistData(Data):
         return self.__build_generic_data_tensor(filename, shuffle, augmentation, testing=True)
 
     def __build_generic_data_tensor(self, filename, shuffle, augmentation, testing, skip_count=0):
-        
 
         def parser(serialized_example):
-          """Parses a single tf.Example into image and label tensors."""
-          features = tf.parse_single_example(
-              serialized_example,
-              features={
-                  'height': tf.FixedLenFeature([], tf.int64),
-                  'width': tf.FixedLenFeature([], tf.int64),
-                  'depth': tf.FixedLenFeature([], tf.int64),
-                  'label': tf.FixedLenFeature([], tf.int64),
-                  'image_raw': tf.FixedLenFeature([], tf.string)
-              })
+            """Parses a single tf.Example into image and label tensors."""
+            features = tf.parse_single_example(
+                serialized_example,
+                features={
+                    'height': tf.FixedLenFeature([], tf.int64),
+                    'width': tf.FixedLenFeature([], tf.int64),
+                    'depth': tf.FixedLenFeature([], tf.int64),
+                    'label': tf.FixedLenFeature([], tf.int64),
+                    'image_raw': tf.FixedLenFeature([], tf.string)
+                })
 
-          image = tf.decode_raw(features['image_raw'], tf.uint8) 
-          image.set_shape((self.IMAGE_WIDTH*self.IMAGE_HEIGHT))
-          # Reshape from [depth * height * width] to [depth, height, width].
-        
-          label = tf.cast(features['label'], tf.int32) 
-          label = tf.one_hot(label, depth=self.NUMBER_OF_CLASSES)
-          # TODO: preprocessing custom
-          return image, label
+            image = tf.decode_raw(features['image_raw'], tf.uint8)
+            image.set_shape((self.IMAGE_WIDTH * self.IMAGE_HEIGHT))
+            # Reshape from [depth * height * width] to [depth, height, width].
 
+            label = tf.cast(features['label'], tf.int32)
+            label = tf.one_hot(label, depth=self.NUMBER_OF_CLASSES)
+
+            return image, label
 
         # Creates the dataset
         dataset = tf.data.TFRecordDataset(filename)
         dataset = dataset.map(parser, num_parallel_calls=self.batch_queue_capacity)
-        
+
         if shuffle:
             dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=12345)
         dataset = dataset.batch(self.curr_config.batch_size)
-        
+
         # Only does multiple epochs if the dataset is going to be used for training
         if not testing:
             dataset = dataset.repeat(self.curr_config.epochs)
@@ -78,11 +78,6 @@ class MnistData(Data):
         iterator = dataset.make_one_shot_iterator()
         images_batch, target_batch = iterator.get_next()
         return images_batch, target_batch
-
-
-
-    def __del__(self):
-        pass
 
     def close(self):
         pass

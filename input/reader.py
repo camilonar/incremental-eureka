@@ -1,5 +1,8 @@
 """
 This module is used to abstract the reading of the data from disk
+Features:
+1. Can load training and testing data separately
+2. Adaptable for multiple mega-batches (changing the mega-batch and reloading data)
 """
 from abc import ABC, abstractmethod
 from typing import List
@@ -77,4 +80,4 @@ class Reader(ABC):
         method.
         :return: None
         """
-        raise NotImplementedError("The subclass hasn't implemented the recreate method")
+        raise NotImplementedError("The subclass hasn't implemented the reload_training_data method")

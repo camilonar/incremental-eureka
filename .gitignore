@@ -103,3 +103,4 @@ ENV/
 # summaries y checkpoints
 checkpoints/
 summaries/
+\.idea/

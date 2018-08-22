@@ -4,7 +4,6 @@
 # Date:         11.2016
 #
 #
-# TODO: 23 images are not jpeg and should be used with the according decoder.
 
 ###############################################################################
 # NOTE: this code has been modified from the original version of Imanol Schlag
@@ -27,8 +26,6 @@ print(target_batch.shape)
 """
 
 import tensorflow as tf
-import numpy as np
-import threading
 
 from input import imagenet_reader as imagenet
 from input.data import Data
@@ -36,7 +33,7 @@ from input.data import Data
 
 class ImagenetData(Data):
     """
-    Downloads the imagenet dataset and creates an input pipeline ready to be fed into a model.
+    Creates an input pipeline for Tiny Imagenet ready to be fed into a model.
 
     memory calculation:
       1 image is 299*299*3*4 bytes = ~1MB

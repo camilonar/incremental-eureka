@@ -1,5 +1,5 @@
 """
-Module for performing tests over Imagenet
+Module for performing tests over CIFAR-10
 """
 import tensorflow as tf
 
@@ -10,14 +10,13 @@ from input.cifar_data import CifarData
 import utils.constants as const
 
 
-# TODO carga de checkpoints
 class CifarTester(Tester):
     """
-    Performs tests over mnist according to the User input and pre-established configurations
+    Performs tests over CIFAR-10 according to the User input and pre-established configurations
     """
 
     def _prepare_data_pipeline(self):
-        self.data_pipeline = CifarTester(self.general_config, self.train_dirs, self.validation_dir, self.extras)
+        self.data_pipeline = CifarData(self.general_config, self.train_dirs, self.validation_dir, self.extras)
 
     def _prepare_neural_network(self):
         self.__input_tensor = tf.placeholder(tf.float32, [None, 32 , 32,3])

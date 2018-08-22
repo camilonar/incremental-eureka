@@ -9,7 +9,6 @@
 
 import tensorflow as tf
 import random
-import os
 
 from input.reader import Reader
 

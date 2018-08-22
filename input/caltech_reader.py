@@ -1,15 +1,21 @@
-import tensorflow as tf
+"""
+Module for the reader of Caltech-101 dataset.
+It reads the dataset from a number of directories previously created and gives a list of filenames and labels.
+"""
 import random
 import os
 
 from input.reader import Reader
 
-ext_validas = [".jpg", ".gif", ".png", ".jpeg"]
+valid_ext = [".jpg", ".gif", ".png", ".jpeg"]
 
 
 ###############################################################################
 # Some TensorFlow Inception functions (ported to python3)
 # source: https://github.com/tensorflow/models/blob/master/inception/inception/data/build_imagenet_data.py
+
+# TODO: documentar (DAVID)
+# TODO: Código extraño: revisar la variable iter
 def _find_image_files(path, categories):
     filenames = []
     labels = []
@@ -20,7 +26,7 @@ def _find_image_files(path, categories):
         for f in os.listdir(path + "/" + category):
             if iter == 0:
                 ext = os.path.splitext(f)[1]
-                if ext.lower() not in ext_validas:
+                if ext.lower() not in valid_ext:
                     continue
                 fullpath = os.path.join(path + "/" + category, f)
                 filenames.append(fullpath)  # NORMALIZE IMAGE
@@ -33,8 +39,8 @@ def _find_image_files(path, categories):
     filenames = [filenames[i] for i in shuffled_index]
     labels = [labels[i] for i in shuffled_index]
 
-    print("Numero filenames: %d" % (len(filenames)))
-    print("Numero labels: %d" % (len(labels)))
+    print("Number of filenames: {}".format(len(filenames)))
+    print("Number of labels: {}".format(len(labels)))
     ncategories = len(categories)
     print(ncategories)
 
@@ -43,13 +49,12 @@ def _find_image_files(path, categories):
 
 class CaltechReader(Reader):
     """
-    Reader for Caltech101 dataset
+    Reader for Caltech-101 dataset
     """
     __train_dirs, __validation_dir = None, None
     data = None
 
     def __init__(self, train_dirs: [str], validation_dir: str):
-        # TODO Que pasa si no tiene test validation
         super().__init__(train_dirs, validation_dir)
         self.categories = sorted(os.listdir(self.curr_path))
         self.val_filenames, self.val_labels = _find_image_files(validation_dir, self.categories)

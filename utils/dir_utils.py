@@ -1,5 +1,5 @@
 """
-Module with utility functions for directory management
+Module with utility functions for directories and paths' management
 """
 from datetime import datetime
 import os

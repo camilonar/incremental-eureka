@@ -1,5 +1,5 @@
 """
-Module with Exceptions
+Module with custom Exceptions for the project
 """
 
 
@@ -15,7 +15,7 @@ class OptionNotSupportedError(Exception):
 
 class TestNotPreparedError(Exception):
     """
-    This error is raised when the Optimizer that is required isn't found
+    This error is raised when the a condition for a test is not met that is required isn't found
     """
 
     def __init__(self, message):

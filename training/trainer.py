@@ -1,5 +1,8 @@
 """
-Module for training a neural network
+Module for training a neural network.
+Features:
+1. It's independent of the dataset, model or Optimizer used for training
+2. Does all the needed preparations for the training (e.g. creating a session)
 """
 import os
 
@@ -48,7 +51,13 @@ class Trainer(object):
 
     def __prepare(self):
         """
-        It does the preparation for the training
+        It does the preparation for the training. This preparations include:
+        -Creating a session (if a default session is already in use, then this method deletes it and replaces with a new
+        one)
+        -Creates operators needed for summaries for TensorBoard
+        -Sets the Optimizer
+        -Sets variables and operators needed for saving checkpoints of the training
+        -Initializes all the variables
         :return: None
         """
         print("Preparing training...")
@@ -88,7 +97,8 @@ class Trainer(object):
     # TODO hacerlo genérico para cualquier Optimizer
     def train(self):
         """
-        Trains a neural network with the appropriate configuration.
+        Trains a neural network with the appropriate configuration. It also does the preparations needed for that
+        training. It loads a checkpoint if a valid checkpoint path has been given.
         :return: None
         """
         self.__prepare()

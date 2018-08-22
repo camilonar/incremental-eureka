@@ -1,42 +1,32 @@
-import tensorflow as tf
-import random
-import os
-import matplotlib.pyplot as plt
-
+"""
+Module for reading the MNIST dataset.
+"""
 from input.reader import Reader
-from tensorflow.examples.tutorials.mnist import input_data
 
 
 class MnistReader(Reader):
-    
+    """
+    Reader for MNIST dataset
+    """
     __train_dirs, __validation_dir, _metadata_file = None, None, None
     data = None
 
-    def __init__(self,train_dirs: [str], validation_dir: str):
+    def __init__(self, train_dirs: [str], validation_dir: str):
         super().__init__(train_dirs, validation_dir)
         print("TEST PATH ", validation_dir)
-        print("TRAIN PATHs ", train_dirs)
-        
+        print("TRAIN PATHS ", train_dirs)
 
     def load_training_data(self):
         return self.curr_path, None
 
     def load_test_data(self):
-        return  self.test_path,None
+        return self.test_path, None
 
     def load_class_names(self):
         pass
 
-    
     def reload_training_data(self):
         pass
-   
-
-    def _printNimages(self):
-        first_array = self.mnist.train.images[0].reshape(28, 28)
-        plt.imshow(first_array)
-        # Actually displaying the plot if you are not in interactive mode
-        plt.show()
 
     @classmethod
     def get_data(cls):
@@ -59,4 +49,3 @@ class MnistReader(Reader):
         """
         cls.__train_dirs = train_dirs
         cls.__validation_dir = validation_dir
-        

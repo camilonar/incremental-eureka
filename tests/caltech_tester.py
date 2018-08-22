@@ -10,10 +10,9 @@ from input.caltech_data import CaltechData
 import utils.constants as const
 
 
-# TODO carga de checkpoints
 class CaltechTester(Tester):
     """
-    Performs tests over Caltech according to the User input and pre-established configurations
+    Performs tests over Caltech-101 according to the User input and pre-established configurations
     """
 
     def _prepare_data_pipeline(self):

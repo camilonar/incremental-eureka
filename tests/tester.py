@@ -1,5 +1,8 @@
 """
 Module that helps with the execution of tests.
+Features:
+1. Prepares the ambient for testing
+2. Executes a test training a neural network over a dataset according to a flexible configuration
 """
 from abc import ABC, abstractmethod
 from errors import OptionNotSupportedError, TestNotPreparedError

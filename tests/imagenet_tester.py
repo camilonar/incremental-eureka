@@ -10,7 +10,6 @@ from input.imagenet_data import ImagenetData
 import utils.constants as const
 
 
-# TODO carga de checkpoints
 class ImagenetTester(Tester):
     """
     Performs tests over Imagenet according to the User input and pre-established configurations

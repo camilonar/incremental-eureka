@@ -1,8 +1,12 @@
+"""
+Module with the reader for Cifar-10 dataset
+"""
 import pickle
 import numpy as np
 
 from input.reader import Reader
 
+# TODO: revisar, documentar y pasar comentarios a inglés (DAVID)
 size_image = 32
 numero_canales = 3
 
@@ -67,7 +71,9 @@ def _load_data(filename):
 
 
 class CifarReader(Reader):
-
+    """
+    Reader for Cifar-10 dataset
+    """
     __train_dirs, __validation_dir, _metadata_file = None, None, None
     data = None
 
@@ -78,7 +84,6 @@ class CifarReader(Reader):
         super().__init__(train_dirs, validation_dir)
         print("TEST PATH ", validation_dir)
         print("TRAIN PATHs ", train_dirs)
-        
 
     def load_class_names(self):
         return _get_human_readable_labels()
@@ -87,7 +92,7 @@ class CifarReader(Reader):
         return self.curr_path, None
 
     def load_test_data(self):
-        return  self.test_path,None
+        return self.test_path, None
 
     @classmethod
     def get_data(cls):
