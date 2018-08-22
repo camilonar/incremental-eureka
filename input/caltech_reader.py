@@ -15,24 +15,31 @@ valid_ext = [".jpg", ".gif", ".png", ".jpeg"]
 # source: https://github.com/tensorflow/models/blob/master/inception/inception/data/build_imagenet_data.py
 
 # TODO: documentar (DAVID)
-# TODO: Código extraño: revisar la variable iter
 def _find_image_files(path, categories):
+	"""Build a list of all images files and labels in the data set.
+    Args:
+      path: directory where the images are located.
+      categories: list of strings that contain the caltech dataset categories
+      	each of the categories corresponds to a folder within the directory specified in the variable :path
+    Returns:
+      filenames: list of strings; each string is a path to an image file.
+      labels: list of integers, 
+      	each value defines the correct category of the image, 
+      	has one-to-one correspondence with the list  :filenames
+    """
     filenames = []
     labels = []
-    # LOAD ALL IMAGES
+    # load all images in folder path 
     for i, category in enumerate(categories):
-        iter = 0
         print("LOAD CATEGORY", category)
         for f in os.listdir(path + "/" + category):
-            if iter == 0:
-                ext = os.path.splitext(f)[1]
-                if ext.lower() not in valid_ext:
-                    continue
-                fullpath = os.path.join(path + "/" + category, f)
-                filenames.append(fullpath)  # NORMALIZE IMAGE
-                label_curr = i
-                labels.append(label_curr)
-    # iter = (iter+1)%10;
+            ext = os.path.splitext(f)[1]
+            if ext.lower() not in valid_ext:
+                continue
+            fullpath = os.path.join(path + "/" + category, f)
+            filenames.append(fullpath) 
+            label_curr = i
+            labels.append(label_curr)
     shuffled_index = list(range(len(filenames)))
     random.seed(12345)
     random.shuffle(shuffled_index)
@@ -55,6 +62,11 @@ class CaltechReader(Reader):
     data = None
 
     def __init__(self, train_dirs: [str], validation_dir: str):
+    	"""
+        Creates an CaltechReader object
+        :param train_dirs: the paths to the training data
+        :param validation_dir: the path to the testing data
+        """
         super().__init__(train_dirs, validation_dir)
         self.categories = sorted(os.listdir(self.curr_path))
         self.val_filenames, self.val_labels = _find_image_files(validation_dir, self.categories)

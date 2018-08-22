@@ -15,30 +15,50 @@ number_of_classes = 10
 
 def _convert_raw_to_image(raw):
     """
-    Convierte las imagenes desde el formato cifar 10
-    y retorna un arreglo de 4 dimensiones [numero de imagenes , alto , ancho , numero de canales]
-     cada pixel se representa por un numero flotante de 0 a 1
+    convert the images from format cifar10 to one array of 4 dimensions 
+    [number of images,heigth, width, number of color chanels]
+    each pixel represented by one floating number from 0 to 1
+    Args:
+      raw: array, one-dimensional array that represents the image
+    Returns:
+      images: array; array of 4 dimensions [number of images,heigth, width, number of color chanels] 
+
     """
-    # Convierte las imgenes sin procesar a valores numericos
+    
     raw_float = np.array(raw, dtype=float) / 255.0
 
     # reshape
     images = raw_float.reshape([-1, numero_canales, size_image, size_image])
-
-    # reordena los indices de el array
     images = images.transpose([0, 2, 3, 1])
 
     return images
 
 
 def _to_one_hot(class_numbers, num_classes=None):
+    """
+    converts numeric values ​​to onehot arrays
+    Args:
+      class_numbers: array, values ​​that correspond to the categories of a classification
+        values ​​between 0 and the number of classes 
+    Returns:
+      one_hot: array 2d;  contains the onehot representation of each of the values in 
+      :class_numbers variable
+    """
     if num_classes is None:
         num_classes = np.max(class_numbers) + 1
 
-    return np.eye(num_classes, dtype=float)[class_numbers]
+    one_hot=np.eye(num_classes, dtype=float)[class_numbers]
+
+    return one_hot
 
 
 def _unpickle(filename):
+    """performs the deserialization process of a file
+    Args:
+      fiilename: string, Serialized file path 
+    Returns:
+      data: raw data in bytes;
+    """
     print("Loading data: " + filename)
     with open(filename, mode='rb') as file:
         data = pickle.load(file, encoding='bytes')
@@ -46,6 +66,11 @@ def _unpickle(filename):
 
 
 def _get_human_readable_labels():
+    """read from the metadata file the categorization tags for humans
+    Args:
+    Returns:
+      humnas: list of labels in string format for humans 
+    """
     raw = _unpickle(filename=CifarReader._metadata_file)[b'label_names']
     humans = [x.decode('utf-8') for x in raw]
     return humans
@@ -55,7 +80,7 @@ def _load_batch(filename):
     """
     load file serialized of dataset CIFAR-10
     """
-    # Carga el archivo serializado
+
     data = _unpickle(filename)
     # obtaing images in format raw *(serialized)
     raw_image = data[b'data']
@@ -66,6 +91,9 @@ def _load_batch(filename):
 
 
 def _load_data(filename):
+    """
+    load file and retur
+    """
     images, cls = _load_batch(filename)
     return images, cls, _to_one_hot(class_numbers=cls, num_classes=number_of_classes)
 
