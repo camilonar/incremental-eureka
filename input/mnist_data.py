@@ -40,9 +40,17 @@ class MnistData(Data):
         return self.__build_generic_data_tensor(filename, shuffle, augmentation, testing=True)
 
     def __build_generic_data_tensor(self, filename, shuffle, augmentation, testing, skip_count=0):
-
+        """
+         Creates the input pipeline and performs some preprocessing.
+        """
         def parser(serialized_example):
-            """Parses a single tf.Example into image and label tensors."""
+            '''
+            Parses a single tf.Example into image and label tensors.
+            :param serialized_example: serialized example in tfrecord type
+            :return: a tuple with two tensors, the first one represents the image data and the second one represents
+            the label.
+            '''
+
             features = tf.parse_single_example(
                 serialized_example,
                 features={

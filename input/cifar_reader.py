@@ -6,7 +6,6 @@ import numpy as np
 
 from input.reader import Reader
 
-# TODO: revisar, documentar y pasar comentarios a inglés (DAVID)
 size_image = 32
 numero_canales = 3
 
@@ -14,16 +13,14 @@ number_of_classes = 10
 
 
 def _convert_raw_to_image(raw):
-    """
-    convert the images from format cifar10 to one array of 4 dimensions 
+    '''
+    convert the images from format cifar10 to one array of 4 dimensions
     [number of images,heigth, width, number of color chanels]
     each pixel represented by one floating number from 0 to 1
-    Args:
-      raw: array, one-dimensional array that represents the image
-    Returns:
-      images: array; array of 4 dimensions [number of images,heigth, width, number of color chanels] 
+    :param raw: array, one-dimensional array that represents the image
+    :return: array of 4 dimensions [number of images,heigth, width, number of color chanels]
+    '''
 
-    """
     
     raw_float = np.array(raw, dtype=float) / 255.0
 
@@ -35,15 +32,15 @@ def _convert_raw_to_image(raw):
 
 
 def _to_one_hot(class_numbers, num_classes=None):
-    """
+    '''
     converts numeric values ​​to onehot arrays
-    Args:
-      class_numbers: array, values ​​that correspond to the categories of a classification
-        values ​​between 0 and the number of classes 
-    Returns:
-      one_hot: array 2d;  contains the onehot representation of each of the values in 
-      :class_numbers variable
-    """
+    :param class_numbers: array, values ​​that correspond to the categories of a classification
+        values ​​between 0 and the number of classes
+    :param num_classes: number of class of dataset
+    :return: array 2d;  contains the onehot representation of each of the values in
+      class_numbers variable
+    '''
+
     if num_classes is None:
         num_classes = np.max(class_numbers) + 1
 
@@ -53,12 +50,11 @@ def _to_one_hot(class_numbers, num_classes=None):
 
 
 def _unpickle(filename):
-    """performs the deserialization process of a file
-    Args:
-      fiilename: string, Serialized file path 
-    Returns:
-      data: raw data in bytes;
-    """
+    '''
+    performs the deserialization process of a file
+    :param filename: string, Serialized file path
+    :return: raw data in bytes
+    '''
     print("Loading data: " + filename)
     with open(filename, mode='rb') as file:
         data = pickle.load(file, encoding='bytes')
@@ -66,11 +62,11 @@ def _unpickle(filename):
 
 
 def _get_human_readable_labels():
-    """read from the metadata file the categorization tags for humans
-    Args:
-    Returns:
-      humnas: list of labels in string format for humans 
-    """
+    '''
+    read from the metadata file the categorization tags for humans
+    :return: list of labels in string format for humans
+    '''
+
     raw = _unpickle(filename=CifarReader._metadata_file)[b'label_names']
     humans = [x.decode('utf-8') for x in raw]
     return humans

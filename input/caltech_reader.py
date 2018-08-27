@@ -14,19 +14,14 @@ valid_ext = [".jpg", ".gif", ".png", ".jpeg"]
 # Some TensorFlow Inception functions (ported to python3)
 # source: https://github.com/tensorflow/models/blob/master/inception/inception/data/build_imagenet_data.py
 
-# TODO: documentar (DAVID)
 def _find_image_files(path, categories):
-	"""Build a list of all images files and labels in the data set.
-    Args:
-      path: directory where the images are located.
-      categories: list of strings that contain the caltech dataset categories
-      	each of the categories corresponds to a folder within the directory specified in the variable :path
-    Returns:
-      filenames: list of strings; each string is a path to an image file.
-      labels: list of integers, 
-      	each value defines the correct category of the image, 
-      	has one-to-one correspondence with the list  :filenames
-    """
+    '''
+    :param path: directory where the images are located.
+    :param categories: list of strings that contain the caltech dataset categories
+    :return: a tuple with two lists, the first one represents the paths of images data and the second one is a integer thats
+    represents the correct category of the image.
+    '''
+
     filenames = []
     labels = []
     # load all images in folder path 
