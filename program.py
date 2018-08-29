@@ -8,7 +8,6 @@ from tests.caltech_tester import CaltechTester
 from tests.cifar_tester import CifarTester
 from tests.mnist_tester import MnistTester
 
-
 def print_menu():
     """
     Prints the menu for the configuration of a Test
@@ -373,7 +372,8 @@ def perform_test(dataset: str, optimizer: str, checkpoint: str, lr: float, s_int
     if dataset == const.DATA_CALTECH_101:
         tester = CaltechTester(lr, train_dirs, validation_dir, extras, s_interval, ckp_interval, checkpoint)
     if dataset == const.DATA_TINY_IMAGENET:
-        tester = ImagenetTester(lr, train_dirs, validation_dir, extras, s_interval, ckp_interval, checkpoint)
+        tester = ImagenetTester(lr1
+                                , train_dirs, validation_dir, extras, s_interval, ckp_interval, checkpoint)
 
     tester.prepare_all(optimizer)
     tester.execute_test()
