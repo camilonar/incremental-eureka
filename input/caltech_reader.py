@@ -57,7 +57,7 @@ class CaltechReader(Reader):
     data = None
 
     def __init__(self, train_dirs: [str], validation_dir: str):
-    	"""
+        """
         Creates an CaltechReader object
         :param train_dirs: the paths to the training data
         :param validation_dir: the path to the testing data

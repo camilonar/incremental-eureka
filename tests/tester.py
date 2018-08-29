@@ -10,7 +10,6 @@ from training.trainer import Trainer
 import utils.constants as const
 import utils.dir_utils as dir
 
-
 class Tester(ABC):
     """
     This class helps with the configuration of the pre-established tests.

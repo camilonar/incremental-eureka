@@ -12,7 +12,7 @@ class CaltechData(Data):
     """
     Data pipeline for Caltech-101 dataset
     """
-    NUMBER_OF_CLASSES = 200
+    NUMBER_OF_CLASSES = 101
     IMAGE_HEIGHT = 224
     IMAGE_WIDTH = 224
     NUM_OF_CHANNELS = 3
