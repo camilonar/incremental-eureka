@@ -5,6 +5,8 @@ import utils.constants as const
 import utils.default_paths as paths
 from tests.imagenet_tester import ImagenetTester
 from tests.caltech_tester import CaltechTester
+from tests.cifar_tester import CifarTester
+from tests.mnist_tester import MnistTester
 
 
 def print_menu():
@@ -365,9 +367,9 @@ def perform_test(dataset: str, optimizer: str, checkpoint: str, lr: float, s_int
     tester = None
 
     if dataset == const.DATA_MNIST:
-        pass
+        tester = MnistTester(lr, train_dirs, validation_dir, s_interval, ckp_interval, checkpoint)
     if dataset == const.DATA_CIFAR_10:
-        pass
+        tester = CifarTester(lr, train_dirs, validation_dir, s_interval, ckp_interval, checkpoint)
     if dataset == const.DATA_CALTECH_101:
         tester = CaltechTester(lr, train_dirs, validation_dir, extras, s_interval, ckp_interval, checkpoint)
     if dataset == const.DATA_TINY_IMAGENET:

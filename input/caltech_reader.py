@@ -15,13 +15,13 @@ valid_ext = [".jpg", ".gif", ".png", ".jpeg"]
 # source: https://github.com/tensorflow/models/blob/master/inception/inception/data/build_imagenet_data.py
 
 def _find_image_files(path, categories):
-    '''
+    """
+    Build a list of all images files and labels in the data set.
     :param path: directory where the images are located.
     :param categories: list of strings that contain the caltech dataset categories
     :return: a tuple with two lists, the first one represents the paths of images data and the second one is a integer thats
     represents the correct category of the image.
-    '''
-
+    """
     filenames = []
     labels = []
     # load all images in folder path 
@@ -57,8 +57,8 @@ class CaltechReader(Reader):
     data = None
 
     def __init__(self, train_dirs: [str], validation_dir: str):
-    	"""
-        Creates an CaltechReader object
+        """
+        Creates a CaltechReader object
         :param train_dirs: the paths to the training data
         :param validation_dir: the path to the testing data
         """
