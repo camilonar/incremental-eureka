@@ -14,6 +14,8 @@ class CifarData(Data):
     NUMBER_OF_CLASSES = 10
     IMAGE_HEIGHT = 32
     IMAGE_WIDTH = 32
+    IMAGE_WIDTH_RESIZE = 224
+    IMAGE_HEIGHT_RESIZE = 224
 
     def __init__(self, general_config,
                  train_dirs: [str],
@@ -70,6 +72,8 @@ class CifarData(Data):
             image = tf.image.convert_image_dtype(image,
                                                  dtype=tf.float32,
                                                  saturate=True) * (1 / 255.0)
+
+            image = tf.image.resize_images(image, [self.IMAGE_WIDTH_RESIZE, self.IMAGE_HEIGHT_RESIZE])
 
             label = tf.cast(features['label'], tf.int32)
             label = tf.one_hot(label, depth=self.NUMBER_OF_CLASSES)

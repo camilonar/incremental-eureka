@@ -42,7 +42,7 @@ class GeneralConfig(object):
         """
         self.learn_rate = learn_rate
         self.summary_interval = summary_interval
-        self.eval_interval = check_interval
+        self.check_interval = check_interval
         self.config_name = config_name
         self.model_name = model_name
         self.train_configurations = []  # It stores the configurations for each mega batch of training data

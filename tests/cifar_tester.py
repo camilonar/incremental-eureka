@@ -19,7 +19,7 @@ class CifarTester(Tester):
         self.data_pipeline = CifarData(self.general_config, self.train_dirs, self.validation_dir, self.extras)
 
     def _prepare_neural_network(self):
-        self.__input_tensor = tf.placeholder(tf.float32, [None, 32 , 32,3])
+        self.__input_tensor = tf.placeholder(tf.float32, [None, 224, 224, 3])
         self.__output_tensor = tf.placeholder(tf.float32, [None, 10])
         self.__neural_net = AlexNet({'data': self.input_tensor})
 

@@ -7,6 +7,7 @@ Features:
 import os
 from abc import ABC, abstractmethod
 
+import numpy
 import tensorflow as tf
 from tensorflow.python.framework.errors_impl import OutOfRangeError
 
@@ -14,7 +15,7 @@ from input.data import Data
 from network import Network
 from training.train_conf import GeneralConfig
 import utils.dir_utils as utils
-
+import matplotlib.pyplot as plt
 
 class Trainer(ABC):
     """
@@ -141,13 +142,14 @@ class Trainer(ABC):
         while True:
             try:
                 image_batch, target_batch = self.sess.run([data_x, data_y])
+                print(numpy.max(image_batch[0]))
                 _, c = self._train_batch(self.sess, image_batch, target_batch, self.tensor_x, self.tensor_y,
                                          self.train_step, self.mse)
 
                 if i % config.summary_interval == 0:
                     print("Performing validation at iteration number: {}. Mse is: {}".format(i, c))
                     self.__perform_validation(i, writer, test_x, test_y)
-                if i % config.eval_interval == 0:
+                if i % config.check_interval == 0:
                     self.__save_model(i, increment)
 
             except OutOfRangeError:

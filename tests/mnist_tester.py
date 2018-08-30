@@ -4,7 +4,7 @@ Module for performing tests over MNIST
 import tensorflow as tf
 
 from tests.tester import Tester
-from models import LeNet
+from models import LeNet, AlexNet
 from training.train_conf import GeneralConfig, TrainConfig
 from input.mnist_data import MnistData
 import utils.constants as const
@@ -19,7 +19,7 @@ class MnistTester(Tester):
         self.data_pipeline = MnistData(self.general_config, self.train_dirs, self.validation_dir, self.extras)
 
     def _prepare_neural_network(self):
-        self.__input_tensor = tf.placeholder(tf.float32, [None, 28 , 28])
+        self.__input_tensor = tf.placeholder(tf.float32, [None, 32, 32, 1])
         self.__output_tensor = tf.placeholder(tf.float32, [None, 10])
         self.__neural_net = LeNet({'data': self.input_tensor})
 

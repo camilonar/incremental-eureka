@@ -21,7 +21,7 @@ def __get_mnist_paths():
     ext = ".tfrecords"
     name_tr = path + base
     tr_paths = [name_tr + "{}".format(x) + ext for x in range(1, 6)]
-    test_path = path + 'test.' + ext
+    test_path = path + 'validation' + ext
     return tr_paths, test_path, []
 
 
@@ -35,10 +35,10 @@ def __get_cifar_paths():
     base_folder = "../datasets/cifar-10-batches-py"
     base = base_folder + "/data_batch_"
     ext = ".tfrecords"
-    tr_paths = [base + "{}.".format(x) + ext for x in range(1, 6)]
+    tr_paths = [base + "{}".format(x) + ext for x in range(1, 6)]
     test_path = base_folder + "/test_batch" + ext
     metadata_file = base_folder + "/batches.meta"
-    return tr_paths, test_path, metadata_file
+    return tr_paths, test_path, [metadata_file]
 
 
 def __get_caltech_paths():
