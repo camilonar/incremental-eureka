@@ -68,6 +68,7 @@ class Trainer(object):
         sess = tf.get_default_session()
         if sess:
             sess.close()
+
         self.sess = tf.InteractiveSession()
 
         # Creates mse and summaries
