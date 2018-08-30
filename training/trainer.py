@@ -15,7 +15,7 @@ from input.data import Data
 from network import Network
 from training.train_conf import GeneralConfig
 import utils.dir_utils as utils
-import matplotlib.pyplot as plt
+
 
 class Trainer(ABC):
     """
@@ -141,8 +141,9 @@ class Trainer(ABC):
         i = iteration
         while True:
             try:
+
                 image_batch, target_batch = self.sess.run([data_x, data_y])
-                print(numpy.max(image_batch[0]))
+
                 _, c = self._train_batch(self.sess, image_batch, target_batch, self.tensor_x, self.tensor_y,
                                          self.train_step, self.mse)
 
