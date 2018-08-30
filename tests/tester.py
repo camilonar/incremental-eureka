@@ -6,7 +6,8 @@ Features:
 """
 from abc import ABC, abstractmethod
 from errors import OptionNotSupportedError, TestNotPreparedError
-from training.trainer import Trainer
+
+from training.basic_trainer import RMSPropTrainer
 import utils.constants as const
 import utils.dir_utils as dir
 
@@ -42,7 +43,7 @@ class Tester(ABC):
         self.ckp_interval = ckp_interval
         self.inc_ckp_path = inc_ckp_path
         self.ckp_path = None
-        self.optimizer = None
+        self.trainer = None
 
     @abstractmethod
     def _prepare_data_pipeline(self):
@@ -62,12 +63,13 @@ class Tester(ABC):
         """
         raise NotImplementedError("The subclass hasn't implemented the _prepare_neural_network method")
 
-    # TODO implementar las subclases Optimizer
-    def _prepare_optimizer(self, str_optimizer: str):
+    def _prepare_trainer(self, str_trainer: str):
 
         """
-        Prepares the optimizer that is required by the User
-        :param str_optimizer: a string that represents the chosen Optimizer. Currently supported strings are:
+        Prepares the trainer that is required by the User. All the other preparations (e.g. _prepare_config,
+        _prepare_neural_network) must be completed before this method is used, otherwise, there may be unexpected
+        behavior
+        :param str_trainer: a string that represents the chosen Trainer. Currently supported strings are:
             -OPT_BASE: for a simple RMSProp
             -OPT_CEAL: for the OPT_CEAL algorithm (See: Keze Wang, Dongyu Zhang, Ya Li, Ruimao Zhang, and Liang Lin.
                     Cost-effective active learning for deep image classification.
@@ -75,25 +77,28 @@ class Tester(ABC):
             -OPT_REPRESENTATIVES: for the proposed approach of this work, i.e. an incremental algorithm that uses RMSProp
                     and select samples based in clustering
         :return: None
-        :raises OptimizerNotSupportedError: if the required Optimizer isn't supported yet
+        :raises OptionNotSupportedError: if the required Trainer isn't supported yet
         """
-        self.optimizer = str_optimizer  # TODO cambiarlo cuando existan los Optimizer
+        self.trainer = RMSPropTrainer(self.general_config, self.neural_net, self.data_input, self.input_tensor,
+                                      self.output_tensor, self.ckp_path)
+        # TODO cambiarlo cuando estén implementados los demás Trainer
 
-        if str_optimizer == const.OPT_BASE:
-            pass  # Base Optimizer (basic RMSProp)
-        elif str_optimizer == const.OPT_CEAL:
+        if str_trainer == const.TR_BASE:
+            self.trainer = RMSPropTrainer(self.general_config, self.neural_net, self.data_input, self.input_tensor,
+                                          self.output_tensor, self.ckp_path)
+        elif str_trainer == const.TR_CEAL:
             pass  # OPT_CEAL Optimizer
-        elif str_optimizer == const.OPT_REPRESENTATIVES:
+        elif str_trainer == const.TR_REPRESENTATIVES:
             pass  # Our Optimizer
         else:
-            raise OptionNotSupportedError("The required Optimizer '{}' isn't supported".format(str_optimizer))
+            raise OptionNotSupportedError("The required Trainer '{}' isn't supported".format(str_trainer))
 
     @abstractmethod
     def _prepare_config(self, str_optimizer: str):
         """
         This method creates and saves the proper Configuration for the training according to the pre-established
         conditions of each dataset
-        :type str_optimizer: a string that represents the chosen Optimizer.
+        :type str_optimizer: a string that represents the chosen Trainer.
         :return: None
         """
         raise NotImplementedError("The subclass hasn't implemented the _prepare_config method")
@@ -110,18 +115,19 @@ class Tester(ABC):
         then this method returns None
         """
         if inc_ckp_path:
-            path, valid = dir.create_full_checkpoint_path(self.dataset_name, self.optimizer, self.inc_ckp_path)
+            path, valid = dir.create_full_checkpoint_path(self.dataset_name, self.trainer, self.inc_ckp_path)
             if valid:
                 print("The checkpoint will be loaded from: {}".format(path))
                 return path
         print("No checkpoint has been loaded...")
         return None
 
-    def prepare_all(self, str_optimizer: str):
+    def prepare_all(self, str_trainer: str):
         """
         It prepares the Tester object for the test, according to the various parameters given up to this point and
         also according to the corresponding dataset to which the concrete Tester is associated.
-        :param str_optimizer: str_optimizer: a string that represents the chosen Optimizer. Currently supported strings are.
+        This method calls ALL the _prepare methods defined in the base class.
+        :param str_trainer: a string that represents the chosen Trainer. Currently supported strings are:
             -OPT_BASE: for a simple RMSProp
             -OPT_CEAL: for the OPT_CEAL algorithm (See: Keze Wang, Dongyu Zhang, Ya Li, Ruimao Zhang, and Liang Lin.
                     Cost-effective active learning for deep image classification.
@@ -130,11 +136,11 @@ class Tester(ABC):
                     and select samples based in clustering
         :return: None
         """
-        self._prepare_config(str_optimizer)
+        self._prepare_config(str_trainer)
         self._prepare_data_pipeline()
         self._prepare_neural_network()
-        self._prepare_optimizer(str_optimizer)
         self.ckp_path = self._prepare_checkpoint_if_required(self.inc_ckp_path)
+        self._prepare_trainer(str_trainer)
 
     def execute_test(self):
         """
@@ -144,9 +150,7 @@ class Tester(ABC):
         :raises TestNotPreparedError: if the Tester hasn't been prepared before the execution of this method
         """
         self.__check_conditions_for_test()
-        trainer = Trainer(self.general_config, self.neural_net, self.data_input, self.input_tensor, self.output_tensor,
-                          self.ckp_path)
-        trainer.train()
+        self.trainer.train()
 
     def __check_conditions_for_test(self):
         """
@@ -166,8 +170,8 @@ class Tester(ABC):
             message += '-Data pipeline missing\n'
         if not self.neural_net:
             message += '-Neural Network missing\n'
-        if not self.optimizer:
-            message += '-Optimizer missing\n'
+        if not self.trainer:
+            message += '-Trainer algorithm missing\n'
         if not self.general_config:
             message += '-Training Configuration missing\n'
         if not self.checkpoint_loaded:

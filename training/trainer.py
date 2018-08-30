@@ -1,10 +1,11 @@
 """
 Module for training a neural network.
 Features:
-1. It's independent of the dataset, model or Optimizer used for training
+1. It's independent of the dataset, or model used for training
 2. Does all the needed preparations for the training (e.g. creating a session)
 """
 import os
+from abc import ABC, abstractmethod
 
 import tensorflow as tf
 from tensorflow.python.framework.errors_impl import OutOfRangeError
@@ -15,10 +16,9 @@ from training.train_conf import GeneralConfig
 import utils.dir_utils as utils
 
 
-# TODO reducir el número de atributos de objeto
-class Trainer(object):
+class Trainer(ABC):
     """
-    Has the purpose of training a generic net, with a generic configuration and optimizer
+    Has the purpose of training a generic net, with a generic configuration. It serves as a base for custom trainers
     """
 
     def __init__(self, config: GeneralConfig, model: Network, pipeline: Data, tensor_x: tf.Tensor, tensor_y: tf.Tensor,
@@ -31,6 +31,8 @@ class Trainer(object):
         :param checkpoint: the checkpoint path if it's required to start the training from a checkpoint. A data path with
         the following structure is expected: ./checkpoints/dataset_name/config_net_name/checkpoint_name.ckpt.
         If there is no checkpoint to be loaded then its value should be None. The default value is None.
+
+        This method must be called by the constructors of the subclasses.
         """
         self.config = config
         self.model = model
@@ -72,14 +74,13 @@ class Trainer(object):
         self.sess = tf.InteractiveSession()
 
         # Creates mse and summaries
-        self.mse = tf.reduce_mean(tf.square(self.tensor_y - self.model.get_output()))
+        self.mse = self._create_mse(self.tensor_y, self.model.get_output())
         correct_prediction = tf.equal(tf.argmax(self.tensor_y, 1), tf.argmax(self.model.get_output(), 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         streaming_accuracy, self.streaming_accuracy_update = tf.metrics.mean(accuracy)
         self.streaming_accuracy_scalar = tf.summary.scalar('accuracy', streaming_accuracy)
 
-        # TODO cambiar para poder crear un Optimizer genérico
-        self.train_step = tf.train.RMSPropOptimizer(self.config.learn_rate).minimize(self.mse)
+        self.train_step = self._create_optimizer(self.config, self.mse)
 
         # Prepares variables and op for checkpoints
         self.iteration_variable = tf.get_variable("iteration", shape=[1], initializer=tf.zeros_initializer)
@@ -95,7 +96,6 @@ class Trainer(object):
 
         print("Finished preparations for training...")
 
-    # TODO hacerlo genérico para cualquier Optimizer
     def train(self):
         """
         Trains a neural network with the appropriate configuration. It also does the preparations needed for that
@@ -112,6 +112,7 @@ class Trainer(object):
             self.pipeline.change_dataset_part(i)
             data_x, data_y = self.pipeline.build_train_data_tensor(skip_count)
             self.train_increment(i, skip_count, self.config, self.writer, data_x, data_y, test_x, test_y)
+            self._post_process_increment()
             skip_count = 0  # Reestablishes the skip_count to zero after the first mega-batch
             print("Finished training of increment {}...".format(i))
 
@@ -135,12 +136,14 @@ class Trainer(object):
         :param test_y: the tensor that has the corresponding labels of the testing/validation data
         :return: None
         """
+        print("Starting training of increment {}...".format(increment))
         i = iteration
         while True:
             try:
                 image_batch, target_batch = self.sess.run([data_x, data_y])
-                _, c = self.sess.run([self.train_step, self.mse],
-                                     feed_dict={self.tensor_x: image_batch, self.tensor_y: target_batch})
+                _, c = self._train_batch(self.sess, image_batch, target_batch, self.tensor_x, self.tensor_y,
+                                         self.train_step, self.mse)
+
                 if i % config.summary_interval == 0:
                     print("Performing validation at iteration number: {}. Mse is: {}".format(i, c))
                     self.__perform_validation(i, writer, test_x, test_y)
@@ -217,3 +220,49 @@ class Trainer(object):
         print("Finishing training...")
         self.pipeline.close()
         self.writer.close()
+
+    @abstractmethod
+    def _create_mse(self, tensor_y: tf.Tensor, net_output: tf.Tensor):
+        """
+        Creates a minimum squared error tensor
+        :param tensor_y: the tensor corresponding to the output of a training
+        :param net_output: a tensor corresponding to the last layer of a neural network
+        :return: a Tensor corresponding to the mse
+        """
+        raise NotImplementedError("The subclass hasn't implemented the _create_mse method")
+
+    @abstractmethod
+    def _create_optimizer(self, config: GeneralConfig, mse: tf.Tensor):
+        """
+        Creates the Optimizer for the training (e.g. AdaGradOptimizer)
+        :param config: the configuration for the Optimizer
+        :param mse: a tensor representing the mse (minimum squared error)
+        :return: a tf.Optimizer
+        """
+        raise NotImplementedError("The subclass hasn't implemented the _create_optimizer method")
+
+    def _post_process_increment(self):
+        """
+        Does some post processing after the training of a batch is completed. It isn't implemented in the base version,
+        but may be overridden by a subclass that needs to perform changes to a variable or any kind of process after
+        the training.
+        :return: None
+        """
+        pass
+
+    @abstractmethod
+    def _train_batch(self, sess, image_batch, target_batch, tensor_x: tf.Tensor, tensor_y: tf.Tensor,
+                     train_step: tf.Operation, mse: tf.Tensor):
+        """
+        Trains the current model over a batch of data
+        :param sess: the current Session
+        :param image_batch: the batch of data corresponding to the input, as obtained from the data pipeline
+        :param target_batch: the batch of data corresponding to the output, as obtained from the data pipeline
+        :param tensor_x: the tensor corresponding to the input of a training
+        :param tensor_y: the tensor corresponding to the output of a training
+        :param train_step: the current tf.Optimizer
+        :param mse: a tensor representing the minimum squared error
+        :return: a tuple containing the result of the training, i.e. the result of running train_step and mse (in that
+        order) over the batch of data using sess as Session
+        """
+        raise NotImplementedError("The subclass hasn't implemented the _train_batch method")

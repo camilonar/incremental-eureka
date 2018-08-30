@@ -9,7 +9,6 @@ import utils.constants as const
 from errors import OptionNotSupportedError
 
 
-# TODO poner los paths por defecto definitivos
 def __get_mnist_paths():
     """
     It gives the default paths to the training and testing data of MNIST
@@ -19,11 +18,11 @@ def __get_mnist_paths():
     """
     path = "../datasets/MNIST_data/"
     base = "train-"
-    ext="tfrecords"
-    name_tr=path+base
-    tr_paths=[name_tr+"1."+ext,name_tr+"2."+ext,name_tr+"3."+ext,name_tr+"4."+ext,name_tr+"5."+ext]
-    test_path=path+'test.'+ext
-    return tr_paths,test_path,[]
+    ext = ".tfrecords"
+    name_tr = path + base
+    tr_paths = [name_tr + "{}".format(x) + ext for x in range(1, 6)]
+    test_path = path + 'test.' + ext
+    return tr_paths, test_path, []
 
 
 def __get_cifar_paths():
@@ -35,8 +34,9 @@ def __get_cifar_paths():
     """
     base_folder = "../datasets/cifar-10-batches-py"
     base = base_folder + "/data_batch_"
-    tr_paths = [base + "1.tfrecords", base + "2.tfrecords", base + "3.tfrecords", base + "4.tfrecords", base + "5.tfrecords"]
-    test_path = base_folder + "/test_batch.tfrecords"
+    ext = ".tfrecords"
+    tr_paths = [base + "{}.".format(x) + ext for x in range(1, 6)]
+    test_path = base_folder + "/test_batch" + ext
     metadata_file = base_folder + "/batches.meta"
     return tr_paths, test_path, metadata_file
 
@@ -48,8 +48,11 @@ def __get_caltech_paths():
     mega-batches for training, the second value is a string corresponding to the path of the testing data and the third
     value is an empty array
     """
-    path = "../datasets/101_ObjectCategories"
-    return [path], path, []
+    base_folder = "../datasets/101_ObjectCategories_split/"
+    base = base_folder + "train/"
+    paths = [base + "Lote{}/".format(x) for x in range(0, 5)]
+    validation_dir = base_folder + "val/"
+    return paths, validation_dir, []
 
 
 def __get_tiny_imagenet_paths():
@@ -59,10 +62,12 @@ def __get_tiny_imagenet_paths():
     mega-batches for training, the second value is a string corresponding to the path of the testing data and the third
     value is an array of this form: [labels_file_path, metadata_file_path]
     """
-    train_dirs = ["../datasets/tiny-imagenet-200/train/", "../datasets/tiny-imagenet-200/val/"]
-    validation_dir = "../datasets/tiny-imagenet-200/val/"
-    labels_file = "../datasets/tiny-imagenet-200/wnids.txt"
-    metadata_file = "../datasets/tiny-imagenet-200/words.txt"
+    base_folder = "../datasets/tiny-imagenet-200/"
+    base = base_folder + "train_split/"
+    train_dirs = [base + "Lote{}/".format(x) for x in range(0, 5)]
+    validation_dir = base_folder + "val/"
+    labels_file = base_folder + "wnids.txt"
+    metadata_file = base_folder + "words.txt"
     return train_dirs, validation_dir, [labels_file, metadata_file]
 
 
@@ -81,8 +86,8 @@ def get_paths_from_dataset(dataset: str):
     metadata file path. The third value is an empty array in the case that the requested dataset doesn't have
     dataset-specific paths.
     """
-    dict = {const.DATA_MNIST: __get_mnist_paths,
-            const.DATA_CIFAR_10: __get_cifar_paths,
-            const.DATA_CALTECH_101: __get_caltech_paths,
-            const.DATA_TINY_IMAGENET: __get_tiny_imagenet_paths}
-    return dict.get(dataset, __get_not_supported_dataset)()
+    options = {const.DATA_MNIST: __get_mnist_paths,
+               const.DATA_CIFAR_10: __get_cifar_paths,
+               const.DATA_CALTECH_101: __get_caltech_paths,
+               const.DATA_TINY_IMAGENET: __get_tiny_imagenet_paths}
+    return options.get(dataset, __get_not_supported_dataset)()

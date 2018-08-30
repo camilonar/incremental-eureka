@@ -131,11 +131,11 @@ def configure_optimizer(curr_optimizer: str):
         print("[X] Cancel Operation and return to Main Menu")
         response = input("Select an optimizer: ").upper()
         if response == 'B':
-            response = const.OPT_BASE
+            response = const.TR_BASE
         elif response == 'C':
-            response = const.OPT_CEAL
+            response = const.TR_CEAL
         elif response == 'R':
-            response = const.OPT_REPRESENTATIVES
+            response = const.TR_REPRESENTATIVES
         elif response == 'X':
             break
         else:
@@ -372,8 +372,7 @@ def perform_test(dataset: str, optimizer: str, checkpoint: str, lr: float, s_int
     if dataset == const.DATA_CALTECH_101:
         tester = CaltechTester(lr, train_dirs, validation_dir, extras, s_interval, ckp_interval, checkpoint)
     if dataset == const.DATA_TINY_IMAGENET:
-        tester = ImagenetTester(lr
-                                ,train_dirs, validation_dir, extras, s_interval, ckp_interval, checkpoint)
+        tester = ImagenetTester(lr, train_dirs, validation_dir, extras, s_interval, ckp_interval, checkpoint)
 
     tester.prepare_all(optimizer)
     tester.execute_test()

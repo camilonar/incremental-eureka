@@ -11,11 +11,11 @@ DATA_CALTECH_101 = "CALTECH-101"
 DATA_TINY_IMAGENET = "TINY IMAGENET"
 
 """
-Names for the optimizers
+Names for the trainers (algorithms)
 """
-OPT_BASE = "OPT_BASE"
-OPT_CEAL = "OPT_CEAL"
-OPT_REPRESENTATIVES = "OPT_REPRESENTATIVES"
+TR_BASE = "TR_BASE"
+TR_CEAL = "TR_CEAL"
+TR_REPRESENTATIVES = "TR_REPRESENTATIVES"
 
 """
 Default parameters for test
