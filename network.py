@@ -208,10 +208,11 @@ class Network(object):
     @layer
     def softmax(self, input, name):
         input_shape = map(lambda v: v.value, input.get_shape())
-        if len(list(input_shape)) > 2:
+        input_shape = list(input_shape)
+        if len(input_shape) > 2:
             # For certain models (like NiN), the singleton spatial dimensions
             # need to be explicitly squeezed, since they're not broadcast-able
-            # in TensorFlow's NHWC ordering (unlike Caffe's NCHW).
+            # in TensorFlow's NHWC ordering (unlike Caffe's NCHW)            
             if input_shape[1] == 1 and input_shape[2] == 1:
                 input = tf.squeeze(input, squeeze_dims=[1, 2])
             else:

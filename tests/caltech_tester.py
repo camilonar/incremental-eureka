@@ -5,6 +5,7 @@ import tensorflow as tf
 
 from tests.tester import Tester
 from models import VGGNet
+from models import NiN
 from training.train_conf import GeneralConfig, TrainConfig
 from input.caltech_data import CaltechData
 import utils.constants as const
@@ -21,14 +22,14 @@ class CaltechTester(Tester):
     def _prepare_neural_network(self):
         self.__input_tensor = tf.placeholder(tf.float32, [None, 224, 224, 3])
         self.__output_tensor = tf.placeholder(tf.float32, [None, 101])
-        self.__neural_net = VGGNet({'data': self.input_tensor})
+        self.__neural_net = NiN({'data': self.input_tensor})
 
     def _prepare_config(self, str_optimizer: str):
         self.__general_config = GeneralConfig(self.lr, self.summary_interval, self.ckp_interval,
                                               config_name=str_optimizer, model_name=self.dataset_name)
         # Creates configuration for 5 mega-batches
         for i in range(1):
-            train_conf = TrainConfig(1, batch_size=128)
+            train_conf = TrainConfig(20, batch_size=160)
             self.general_config.add_train_conf(train_conf)
 
     @property
