@@ -48,8 +48,8 @@ class Trainer(ABC):
         self.ckp_path, self.summaries_path = None, None
         self.streaming_accuracy_update, self.streaming_accuracy_scalar = None, None
         self.train_step = None
-        self.iteration_variable, self.mega_batch_variable = None, None
-        self.iteration, self.mega_batch, self.aux_tensor = None, None, None
+        self.iteration_variable, self.mega_batch_variable, self.it_from_start_variable = None, None, None
+        self.iteration, self.mega_batch, self.it_from_start, self.aux_tensor = None, None, None, None
         self.saver = None
         self.test_iterator = None
 
@@ -87,9 +87,11 @@ class Trainer(ABC):
         # Prepares variables and op for checkpoints
         self.iteration_variable = tf.get_variable("iteration", shape=[1], initializer=tf.zeros_initializer)
         self.mega_batch_variable = tf.get_variable("megabatch", shape=[1], initializer=tf.zeros_initializer)
+        self.it_from_start_variable = tf.get_variable("it_start", shape=[1], initializer=tf.zeros_initializer)
         self.aux_tensor = tf.placeholder(dtype=tf.float32, shape=[None])
         self.iteration = self.iteration_variable.assign(self.aux_tensor)
         self.mega_batch = self.mega_batch_variable.assign(self.aux_tensor)
+        self.it_from_start = self.it_from_start_variable.assign(self.aux_tensor)
 
         self.saver = tf.train.Saver()
 
@@ -107,17 +109,17 @@ class Trainer(ABC):
         :return: None
         """
         self.__prepare()
-        inc, skip_count = self.__maybe_load_model(self.checkpoint)
+        inc, skip_count, iteration = self.__maybe_load_model(self.checkpoint)
 
         self.writer = tf.summary.FileWriter(self.summaries_path, tf.get_default_graph())
         self.test_iterator, test_x, test_y = self.pipeline.build_test_data_tensor()
 
-        iteration = skip_count
         for i in range(inc, len(self.config.train_configurations)):
             self.pipeline.change_dataset_part(i)
             training_iterator, data_x, data_y = self.pipeline.build_train_data_tensor(skip_count)
             self.sess.run(training_iterator.initializer)
-            iteration = self.train_increment(i, iteration, self.config, self.writer, data_x, data_y, test_x, test_y)
+            iteration = self.train_increment(i, skip_count, iteration, self.config, self.writer, data_x, data_y, test_x,
+                                             test_y)
             self._post_process_increment()
             skip_count = 0  # Reestablishes the skip_count to zero after the first mega-batch
             print("Finished training of increment {}...".format(i))
@@ -125,7 +127,8 @@ class Trainer(ABC):
         self.__finish()
 
     # TODO mensajes con porcentajes de avance
-    def train_increment(self, increment: int, iteration: int, config: GeneralConfig, writer: tf.summary.FileWriter,
+    def train_increment(self, increment: int, iteration: int, total_iteration: int, config: GeneralConfig,
+                        writer: tf.summary.FileWriter,
                         data_x: tf.Tensor, data_y: tf.Tensor,
                         test_x: tf.Tensor, test_y: tf.Tensor):
         """
@@ -133,7 +136,9 @@ class Trainer(ABC):
         provided. It also saves summaries for TensorBoard and creates checkpoints according to the given configuration.
         :param increment: the number of the mega-batch
         :param iteration: the current iteration number over the training data. It should be zero if no checkpoint has
-        been loaded or if the mega-batch at which the restored checkpoint is different from the current mega-batch
+        been loaded or if the mega-batch at which the restored checkpoint is differs from the current mega-batch
+        :param total_iteration: the current iteration number over the training data, counting from the start of the
+        training (that is, from the first batch of mega-batch 0)
         :param config: the configuration for the whole training
         :param writer: a FileWriter properly configured
         :param data_x: the tensor associated with the training data
@@ -143,10 +148,9 @@ class Trainer(ABC):
         :return: the current iteration
         """
         print("Starting training of increment {}...".format(increment))
-        i = iteration
+        i = total_iteration  # Iteration counting from the start of the training
         while True:
             try:
-
                 image_batch, target_batch = self.sess.run([data_x, data_y])
                 _, c = self._train_batch(self.sess, image_batch, target_batch, self.tensor_x, self.tensor_y,
                                          self.train_step, self.mse)
@@ -155,11 +159,12 @@ class Trainer(ABC):
                     print("Performing validation at iteration number: {}. Mse is: {}".format(i, c))
                     self.__perform_validation(i, writer, test_x, test_y)
                 if i % config.check_interval == 0:
-                    self.__save_model(i, increment)
+                    self.__save_model(iteration, i, increment)
 
             except OutOfRangeError:
                 break
             i += 1
+            iteration += 1
         return i
 
     def __perform_validation(self, iteration: int, writer: tf.summary.FileWriter, test_x: tf.Tensor, test_y: tf.Tensor):
@@ -201,24 +206,25 @@ class Trainer(ABC):
         """
         if not ckp_path:
             print("No checkpoint has been loaded.")
-            return 0, 0
+            return 0, 0, 0
         else:
             print("Loading checkpoint from {}.".format(ckp_path))
 
         self.saver.restore(self.sess, ckp_path)
-        inc, it = self.sess.run([self.mega_batch_variable, self.iteration_variable])
+        inc, it, it_t = self.sess.run([self.mega_batch_variable, self.iteration_variable, self.it_from_start_variable])
         print("Loaded checkpoint at iteration {} of increment {}".format(it, inc))
-        return int(inc[0]), int(it[0] + 1)
+        return int(inc[0]), int(it[0] + 1), int(it_t[0] + 1)
 
-    def __save_model(self, iteration: int, increment: int):
+    def __save_model(self, iteration: int, total_iteration: int, increment: int):
         """
         Saves all the variables of the model
         :param iteration: the current iteration number over the training data
         :param increment: the number of the mega-batch
         """
-        filename = "model-{}-{}.ckpt".format(increment, iteration)
+        filename = "model-{}-{}.ckpt".format(increment, total_iteration)
         self.sess.run(self.mega_batch, feed_dict={self.aux_tensor: [increment]})
         self.sess.run(self.iteration, feed_dict={self.aux_tensor: [iteration]})
+        self.sess.run(self.it_from_start, feed_dict={self.aux_tensor: [total_iteration]})
         save_path = self.saver.save(self.sess, os.path.join(self.ckp_path, filename))
         print("Model saved in path: {}".format(save_path))
         return save_path

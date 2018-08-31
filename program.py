@@ -197,7 +197,7 @@ def get_checkpoint():
     """
     print()
     while True:
-        response = input("Please enter the mega-batch and iteration corresponding to the desired checkpoint with the"
+        response = input("Please enter the mega-batch and iteration corresponding to the desired checkpoint with the "
                          "format [mega-batch]-[iteration], e.g. '0-50' (both must be ints equal or greater than 0): ")
         if len(response.split("-")) == 2:
             if 0 <= int(response.split("-")[0]):

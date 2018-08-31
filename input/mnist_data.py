@@ -75,7 +75,7 @@ class MnistData(Data):
 
             image = tf.image.convert_image_dtype(image,
                                                  dtype=tf.float32,
-                                                 saturate=True) * (1 / 255.0)
+                                                 saturate=True)
 
             label = tf.cast(features['label'], tf.int32)
             label = tf.one_hot(label, depth=self.NUMBER_OF_CLASSES)

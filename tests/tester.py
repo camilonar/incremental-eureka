@@ -103,19 +103,20 @@ class Tester(ABC):
         """
         raise NotImplementedError("The subclass hasn't implemented the _prepare_config method")
 
-    def _prepare_checkpoint_if_required(self, inc_ckp_path: str):
+    def _prepare_checkpoint_if_required(self, inc_ckp_path: str, str_optimizer: str):
         """
         This method prepares the checkpoint path given an incomplete checkpoint path. It also checks if the created
         checkpoint path is a valid path.
         :param inc_ckp_path: the checkpoint path if it's required to start the training from a checkpoint. It is
          expected to follow the format "[increment]-[iteration]", e.g. "0-50".
         If there is no checkpoint to be loaded then its value should be None.
+        :param str_optimizer: a string that represents the selected trainer/optimizer
         :return: if a checkpoint has been successfully loaded then this method returns a string representing the full
         path to the checkpoint. If no checkpoint has been requested or if the generated path doesn't exists
         then this method returns None
         """
         if inc_ckp_path:
-            path, valid = dir.create_full_checkpoint_path(self.dataset_name, self.trainer, self.inc_ckp_path)
+            path, valid = dir.create_full_checkpoint_path(self.dataset_name, str_optimizer, self.inc_ckp_path)
             if valid:
                 print("The checkpoint will be loaded from: {}".format(path))
                 return path
@@ -139,7 +140,7 @@ class Tester(ABC):
         self._prepare_config(str_trainer)
         self._prepare_data_pipeline()
         self._prepare_neural_network()
-        self.ckp_path = self._prepare_checkpoint_if_required(self.inc_ckp_path)
+        self.ckp_path = self._prepare_checkpoint_if_required(self.inc_ckp_path, str_trainer)
         self._prepare_trainer(str_trainer)
 
     def execute_test(self):
