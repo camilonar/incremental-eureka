@@ -95,9 +95,9 @@ class MnistData(Data):
             dataset = dataset.repeat(self.curr_config.epochs)
 
         dataset.skip(skip_count)
-        iterator = dataset.make_one_shot_iterator()
+        iterator = dataset.make_initializable_iterator()
         images_batch, target_batch = iterator.get_next()
-        return images_batch, target_batch
+        return iterator, images_batch, target_batch
 
     def close(self):
         pass

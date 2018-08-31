@@ -46,8 +46,10 @@ class Data(ABC):
         :param skip_count: number of elements to be skipped from the Dataset. If the dataset.batch is applied, then each
         batch is treated as 1 element, so in that case, skip_count is the number of batches to be skipped from the
         Dataset.
-        :return: a tuple of Tensors, where the first value corresponds with the tensor of training data and the second
-        is the tensor with the corresponding labels of the data
+        :return: a tuple of an Iterator and two Tensors, where the first value corresponds with an Iterator for the
+         data, the second value is the tensor of training data and the third value is the tensor with the
+         corresponding labels of the data. NOTE: the Iterator must be initialized before the training and label data
+         tensors can be used to feed data into a model
         """
         raise NotImplementedError("The subclass hasn't implemented the build_train_data_tensor method")
 
@@ -57,8 +59,10 @@ class Data(ABC):
         Builds the test data tensor
         :param shuffle: specifies whether the data is going to be randomly shuffled or not
         :param augmentation: specifies if there is going to be performed a data augmentation process
-        :return: a tuple of Tensors, where the first value corresponds with the tensor of test data and the second is
-        the tensor with the corresponding labels of the data
+        :return: a tuple of an Operation and two Tensors, where the first value corresponds with an initializer for an
+         iterator, the second value is the tensor of test data and the second is the tensor with the corresponding
+         labels of the data. NOTE: the Iterator must be initialized before the testing and label data tensors can be
+         used to feed data into a model
         """
         raise NotImplementedError("The subclass hasn't implemented the build_test_data_tensor method")
 
