@@ -63,7 +63,7 @@ class MnistData(Data):
                     'image_raw': tf.FixedLenFeature([], tf.string)
                 })
 
-            image = tf.decode_raw(features['image_raw'], tf.int32)
+            image = tf.decode_raw(features['image_raw'], tf.float32)
             image.set_shape((self.IMAGE_WIDTH * self.IMAGE_HEIGHT))
             # Reshape from [depth * height * width] to [depth, height, width].
 
@@ -91,9 +91,9 @@ class MnistData(Data):
             dataset = dataset.repeat(self.curr_config.epochs)
 
         dataset.skip(skip_count)
-        iterator = dataset.make_one_shot_iterator()
+        iterator = dataset.make_initializable_iterator()
         images_batch, target_batch = iterator.get_next()
-        return images_batch, target_batch
+        return iterator, images_batch, target_batch
 
     def close(self):
         pass

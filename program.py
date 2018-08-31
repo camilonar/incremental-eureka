@@ -90,7 +90,7 @@ def configure_dataset_and_neural_net(curr_dataset: str):
     while True:
         print("[M] MNIST (uses LeNet)")
         print("[C] CIFAR-10 (uses AlexNet)")
-        print("[L] CALTECH-101 (uses VGG16)")
+        print("[L] CALTECH-101 (uses NiN)")
         print("[I] TINY IMAGENET (uses CaffeNet)")
         print("[X] Cancel Operation and return to Main Menu")
         response = input("Select an optimizer: ").upper()
