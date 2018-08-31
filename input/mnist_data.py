@@ -63,7 +63,7 @@ class MnistData(Data):
                     'image_raw': tf.FixedLenFeature([], tf.string)
                 })
 
-            image = tf.decode_raw(features['image_raw'], tf.int32)
+            image = tf.decode_raw(features['image_raw'], tf.float32)
             image.set_shape((self.IMAGE_WIDTH * self.IMAGE_HEIGHT))
             # Reshape from [depth * height * width] to [depth, height, width].
 
@@ -72,6 +72,10 @@ class MnistData(Data):
                 tf.float32)
 
             image = tf.image.resize_images(image, [self.IMAGE_WIDTH_RESIZE, self.IMAGE_HEIGHT_RESIZE])
+
+            image = tf.image.convert_image_dtype(image,
+                                                 dtype=tf.float32,
+                                                 saturate=True) * (1 / 255.0)
 
             label = tf.cast(features['label'], tf.int32)
             label = tf.one_hot(label, depth=self.NUMBER_OF_CLASSES)
