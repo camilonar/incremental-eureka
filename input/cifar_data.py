@@ -95,10 +95,10 @@ class CifarData(Data):
 
         dataset.skip(skip_count)
 
-        iterator = dataset.make_initializable_iterator()
+        iterator = dataset.make_one_shot_iterator()
         images_batch, target_batch = iterator.get_next()
 
-        return iterator, images_batch, target_batch
+        return images_batch, target_batch
 
     def close(self):
         pass

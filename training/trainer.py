@@ -17,6 +17,7 @@ from training.train_conf import GeneralConfig
 import utils.dir_utils as utils
 import matplotlib.pyplot as plt
 
+
 class Trainer(ABC):
     """
     Has the purpose of training a generic net, with a generic configuration. It serves as a base for custom trainers
@@ -51,6 +52,7 @@ class Trainer(ABC):
         self.iteration_variable, self.mega_batch_variable = None, None
         self.iteration, self.mega_batch, self.aux_tensor = None, None, None
         self.saver = None
+        self.test_iterator = None
 
     def __prepare(self):
         """
@@ -78,8 +80,8 @@ class Trainer(ABC):
         self.mse = self._create_mse(self.tensor_y, self.model.get_output())
         correct_prediction = tf.equal(tf.argmax(self.tensor_y, 1), tf.argmax(self.model.get_output(), 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-        streaming_accuracy, self.streaming_accuracy_update = tf.metrics.mean(accuracy)
-        self.streaming_accuracy_scalar = tf.summary.scalar('accuracy', streaming_accuracy)
+        self.streaming_accuracy, self.streaming_accuracy_update = tf.metrics.mean(accuracy)
+        self.streaming_accuracy_scalar = tf.summary.scalar('accuracy', self.streaming_accuracy)
 
         self.train_step = self._create_optimizer(self.config, self.mse)
 
@@ -91,6 +93,8 @@ class Trainer(ABC):
         self.mega_batch = self.mega_batch_variable.assign(self.aux_tensor)
 
         self.saver = tf.train.Saver()
+
+        self._custom_prepare(self.sess)
 
         self.sess.run(tf.local_variables_initializer())
         self.sess.run(tf.global_variables_initializer())
@@ -107,12 +111,14 @@ class Trainer(ABC):
         inc, skip_count = self.__maybe_load_model(self.checkpoint)
 
         self.writer = tf.summary.FileWriter(self.summaries_path, tf.get_default_graph())
-        test_x, test_y = self.pipeline.build_test_data_tensor()
+        self.test_iterator, test_x, test_y = self.pipeline.build_test_data_tensor()
 
+        iteration = skip_count
         for i in range(inc, len(self.config.train_configurations)):
             self.pipeline.change_dataset_part(i)
-            data_x, data_y = self.pipeline.build_train_data_tensor(skip_count)
-            self.train_increment(i, skip_count, self.config, self.writer, data_x, data_y, test_x, test_y)
+            training_iterator, data_x, data_y = self.pipeline.build_train_data_tensor(skip_count)
+            self.sess.run(training_iterator.initializer)
+            iteration = self.train_increment(i, iteration, self.config, self.writer, data_x, data_y, test_x, test_y)
             self._post_process_increment()
             skip_count = 0  # Reestablishes the skip_count to zero after the first mega-batch
             print("Finished training of increment {}...".format(i))
@@ -135,14 +141,13 @@ class Trainer(ABC):
         :param data_y: the tensor that has the corresponding labels of the training data
         :param test_x: the tensor associated with the testing/validation data
         :param test_y: the tensor that has the corresponding labels of the testing/validation data
-        :return: None
+        :return: the current iteration
         """
         print("Starting training of increment {}...".format(increment))
         i = iteration
         while True:
             try:
                 image_batch, target_batch = self.sess.run([data_x, data_y])
-                print(numpy.max(image_batch[0]))
                 _, c = self._train_batch(self.sess, image_batch, target_batch, self.tensor_x, self.tensor_y,
                                          self.train_step, self.mse)
 
@@ -155,6 +160,7 @@ class Trainer(ABC):
             except OutOfRangeError:
                 break
             i += 1
+        return i
 
     def __perform_validation(self, iteration: int, writer: tf.summary.FileWriter, test_x: tf.Tensor, test_y: tf.Tensor):
         """
@@ -166,11 +172,14 @@ class Trainer(ABC):
         :param test_y: the tensor that has the corresponding labels of the data
         :return: None
         """
+        self.sess.run(self.test_iterator.initializer)
+        self.sess.run(tf.variables_initializer(tf.get_default_graph().get_collection(tf.GraphKeys.METRIC_VARIABLES)))
         while True:
             try:
                 test_images, test_target = self.sess.run([test_x, test_y])
-                self.sess.run([self.streaming_accuracy_update],
-                              feed_dict={self.tensor_x: test_images, self.tensor_y: test_target})
+                self.streaming_accuracy = self.sess.run([self.streaming_accuracy_update],
+                                                        feed_dict={self.tensor_x: test_images,
+                                                                   self.tensor_y: test_target})
             except OutOfRangeError:
                 print("Finished validation of iteration {}...".format(iteration))
                 break
@@ -268,3 +277,12 @@ class Trainer(ABC):
         order) over the batch of data using sess as Session
         """
         raise NotImplementedError("The subclass hasn't implemented the _train_batch method")
+
+    def _custom_prepare(self, sess):
+        """
+        This method may be used by concrete trainers to define custom preparations for the training. This method isn't
+        implemented by default
+        :param sess: the current session
+        :return: None
+        """
+        pass
