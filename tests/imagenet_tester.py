@@ -1,11 +1,12 @@
 """
 Module for performing tests over Imagenet
 """
+from abc import abstractmethod
+
 import tensorflow as tf
 
 from tests.tester import Tester
 from models import CaffeNet
-from training.train_conf import GeneralConfig, TrainConfig
 from input.imagenet_data import ImagenetData
 import utils.constants as const
 
@@ -14,6 +15,9 @@ class ImagenetTester(Tester):
     """
     Performs tests over Imagenet according to the User input and pre-established configurations
     """
+    @abstractmethod
+    def _prepare_trainer(self):
+        pass
 
     def _prepare_data_pipeline(self):
         self.data_pipeline = ImagenetData(self.general_config, self.train_dirs, self.validation_dir, self.extras)
@@ -23,13 +27,9 @@ class ImagenetTester(Tester):
         self.__output_tensor = tf.placeholder(tf.float32, [None, 200])
         self.__neural_net = CaffeNet({'data': self.input_tensor})
 
+    @abstractmethod
     def _prepare_config(self, str_optimizer: str):
-        self.__general_config = GeneralConfig(self.lr, self.summary_interval, self.ckp_interval,
-                                              config_name=str_optimizer, model_name=self.dataset_name)
-        # Creates configuration for 5 mega-batches
-        for i in range(5):
-            train_conf = TrainConfig(1, batch_size=128)
-            self.general_config.add_train_conf(train_conf)
+        pass
 
     @property
     def dataset_name(self):
@@ -44,8 +44,9 @@ class ImagenetTester(Tester):
         return self.__neural_net
 
     @property
+    @abstractmethod
     def general_config(self):
-        return self.__general_config
+        pass
 
     @property
     def input_tensor(self):

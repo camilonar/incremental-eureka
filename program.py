@@ -3,10 +3,8 @@ This module acts as an interface for performing the tests
 """
 import utils.constants as const
 import utils.default_paths as paths
-from tests.imagenet_tester import ImagenetTester
-from tests.caltech_tester import CaltechTester
-from tests.cifar_tester import CifarTester
-from tests.mnist_tester import MnistTester
+from tests_impl.testers import Testers
+
 
 def print_menu():
     """
@@ -135,7 +133,7 @@ def configure_optimizer(curr_optimizer: str):
         elif response == 'C':
             response = const.TR_CEAL
         elif response == 'R':
-            response = const.TR_REPRESENTATIVES
+            response = const.TR_REP
         elif response == 'X':
             break
         else:
@@ -363,16 +361,9 @@ def perform_test(dataset: str, optimizer: str, checkpoint: str, lr: float, s_int
     if the dataset doesn't have any dataset-specific path.
     :return: None
     """
-    tester = None
 
-    if dataset == const.DATA_MNIST:
-        tester = MnistTester(lr, train_dirs, validation_dir, extras, s_interval, ckp_interval, checkpoint)
-    if dataset == const.DATA_CIFAR_10:
-        tester = CifarTester(lr, train_dirs, validation_dir, extras, s_interval, ckp_interval, checkpoint)
-    if dataset == const.DATA_CALTECH_101:
-        tester = CaltechTester(lr, train_dirs, validation_dir, extras, s_interval, ckp_interval, checkpoint)
-    if dataset == const.DATA_TINY_IMAGENET:
-        tester = ImagenetTester(lr, train_dirs, validation_dir, extras, s_interval, ckp_interval, checkpoint)
+    factory = Testers.get_tester(optimizer, dataset)
+    tester = factory(lr, train_dirs, validation_dir, extras, s_interval, ckp_interval, checkpoint)
 
     tester.prepare_all(optimizer)
     tester.execute_test()

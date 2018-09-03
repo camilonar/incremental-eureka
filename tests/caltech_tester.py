@@ -1,12 +1,12 @@
 """
 Module for performing tests over Caltech-101
 """
+from abc import abstractmethod
+
 import tensorflow as tf
 
 from tests.tester import Tester
-from models import VGGNet
 from models import NiN
-from training.train_conf import GeneralConfig, TrainConfig
 from input.caltech_data import CaltechData
 import utils.constants as const
 
@@ -16,6 +16,10 @@ class CaltechTester(Tester):
     Performs tests over Caltech-101 according to the User input and pre-established configurations
     """
 
+    @abstractmethod
+    def _prepare_trainer(self):
+        pass
+
     def _prepare_data_pipeline(self):
         self.data_pipeline = CaltechData(self.general_config, self.train_dirs, self.validation_dir)
 
@@ -24,13 +28,9 @@ class CaltechTester(Tester):
         self.__output_tensor = tf.placeholder(tf.float32, [None, 101])
         self.__neural_net = NiN({'data': self.input_tensor})
 
+    @abstractmethod
     def _prepare_config(self, str_optimizer: str):
-        self.__general_config = GeneralConfig(0.001, self.summary_interval, self.ckp_interval,
-                                              config_name=str_optimizer, model_name=self.dataset_name)
-        # Creates configuration for 5 mega-batches
-        for i in range(5):
-            train_conf = TrainConfig(1, batch_size=160)
-            self.general_config.add_train_conf(train_conf)
+        pass
 
     @property
     def dataset_name(self):
@@ -45,8 +45,9 @@ class CaltechTester(Tester):
         return self.__neural_net
 
     @property
+    @abstractmethod
     def general_config(self):
-        return self.__general_config
+        pass
 
     @property
     def input_tensor(self):

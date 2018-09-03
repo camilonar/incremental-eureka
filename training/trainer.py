@@ -7,7 +7,6 @@ Features:
 import os
 from abc import ABC, abstractmethod
 
-import numpy
 import tensorflow as tf
 from tensorflow.python.framework.errors_impl import OutOfRangeError
 
@@ -29,8 +28,8 @@ class Trainer(ABC):
         :param config: the configuration for the whole training
         :param model: the neural net that is going to be trained
         :param pipeline: the data pipeline for the training
-        :param checkpoint: the checkpoint path if it's required to start the training from a checkpoint. A data path with
-        the following structure is expected: ./checkpoints/dataset_name/config_net_name/checkpoint_name.ckpt.
+        :param checkpoint: the checkpoint path if it's required to start the training from a checkpoint. A data path
+        with the following structure is expected: ./checkpoints/dataset_name/config_net_name/checkpoint_name.ckpt.
         If there is no checkpoint to be loaded then its value should be None. The default value is None.
 
         This method must be called by the constructors of the subclasses.
@@ -109,7 +108,7 @@ class Trainer(ABC):
         :return: None
         """
         self.__prepare()
-        inc, skip_count, iteration = self.__maybe_load_model(self.checkpoint)
+        inc, skip_count, iteration = self._maybe_load_model(self.checkpoint)
 
         self.writer = tf.summary.FileWriter(self.summaries_path, tf.get_default_graph())
         self.test_iterator, test_x, test_y = self.pipeline.build_test_data_tensor()
@@ -153,13 +152,13 @@ class Trainer(ABC):
             try:
                 image_batch, target_batch = self.sess.run([data_x, data_y])
                 _, c = self._train_batch(self.sess, image_batch, target_batch, self.tensor_x, self.tensor_y,
-                                         self.train_step, self.mse)
+                                         self.train_step, self.mse, increment, iteration, total_iteration)
 
                 if i % config.summary_interval == 0:
                     print("Performing validation at iteration number: {}. Mse is: {}".format(i, c))
                     self.__perform_validation(i, writer, test_x, test_y)
                 if i % config.check_interval == 0:
-                    self.__save_model(iteration, i, increment)
+                    self._save_model(iteration, i, increment)
 
             except OutOfRangeError:
                 break
@@ -192,7 +191,7 @@ class Trainer(ABC):
         summary = self.sess.run(self.streaming_accuracy_scalar)
         writer.add_summary(summary, iteration)
 
-    def __maybe_load_model(self, ckp_path: str):
+    def _maybe_load_model(self, ckp_path: str):
         """
         This method prepares the previously created neural network with the checkpoint data if a checkpoint is
         provided. It also loads any kind of additional Variable that is need for the training (like Data or Optimizer's
@@ -201,8 +200,8 @@ class Trainer(ABC):
         the following structure is expected: ./checkpoints/dataset_name/config_name/checkpoint_name.ckpt.
         If there is no checkpoint to be loaded then its value should be None.
         :return:  if a checkpoint has been successfully loaded then this method returns a tuple containing the number of
-        the current mega-batch (increment) and iteration in that order. It returns a tuple of zeros if no checkpoint is
-        loaded.
+        the current mega-batch (increment), iteration over the batch and iteration counting from the start of the
+        training, in that order. It returns a tuple of zeros if no checkpoint is loaded.
         """
         if not ckp_path:
             print("No checkpoint has been loaded.")
@@ -212,10 +211,11 @@ class Trainer(ABC):
 
         self.saver.restore(self.sess, ckp_path)
         inc, it, it_t = self.sess.run([self.mega_batch_variable, self.iteration_variable, self.it_from_start_variable])
+        self._custom_checkpoint_load(self.sess)
         print("Loaded checkpoint at iteration {} of increment {}".format(it, inc))
         return int(inc[0]), int(it[0] + 1), int(it_t[0] + 1)
 
-    def __save_model(self, iteration: int, total_iteration: int, increment: int):
+    def _save_model(self, iteration: int, total_iteration: int, increment: int):
         """
         Saves all the variables of the model
         :param iteration: the current iteration number over the training data
@@ -225,6 +225,7 @@ class Trainer(ABC):
         self.sess.run(self.mega_batch, feed_dict={self.aux_tensor: [increment]})
         self.sess.run(self.iteration, feed_dict={self.aux_tensor: [iteration]})
         self.sess.run(self.it_from_start, feed_dict={self.aux_tensor: [total_iteration]})
+        self._custom_checkpoint_save(self.sess)
         save_path = self.saver.save(self.sess, os.path.join(self.ckp_path, filename))
         print("Model saved in path: {}".format(save_path))
         return save_path
@@ -269,7 +270,7 @@ class Trainer(ABC):
 
     @abstractmethod
     def _train_batch(self, sess, image_batch, target_batch, tensor_x: tf.Tensor, tensor_y: tf.Tensor,
-                     train_step: tf.Operation, mse: tf.Tensor):
+                     train_step: tf.Operation, mse: tf.Tensor, increment: int, iteration: int, total_it: int):
         """
         Trains the current model over a batch of data
         :param sess: the current Session
@@ -279,6 +280,9 @@ class Trainer(ABC):
         :param tensor_y: the tensor corresponding to the output of a training
         :param train_step: the current tf.Optimizer
         :param mse: a tensor representing the minimum squared error
+        :param increment: the number of the mega-batch
+        :param iteration: the current iteration counting from the start of the mega-batch
+        _param total_it: the current iteration counting from the start of the whole training
         :return: a tuple containing the result of the training, i.e. the result of running train_step and mse (in that
         order) over the batch of data using sess as Session
         """
@@ -288,6 +292,32 @@ class Trainer(ABC):
         """
         This method may be used by concrete trainers to define custom preparations for the training. This method isn't
         implemented by default
+        :param sess: the current session
+        :return: None
+        """
+        pass
+
+    def _custom_checkpoint_load(self, sess):
+        """
+        This method may be used by concrete trainers to define custom attributes to be obtained when a checkpoint is
+        loaded. This is intended to be used for information that isn't supported in the base Trainer's checkpoint load.
+        Please note that the checkpoints are saved and restored using the Saver class from Tensorflow, so all the
+        information must be loaded from that source. If you need another kind of checkpoint management then you should
+        override the _maybe_load_model and _save_model methods.
+        This method isn't implemented by default
+        :param sess: the current session
+        :return: None
+        """
+        pass
+
+    def _custom_checkpoint_save(self, sess):
+        """
+        This method may be used by concrete trainers to define custom attributes to be stored when a checkpoint is
+        saved. This is intended to be used for information that isn't supported in the base Trainer's checkpoint saver.
+        Please note that the checkpoints are saved and restored using the Saver class from Tensorflow, so all the
+        information must be loaded from that source. If you need another kind of checkpoint management then you should
+        override the _maybe_load_model and _save_model methods.
+        This method isn't implemented by default
         :param sess: the current session
         :return: None
         """

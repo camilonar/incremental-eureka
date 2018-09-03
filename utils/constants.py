@@ -15,12 +15,12 @@ Names for the trainers (algorithms)
 """
 TR_BASE = "TR_BASE"
 TR_CEAL = "TR_CEAL"
-TR_REPRESENTATIVES = "TR_REPRESENTATIVES"
+TR_REP = "TR_REP"
 
 """
 Default parameters for test
 """
-LEARNING_RATE = 0.1
+LEARNING_RATE = 0.01
 SUMMARY_INTERVAL = 100
 CKP_INTERVAL = 200
 

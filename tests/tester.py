@@ -5,10 +5,8 @@ Features:
 2. Executes a test training a neural network over a dataset according to a flexible configuration
 """
 from abc import ABC, abstractmethod
-from errors import OptionNotSupportedError, TestNotPreparedError
+from errors import TestNotPreparedError
 
-from training.basic_trainer import RMSPropTrainer
-import utils.constants as const
 import utils.dir_utils as dir
 
 
@@ -63,35 +61,14 @@ class Tester(ABC):
         """
         raise NotImplementedError("The subclass hasn't implemented the _prepare_neural_network method")
 
-    def _prepare_trainer(self, str_trainer: str):
-
+    @abstractmethod
+    def _prepare_trainer(self):
         """
         Prepares the trainer that is required by the User. All the other preparations (e.g. _prepare_config,
         _prepare_neural_network) must be completed before this method is used, otherwise, there may be unexpected
         behavior
-        :param str_trainer: a string that represents the chosen Trainer. Currently supported strings are:
-            -OPT_BASE: for a simple RMSProp
-            -OPT_CEAL: for the OPT_CEAL algorithm (See: Keze Wang, Dongyu Zhang, Ya Li, Ruimao Zhang, and Liang Lin.
-                    Cost-effective active learning for deep image classification.
-                    IEEE Transactions on Circuits and Systems for Video Technology, 2016)
-            -OPT_REPRESENTATIVES: for the proposed approach of this work, i.e. an incremental algorithm that uses RMSProp
-                    and select samples based in clustering
         :return: None
-        :raises OptionNotSupportedError: if the required Trainer isn't supported yet
         """
-        self.trainer = RMSPropTrainer(self.general_config, self.neural_net, self.data_input, self.input_tensor,
-                                      self.output_tensor, self.ckp_path)
-        # TODO cambiarlo cuando estén implementados los demás Trainer
-
-        if str_trainer == const.TR_BASE:
-            self.trainer = RMSPropTrainer(self.general_config, self.neural_net, self.data_input, self.input_tensor,
-                                          self.output_tensor, self.ckp_path)
-        elif str_trainer == const.TR_CEAL:
-            pass  # OPT_CEAL Optimizer
-        elif str_trainer == const.TR_REPRESENTATIVES:
-            pass  # Our Optimizer
-        else:
-            raise OptionNotSupportedError("The required Trainer '{}' isn't supported".format(str_trainer))
 
     @abstractmethod
     def _prepare_config(self, str_optimizer: str):
@@ -141,7 +118,7 @@ class Tester(ABC):
         self._prepare_data_pipeline()
         self._prepare_neural_network()
         self.ckp_path = self._prepare_checkpoint_if_required(self.inc_ckp_path, str_trainer)
-        self._prepare_trainer(str_trainer)
+        self._prepare_trainer()
 
     def execute_test(self):
         """
