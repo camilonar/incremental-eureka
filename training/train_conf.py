@@ -11,15 +11,17 @@ class TrainConfig(object):
     Configuration for training based on a batch of data. This is used for a specific increment of data
     """
 
-    def __init__(self, epochs: int, batch_size=100):
+    def __init__(self, epochs: int, ttime: int = None, batch_size=100):
         """
         Creates a TrainConfig object
-        :param epochs: number of epochs for the training
+        :param epochs: number of epochs for the training. If None, then the dataset is repeated forever
+        :param ttime: number of seconds that the model should be trained. If None, then time restrictions are not used
         :param batch_size: the sizes of the batches that are going to be used in training. This is different from the
         number of instances of each incremental training. E.g. An incremental training may be of a total of 1000
         samples using batches with batch_size 100
         """
         self.epochs = epochs
+        self.ttime = ttime
         self.batch_size = batch_size
 
 
@@ -29,18 +31,18 @@ class GeneralConfig(object):
     of data, then this part of the configuration is used for ALL of them
     """
 
-    def __init__(self, learn_rate: float,
+    def __init__(self, learning_rate: float,
                  summary_interval=100, check_interval=200, config_name='default', model_name='dataset_default'):
         """
         Creates a GeneralConfig object
-        :param learn_rate: the learning rate to be used in the training
+        :param learning_rate: the learning rate to be used in the training
         :param summary_interval: the interval of iterations at which the summaries are going to be performed
         :param check_interval: the interval of iterations at which the evaluations and checkpoints are going to be
         performed. Must be an integer multiple of summary_interval
         :param config_name: a descriptive name for the training configuration
         :param model_name: a descriptive name for the model
         """
-        self.learn_rate = learn_rate
+        self.learn_rate = learning_rate
         self.summary_interval = summary_interval
         self.check_interval = check_interval
         self.config_name = config_name

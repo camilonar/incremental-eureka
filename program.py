@@ -123,9 +123,10 @@ def configure_optimizer(curr_optimizer: str):
     print("----------------------------Configure the Optimizer----------------------------")
 
     while True:
+        # TODO cambiar nuestro algoritmo a un nombre más apropiado, y remover -NOT SUPPORTED YET-
         print("[B] Simple RMSProp (Base optimizer)")
-        print("[C] CEAL Algorithm (Active Learning)")
-        print("[R] Incremental Representative Sampling (The proposed method)")  # TODO cambiar a un nombre más apropiado
+        print("[C] CEAL Algorithm (Active Learning) -NOT SUPPORTED YET-")
+        print("[R] Incremental Representative Sampling (The proposed method) -NOT SUPPORTED YET-")
         print("[X] Cancel Operation and return to Main Menu")
         response = input("Select an optimizer: ").upper()
         if response == 'B':
