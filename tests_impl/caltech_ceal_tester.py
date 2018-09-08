@@ -3,7 +3,8 @@ Tester for Caltech-101 dataset using CEAL algorithm
 """
 from tests.caltech_tester import CaltechTester
 from training.ceal_trainer import CEALTrainer
-from training.train_conf import GeneralConfig, TrainConfig
+from training.train_conf import  TrainConfig
+from training.ceal_conf import CealConfig
 
 
 class CaltechCEALTester(CaltechTester):
@@ -16,7 +17,7 @@ class CaltechCEALTester(CaltechTester):
                                    self.output_tensor, self.ckp_path)
 
     def _prepare_config(self, str_optimizer: str):
-        self.__general_config = GeneralConfig(0.001, self.summary_interval, self.ckp_interval,
+        self.__general_config = CealConfig(0.001, 10, 0.3, 0.5, 100, 32, self.summary_interval, self.ckp_interval,
                                               config_name=str_optimizer, model_name=self.dataset_name)
         # Creates configuration for 5 mega-batches
         for i in range(5):

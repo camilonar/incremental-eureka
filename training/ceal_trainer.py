@@ -7,8 +7,9 @@ from tensorflow.python.training.gradient_descent import GradientDescentOptimizer
 
 from input.data import Data
 from network import Network
-from training.train_conf import GeneralConfig
+from training.ceal_conf import CealConfig
 from training.trainer import Trainer
+
 
 
 class CEALTrainer(Trainer):
@@ -18,7 +19,7 @@ class CEALTrainer(Trainer):
         Cost-effective active learning for deep image classification.
         IEEE Transactions on Circuits and Systems for Video Technology, 2016)
     """
-    def __init__(self, config: GeneralConfig, model: Network, pipeline: Data, tensor_x: tf.Tensor, tensor_y: tf.Tensor,
+    def __init__(self, config: CealConfig, model: Network, pipeline: Data, tensor_x: tf.Tensor, tensor_y: tf.Tensor,
                  checkpoint: str = None):
         """
         It creates a CEALTrainer object
@@ -37,6 +38,13 @@ class CEALTrainer(Trainer):
         # Fine tuning interval
         # Selection criteria
 
+        self.du = None
+        self.du_y = None
+        self.dl_x = None
+        self.dl_y = None
+        self.dh_x = None
+        self.dh_y = None
+
         # Unlabeled set
         # Labeled set
 
@@ -47,12 +55,34 @@ class CEALTrainer(Trainer):
         # TODO
         pass
 
-    def _create_optimizer(self, config: GeneralConfig, mse: tf.Tensor):
+    def _create_optimizer(self, config: CealConfig, mse: tf.Tensor):
         return GradientDescentOptimizer(config.learn_rate).minimize(mse)
 
     def _train_batch(self, sess, image_batch, target_batch, tensor_x: tf.Tensor, tensor_y: tf.Tensor,
                      train_step: tf.Operation, mse: tf.Tensor, increment: int, iteration: int, total_it: int):
-        # TODO
+
+        if increment==0:
+            self.dl_x=image_batch
+            self.dl_y=target_batch
+            return self.sess.run([self.train_step, self.mse],
+                                 feed_dict={self.tensor_x: image_batch, self.tensor_y: target_batch})
+        else:
+            self.du = image_batch
+            self.du_y = target_batch # represent manual tag
+            # Add K uncertainty samples into DL
+            # TODO: select method of sampling
+            lc_x,lc_y = self.__get_least_confidence_sampling(self.config.k)
+            self.dl_x = numpy.append(self.dl_x,lc_x)
+            self.dl_y = numpy.append(self.dl_y, lc_y)
+            #Obtain high conﬁdence samples DH
+            self.dh_x,self.dh_y = self.__get_high_confidence_sampling()
+            # In every t iterations
+            if True :
+                # self.config.delta = self.config.delta - self.config.dr * t
+                return self.sess.run([self.train_step, self.mse],
+                                 feed_dict={self.tensor_x: image_batch, self.tensor_y: target_batch})
+
+
         pass
 
     def __get_prediction(self, sess, samples: numpy.ndarray, tensor_x: tf.Tensor):
@@ -73,7 +103,11 @@ class CEALTrainer(Trainer):
         :param k: the number of samples to be retrieved
         :return: a numpy array with the k least confident unlabeled samples
         """
-        pass
+        predicts = self.__get_prediction(self.sess,self.du,self.tensor_x)
+        predicts_max = numpy.amax(predicts, axis=1)
+        index_sorted = numpy.argpartition(predicts_max, k)
+        return numpy.take(self.du, index_sorted[0:k]), numpy.take(self.du_y, index_sorted[0:k])
+
 
     def __get_margin_sampling(self, k: int):
         """
@@ -83,7 +117,14 @@ class CEALTrainer(Trainer):
         :param k: the number of samples to be retrieved
         :return: a numpy array with the k least confident unlabeled samples
         """
-        pass
+        predicts = self.__get_prediction(self.sess, self.du, self.tensor_x)
+        delt_preds = numpy.array([])
+        for pred in predicts:
+            temp = -numpy.partition(-pred, 2)
+            delta= temp[0]-temp[1]
+            delt_preds = numpy.append(delt_preds,delta)
+        index_sorted = numpy.argpartition(delt_preds, k)
+        return numpy.take(self.du, index_sorted[0:k]), numpy.take(self.du_y, index_sorted[0:k])
 
     def __get_entropy_sampling(self, k: int):
         """
@@ -92,7 +133,24 @@ class CEALTrainer(Trainer):
         :param k: the number of samples to be retrieved
         :return: a numpy array with the k least confident unlabeled samples
         """
-        pass
+
+        entropy_predicts = numpy.array([])
+        for sample in self.du:
+            numpy.append(entropy_predicts,self.__calculate_entropy(sample))
+        index_sorted = numpy.argpartition(-entropy_predicts, k)
+        return numpy.take(self.du,index_sorted[0:k]),numpy.take(self.du_y,index_sorted[0:k])
+
+    def __get_high_confidence_sampling(self):
+        '''
+        get samples that have high confidence of unlabeled samples
+        :return: a numpy array with high confidence samples
+        '''
+        predicts = self.__get_prediction(self.sess, self.du, self.tensor_x)
+        predicts_entropy = -numpy.sum(predicts * numpy.log(predicts),axis=1)
+        indexs_high_confidence = numpy.where(predicts_entropy < self.config.delta)
+        dh_x = numpy.take(self.du,indexs_high_confidence)
+        dh_y = tf.one_hot(numpy.argmax(numpy.take(predicts, indexs_high_confidence)),predicts.shape[0])
+        return dh_x, dh_y
 
     def __calculate_entropy(self, input_array: numpy.ndarray):
         """
@@ -100,6 +158,7 @@ class CEALTrainer(Trainer):
         :param input_array: the sample to which the entropy is going to be calculated
         :return: a float with the entropy of a sample
         """
-        pass
+        predict = self.__get_prediction(self.sess,input_array,self.tensor_x)
+        return -sum(predict * numpy.log(predict)) #calculate entropy
 
     # TODO implementar mecanismo para hacer un guardado y carga adecuada de todos los datos de un checkpoint

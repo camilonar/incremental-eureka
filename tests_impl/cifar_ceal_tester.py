@@ -2,6 +2,7 @@
 Tester for Cifar-10 dataset using CEAL algorithm
 """
 from tests.cifar_tester import CifarTester
+from training.ceal_conf import CealConfig
 from training.ceal_trainer import CEALTrainer
 from training.train_conf import GeneralConfig, TrainConfig
 
@@ -16,7 +17,7 @@ class CifarCEALTester(CifarTester):
                                    self.output_tensor, self.ckp_path)
 
     def _prepare_config(self, str_optimizer: str):
-        self.__general_config = GeneralConfig(0.0001, self.summary_interval, self.ckp_interval,
+        self.__general_config = CealConfig(0.001, 10, 0.3, 0.5, 100, 32, self.summary_interval, self.ckp_interval,
                                               config_name=str_optimizer, model_name=self.dataset_name)
         # Creates configuration for 5 mega-batches
         for i in range(5):
