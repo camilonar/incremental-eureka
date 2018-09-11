@@ -104,10 +104,11 @@ class Trainer(ABC):
         self.__prepare()
         inc, skip_count, iteration, start_time = self._maybe_load_model(self.checkpoint)
 
-        self.writer = tf.summary.FileWriter(self.summaries_path, tf.get_default_graph())
         self.test_iterator, test_x, test_y = self.pipeline.build_test_data_tensor()
 
         for i in range(inc, len(self.config.train_configurations)):
+            self.writer = tf.summary.FileWriter(os.path.join(self.summaries_path, "increment_{}".format(i)),
+                                                tf.get_default_graph())
             self.pipeline.change_dataset_part(i)
             training_iterator, data_x, data_y = self.pipeline.build_train_data_tensor(skip_count)
             self.sess.run(training_iterator.initializer)
@@ -119,6 +120,7 @@ class Trainer(ABC):
             start_time = 0
             skip_count = 0
             print("Finished training of increment {}...".format(i))
+            self.writer.close()
 
         self.__finish()
 
@@ -152,6 +154,7 @@ class Trainer(ABC):
         print("Starting training of increment {}...".format(increment))
         start_time += time.time()  # The start time is relative to the training, and must be adapted to current hour
         i = total_iteration  # Iteration counting from the start of the training
+        self.__perform_validation(i, writer, test_x, test_y)  # Performs validation at the beginning
         while True:
             try:
                 image_batch, target_batch = self.sess.run([data_x, data_y])
@@ -160,24 +163,26 @@ class Trainer(ABC):
                 curr_time = time.time()
                 interval = curr_time - start_time
 
-                if i % config.summary_interval == 0:
+                if i % config.summary_interval == 0 and not i == 0:
                     print("Performing validation at iteration: {}. Mse is: {}. "
                           "Time is: {}".format(i, c, interval))
                     self.__perform_validation(i, writer, test_x, test_y)
                 if i % config.check_interval == 0:
                     self._save_model(iteration, i, increment, interval)
                 if ttime and interval > ttime:
-                    print("Finished increment {} in {} seconds".format(increment, interval))
+                    print("Finished increment {} in {} seconds. You can see the results of the training using "
+                          "Tensorboard".format(increment, interval))
                     break
 
             except OutOfRangeError:
                 break
             i += 1
             iteration += 1
+        self.__perform_validation(i, writer, test_x, test_y) # Performs validation at the end
         return i
 
-    # TODO establecer una forma de diferenciar fácilmente los resultados de diferentes mega-batches
-    def __perform_validation(self, iteration: int, writer: tf.summary.FileWriter, test_x: tf.Tensor, test_y: tf.Tensor):
+    def __perform_validation(self, iteration: int, writer: tf.summary.FileWriter,
+                             test_x: tf.Tensor, test_y: tf.Tensor):
         """
         Performs validation over the test data and register the results in the form of summaries that can be interpreted
         by Tensorboard
