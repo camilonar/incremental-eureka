@@ -6,7 +6,7 @@ from abc import abstractmethod
 import tensorflow as tf
 
 from tests.tester import Tester
-from models import AlexNet
+from models import Net_Cfar10
 from input.cifar_data import CifarData
 import utils.constants as const
 
@@ -23,9 +23,9 @@ class CifarTester(Tester):
         self.data_pipeline = CifarData(self.general_config, self.train_dirs, self.validation_dir, self.extras)
 
     def _prepare_neural_network(self):
-        self.__input_tensor = tf.placeholder(tf.float32, [None, 224, 224, 3])
+        self.__input_tensor = tf.placeholder(tf.float32, [None, 32, 32, 3])
         self.__output_tensor = tf.placeholder(tf.float32, [None, 10])
-        self.__neural_net = AlexNet({'data': self.input_tensor})
+        self.__neural_net = Net_Cfar10({'data': self.input_tensor})
 
     @abstractmethod
     def _prepare_config(self, str_optimizer: str):

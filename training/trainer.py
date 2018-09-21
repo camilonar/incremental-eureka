@@ -4,8 +4,12 @@ Features:
 1. It's independent of the dataset, or model used for training
 2. Does all the needed preparations for the training (e.g. creating a session)
 """
+from collections import Counter
+
+import numpy
 import os
 import time
+import matplotlib.pyplot as plt
 from abc import ABC, abstractmethod
 
 import tensorflow as tf
@@ -124,6 +128,14 @@ class Trainer(ABC):
 
         self.__finish()
 
+    def print_frec_histogram(self,values_):
+        hist= {}
+        for i in values_:
+            v =numpy.argmax(i)
+            #print(type(v), ":", v)
+            hist[v] = hist.get(v,0)+1
+        print(hist)
+
     def train_increment(self, increment: int, iteration: int, total_iteration: int, start_time: float, ttime: float,
                         config: GeneralConfig,
                         writer: tf.summary.FileWriter,
@@ -158,6 +170,9 @@ class Trainer(ABC):
         while True:
             try:
                 image_batch, target_batch = self.sess.run([data_x, data_y])
+
+                self.print_frec_histogram(target_batch)
+
                 _, c = self._train_batch(self.sess, image_batch, target_batch, self.tensor_x, self.tensor_y,
                                          self.train_step, self.mse, increment, iteration, total_iteration)
                 curr_time = time.time()

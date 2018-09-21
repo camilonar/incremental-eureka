@@ -11,7 +11,6 @@ from training.ceal_conf import CealConfig
 from training.trainer import Trainer
 
 
-
 class CEALTrainer(Trainer):
     """
     Trainer that uses the CEAL algorithm
@@ -19,6 +18,7 @@ class CEALTrainer(Trainer):
         Cost-effective active learning for deep image classification.
         IEEE Transactions on Circuits and Systems for Video Technology, 2016)
     """
+
     def __init__(self, config: CealConfig, model: Network, pipeline: Data, tensor_x: tf.Tensor, tensor_y: tf.Tensor,
                  checkpoint: str = None):
         """
@@ -61,27 +61,29 @@ class CEALTrainer(Trainer):
     def _train_batch(self, sess, image_batch, target_batch, tensor_x: tf.Tensor, tensor_y: tf.Tensor,
                      train_step: tf.Operation, mse: tf.Tensor, increment: int, iteration: int, total_it: int):
 
-        if increment==0:
-            self.dl_x=image_batch
-            self.dl_y=target_batch
+        if increment == 0:
+            self.dl_x = image_batch
+            self.dl_y = target_batch
             return self.sess.run([self.train_step, self.mse],
                                  feed_dict={self.tensor_x: image_batch, self.tensor_y: target_batch})
         else:
+
             self.du = image_batch
-            self.du_y = target_batch # represent manual tag
+            self.du_y = target_batch  # represent manual tag
+            predicts = self.__get_prediction(self.sess,self.du,self.tensor_x)
+            predicts_entropy = self.__calculate_entropy(predicts)
             # Add K uncertainty samples into DL
             # TODO: select method of sampling
-            lc_x,lc_y = self.__get_least_confidence_sampling(self.config.k)
-            self.dl_x = numpy.append(self.dl_x,lc_x)
+            lc_x, lc_y = self.__get_least_confidence_sampling(self.config.k,predicts)
+            self.dl_x = numpy.append(self.dl_x, lc_x)
             self.dl_y = numpy.append(self.dl_y, lc_y)
-            #Obtain high conﬁdence samples DH
-            self.dh_x,self.dh_y = self.__get_high_confidence_sampling()
+            # Obtain high conﬁdence samples DH
+            self.dh_x, self.dh_y = self.__get_high_confidence_sampling(predicts,predicts_entropy)
             # In every t iterations
-            if True :
+            if True:
                 # self.config.delta = self.config.delta - self.config.dr * t
                 return self.sess.run([self.train_step, self.mse],
-                                 feed_dict={self.tensor_x: image_batch, self.tensor_y: target_batch})
-
+                                     feed_dict={self.tensor_x: image_batch, self.tensor_y: target_batch})
 
         pass
 
@@ -96,20 +98,18 @@ class CEALTrainer(Trainer):
         """
         return sess.run(self.model.get_output(), feed_dict={tensor_x: samples})
 
-    def __get_least_confidence_sampling(self, k: int):
+    def __get_least_confidence_sampling(self, k: int, predicts: numpy.ndarray):
         """
         Gets the k least confident samples. A sample has low confidence if the probability of the most probable class
         is low
         :param k: the number of samples to be retrieved
         :return: a numpy array with the k least confident unlabeled samples
         """
-        predicts = self.__get_prediction(self.sess,self.du,self.tensor_x)
         predicts_max = numpy.amax(predicts, axis=1)
         index_sorted = numpy.argpartition(predicts_max, k)
         return numpy.take(self.du, index_sorted[0:k]), numpy.take(self.du_y, index_sorted[0:k])
 
-
-    def __get_margin_sampling(self, k: int):
+    def __get_margin_sampling(self, k: int, predicts: numpy.ndarray):
         """
         Gets the k least confident samples according to the Best vs. Second Best strategy, that is, according to the
         difference between the probability of the most probable class and the probability of the second most probable
@@ -117,48 +117,40 @@ class CEALTrainer(Trainer):
         :param k: the number of samples to be retrieved
         :return: a numpy array with the k least confident unlabeled samples
         """
-        predicts = self.__get_prediction(self.sess, self.du, self.tensor_x)
         delt_preds = numpy.array([])
         for pred in predicts:
             temp = -numpy.partition(-pred, 2)
-            delta= temp[0]-temp[1]
-            delt_preds = numpy.append(delt_preds,delta)
+            delta = temp[0] - temp[1]
+            delt_preds = numpy.append(delt_preds, delta)
         index_sorted = numpy.argpartition(delt_preds, k)
         return numpy.take(self.du, index_sorted[0:k]), numpy.take(self.du_y, index_sorted[0:k])
 
-    def __get_entropy_sampling(self, k: int):
+    def __get_entropy_sampling(self, k: int,entropy_predicts: numpy.ndarray):
         """
         Gets the k least confident samples according to the Entropy measure, which is calculated using all the class
         label probabilities. A sample with big entropy is an uncertain sample
         :param k: the number of samples to be retrieved
         :return: a numpy array with the k least confident unlabeled samples
         """
+        index_sorted = numpy.argpartition(-entropy_predicts, k)  # sort asc
+        return numpy.take(self.du, index_sorted[0:k]), numpy.take(self.du_y, index_sorted[0:k])
 
-        entropy_predicts = numpy.array([])
-        for sample in self.du:
-            numpy.append(entropy_predicts,self.__calculate_entropy(sample))
-        index_sorted = numpy.argpartition(-entropy_predicts, k)
-        return numpy.take(self.du,index_sorted[0:k]),numpy.take(self.du_y,index_sorted[0:k])
-
-    def __get_high_confidence_sampling(self):
+    def __get_high_confidence_sampling(self, predicts: numpy.ndarray, predicts_entropy: numpy.ndarray):
         '''
         get samples that have high confidence of unlabeled samples
         :return: a numpy array with high confidence samples
         '''
-        predicts = self.__get_prediction(self.sess, self.du, self.tensor_x)
-        predicts_entropy = -numpy.sum(predicts * numpy.log(predicts),axis=1)
         indexs_high_confidence = numpy.where(predicts_entropy < self.config.delta)
-        dh_x = numpy.take(self.du,indexs_high_confidence)
-        dh_y = tf.one_hot(numpy.argmax(numpy.take(predicts, indexs_high_confidence)),predicts.shape[0])
+        dh_x = numpy.take(self.du, indexs_high_confidence)
+        dh_y = tf.one_hot(numpy.argmax(numpy.take(predicts, indexs_high_confidence)), predicts.shape[0])
         return dh_x, dh_y
 
-    def __calculate_entropy(self, input_array: numpy.ndarray):
+    def __calculate_entropy(self, predicts: numpy.ndarray):
         """
         Calculates the entropy of a sample
-        :param input_array: the sample to which the entropy is going to be calculated
-        :return: a float with the entropy of a sample
+        :param predicts: the samples to which the entropy is going to be calculated
+        :return: numpy array with values of entropy
         """
-        predict = self.__get_prediction(self.sess,input_array,self.tensor_x)
-        return -sum(predict * numpy.log(predict)) #calculate entropy
+        return -sum(predicts * numpy.log(predicts))  # calculate entropy
 
     # TODO implementar mecanismo para hacer un guardado y carga adecuada de todos los datos de un checkpoint

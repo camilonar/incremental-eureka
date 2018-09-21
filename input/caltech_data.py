@@ -80,7 +80,7 @@ class CaltechData(Data):
                 single_image = tf.image.per_image_standardization(single_image)
             return single_image, single_target
 
-        # Creates the dataset
+        # Creates the datasetwa 
         filenames = tf.constant(all_img_paths)
         labels = tf.constant(all_targets)
 

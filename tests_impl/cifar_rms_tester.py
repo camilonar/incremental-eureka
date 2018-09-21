@@ -20,7 +20,7 @@ class CifarRMSPropTester(CifarTester):
                                               config_name=str_optimizer, model_name=self.dataset_name)
         # Creates configuration for 5 mega-batches
         for i in range(5):
-            train_conf = TrainConfig(1, batch_size=128)
+            train_conf = TrainConfig(80, batch_size=200)
             self.general_config.add_train_conf(train_conf)
 
     @property

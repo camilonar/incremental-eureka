@@ -14,8 +14,8 @@ class CifarData(Data):
     NUMBER_OF_CLASSES = 10
     IMAGE_HEIGHT = 32
     IMAGE_WIDTH = 32
-    IMAGE_WIDTH_RESIZE = 224
-    IMAGE_HEIGHT_RESIZE = 224
+    IMAGE_WIDTH_RESIZE = 32
+    IMAGE_HEIGHT_RESIZE = 32
 
     def __init__(self, general_config,
                  train_dirs: [str],
