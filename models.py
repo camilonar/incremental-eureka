@@ -139,7 +139,7 @@ class AlexNet(Network):
          .softmax(name='prob'))
 
 
-class Net_Cfar10(Network):
+class CifarTFNet(Network):
  def setup(self):
   """
    Architecture taken from:
