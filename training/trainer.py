@@ -128,15 +128,7 @@ class Trainer(ABC):
 
         self.__finish()
 
-    def print_frec_histogram(self,values_):
-        hist= {}
-        for i in values_:
-            v =numpy.argmax(i)
-            #print(type(v), ":", v)
-            hist[v] = hist.get(v,0)+1
-        print(hist)
-
-    def train_increment(self, increment: int, iteration: int, total_iteration: int, start_time: float, ttime: float,
+    def train_increment(self, increment: int, iteration: int, total_iteration: int, trained_time: float, ttime: float,
                         config: GeneralConfig,
                         writer: tf.summary.FileWriter,
                         data_x: tf.Tensor, data_y: tf.Tensor,
@@ -151,7 +143,7 @@ class Trainer(ABC):
         been loaded or if the mega-batch at which the restored checkpoint is differs from the current mega-batch
         :param total_iteration: the current iteration number over the training data, counting from the start of the
         training (that is, from the first batch of mega-batch 0)
-        :param start_time: number of seconds that the network has been trained (counting from the start of the
+        :param trained_time: number of seconds that the network has been trained (counting from the start of the
         mega-batch). It should be zero if no checkpoint has been loaded or if the current mega-batch is different than
         the one that was loaded from a checkpoint
         :param ttime: number of seconds that the model should be trained. If None, then time restrictions are not used
@@ -164,18 +156,17 @@ class Trainer(ABC):
         :return: the current iteration
         """
         print("Starting training of increment {}...".format(increment))
-        start_time += time.time()  # The start time is relative to the training, and must be adapted to current hour
+        start_time = time.time()
         i = total_iteration  # Iteration counting from the start of the training
         self.__perform_validation(i, writer, test_x, test_y)  # Performs validation at the beginning
+
         while True:
             try:
                 image_batch, target_batch = self.sess.run([data_x, data_y])
 
-                self.print_frec_histogram(target_batch)
-
                 _, c = self._train_batch(self.sess, image_batch, target_batch, self.tensor_x, self.tensor_y,
                                          self.train_step, self.mse, increment, iteration, total_iteration)
-                curr_time = time.time()
+                curr_time = time.time() + trained_time  # If a checkpoint has been loaded, it should adapt the time
                 interval = curr_time - start_time
 
                 if i % config.summary_interval == 0 and not i == 0:
@@ -193,7 +184,7 @@ class Trainer(ABC):
                 break
             i += 1
             iteration += 1
-        self.__perform_validation(i, writer, test_x, test_y) # Performs validation at the end
+        self.__perform_validation(i, writer, test_x, test_y)  # Performs validation at the end
         return i
 
     def __perform_validation(self, iteration: int, writer: tf.summary.FileWriter,
@@ -246,7 +237,7 @@ class Trainer(ABC):
                                           self.it_from_start_variable, self.time_variable])
         self._custom_checkpoint_load(self.sess)
         print("Loaded checkpoint at iteration {} of increment {}. Total iterations: {}".format(it, inc, it_t))
-        return int(inc[0]), int(it[0] + 1), int(it_t[0] + 1), t
+        return int(inc[0]), int(it[0] + 1), int(it_t[0] + 1), t[0]
 
     def _save_model(self, iteration: int, total_iteration: int, increment: int, curr_time: float):
         """

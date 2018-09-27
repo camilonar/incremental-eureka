@@ -16,7 +16,7 @@ def __get_mnist_paths():
     mega-batches for training, the second value is a string corresponding to the path of the testing data, and the third
     value is an empty array
     """
-    path = "../datasets/MNIST_data/"
+    path = "../datasets/MNIST/"
     base = "train-"
     ext = ".tfrecords"
     name_tr = path + base
@@ -32,7 +32,7 @@ def __get_cifar_paths():
     mega-batches for training, the second value is a string corresponding to the path of the testing data, and the third
     value is an array of this form: [metadata_file_path]
     """
-    base_folder = "../datasets/cifar-10-batches-py"
+    base_folder = "../datasets/cifar10"
     base = base_folder + "/data_batch_"
     ext = ".tfrecords"
     tr_paths = [base + "{}".format(x) + ext for x in range(1, 6)]
@@ -48,10 +48,10 @@ def __get_caltech_paths():
     mega-batches for training, the second value is a string corresponding to the path of the testing data and the third
     value is an empty array
     """
-    base_folder = "../datasets/101_ObjectCategories_split/"
+    base_folder = "../datasets/101_ObjectCategories/"
     base = base_folder + "train/"
     paths = [base + "Lote{}/".format(x) for x in range(0, 5)]
-    validation_dir = base_folder + "val/"
+    validation_dir = base_folder + "test/"
     return paths, validation_dir, []
 
 
