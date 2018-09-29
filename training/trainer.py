@@ -79,14 +79,14 @@ class Trainer(ABC):
             sess.close()
         self.sess = tf.InteractiveSession()
 
-        # Creates mse and summaries
-        self.mse = self._create_mse(self.tensor_y, self.model.get_output())
+        # Creates loss function and summaries
+        self.loss = self._create_loss(self.tensor_y, self.model.get_output())
         correct_prediction = tf.equal(tf.argmax(self.tensor_y, 1), tf.argmax(self.model.get_output(), 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         self.streaming_accuracy, self.streaming_accuracy_update = tf.metrics.mean(accuracy)
         self.streaming_accuracy_scalar = tf.summary.scalar('accuracy', self.streaming_accuracy)
 
-        self.train_step = self._create_optimizer(self.config, self.mse)
+        self.train_step = self._create_optimizer(self.config, self.loss)
 
         self._prepare_variables_for_checkpoints()
 
@@ -165,12 +165,12 @@ class Trainer(ABC):
                 image_batch, target_batch = self.sess.run([data_x, data_y])
 
                 _, c = self._train_batch(self.sess, image_batch, target_batch, self.tensor_x, self.tensor_y,
-                                         self.train_step, self.mse, increment, iteration, total_iteration)
+                                         self.train_step, self.loss, increment, iteration, total_iteration)
                 curr_time = time.time() + trained_time  # If a checkpoint has been loaded, it should adapt the time
                 interval = curr_time - start_time
 
                 if i % config.summary_interval == 0 and not i == 0:
-                    print("Performing validation at iteration: {}. Mse is: {}. "
+                    print("Performing validation at iteration: {}. Loss is: {}. "
                           "Time is: {}".format(i, c, interval))
                     self.__perform_validation(i, writer, test_x, test_y)
                 if i % config.check_interval == 0:
@@ -283,21 +283,21 @@ class Trainer(ABC):
         self.time = self.time_variable.assign(self.aux_tensor)
 
     @abstractmethod
-    def _create_mse(self, tensor_y: tf.Tensor, net_output: tf.Tensor):
+    def _create_loss(self, tensor_y: tf.Tensor, net_output: tf.Tensor):
         """
-        Creates a minimum squared error tensor
+        Creates a loss function
         :param tensor_y: the tensor corresponding to the output of a training
         :param net_output: a tensor corresponding to the last layer of a neural network
-        :return: a Tensor corresponding to the mse
+        :return: a Tensor corresponding to the loss function
         """
-        raise NotImplementedError("The subclass hasn't implemented the _create_mse method")
+        raise NotImplementedError("The subclass hasn't implemented the _create_loss method")
 
     @abstractmethod
-    def _create_optimizer(self, config: GeneralConfig, mse: tf.Tensor):
+    def _create_optimizer(self, config: GeneralConfig, loss: tf.Tensor):
         """
         Creates the Optimizer for the training (e.g. AdaGradOptimizer)
         :param config: the configuration for the Optimizer
-        :param mse: a tensor representing the mse (minimum squared error)
+        :param loss: a tensor representing the loss function
         :return: a tf.Optimizer
         """
         raise NotImplementedError("The subclass hasn't implemented the _create_optimizer method")
@@ -313,7 +313,7 @@ class Trainer(ABC):
 
     @abstractmethod
     def _train_batch(self, sess, image_batch, target_batch, tensor_x: tf.Tensor, tensor_y: tf.Tensor,
-                     train_step: tf.Operation, mse: tf.Tensor, increment: int, iteration: int, total_it: int):
+                     train_step: tf.Operation, loss: tf.Tensor, increment: int, iteration: int, total_it: int):
         """
         Trains the current model over a batch of data
         :param sess: the current Session
@@ -322,11 +322,11 @@ class Trainer(ABC):
         :param tensor_x: the tensor corresponding to the input of a training
         :param tensor_y: the tensor corresponding to the output of a training
         :param train_step: the current tf.Optimizer
-        :param mse: a tensor representing the minimum squared error
+        :param loss: a tensor representing the loss function
         :param increment: the number of the mega-batch
         :param iteration: the current iteration counting from the start of the mega-batch
         _param total_it: the current iteration counting from the start of the whole training
-        :return: a tuple containing the result of the training, i.e. the result of running train_step and mse (in that
+        :return: a tuple containing the result of the training, i.e. the result of running train_step and loss (in that
         order) over the batch of data using sess as Session
         """
         raise NotImplementedError("The subclass hasn't implemented the _train_batch method")

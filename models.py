@@ -1,7 +1,7 @@
 """
 Module containing various useful neural networks models
 """
-
+import tensorflow as tf
 from network import Network
 
 
@@ -45,8 +45,11 @@ class NiN(Network):
          .conv(3, 3, 1024, 1, 1, name='conv4')
          .conv(1, 1, 1024, 1, 1, name='mlp7')
          .conv(1, 1, 101, 1, 1, name='mlp8')
-         .avg_pool(6, 6, 1, 1, padding='VALID', name='pool4')
-         .softmax(name='prob'))
+         .avg_pool(6, 6, 1, 1, padding='VALID', name='pool4'))
+        #  .softmax(name='prob'))
+
+    def get_output(self):
+        return tf.squeeze(self.terminals[-1])
 
 
 class CaffeNet(Network):
@@ -73,8 +76,8 @@ class CaffeNet(Network):
          .conv(3, 3, 256, 1, 1, group=2, name='conv5')
          .max_pool(3, 3, 2, 2, padding='VALID', name='pool5')
          .fc(512, name='fc6')
-         .fc(200, relu=False, name='fc8')
-         .softmax(name='prob'))
+         .fc(200, relu=False, name='fc8'))
+         #  .softmax(name='prob'))
 
 
 class VGGNet(Network):
@@ -107,8 +110,8 @@ class VGGNet(Network):
          .max_pool(2, 2, 2, 2, padding='SAME', name='pool5')
          .fc(4096, name='fc6')
          .fc(4096, name='fc7')
-         .fc(101, name='fc8')
-         .softmax(name='prob'))
+         .fc(101, name='fc8'))
+         #  .softmax(name='prob'))
 
 
 class AlexNet(Network):
@@ -135,8 +138,8 @@ class AlexNet(Network):
          .conv(3, 3, 256, 1, 1, group=2, name='conv5')
          .fc(4096, name='fc6')
          .fc(4096, name='fc7')
-         .fc(10, relu=False, name='fc8')
-         .softmax(name='prob'))
+         .fc(10, relu=False, name='fc8'))
+         #  .softmax(name='prob'))
 
 
 class CifarTFNet(Network):
@@ -155,5 +158,5 @@ class CifarTFNet(Network):
    .max_pool(3, 3, 2, 2, padding='VALID', name='pool2')
    .fc(384, name='fc3')
    .fc(192, name='fc4')
-   .fc(10, relu=False, name='fc5')
-   .softmax(name='prob'))
+   .fc(10, relu=False, name='fc5'))
+   #  .softmax(name='prob'))

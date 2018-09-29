@@ -48,23 +48,23 @@ class CEALTrainer(Trainer):
         # Unlabeled set
         # Labeled set
 
-    def _create_mse(self, tensor_y: tf.Tensor, net_output: tf.Tensor):
+    def _create_loss(self, tensor_y: tf.Tensor, net_output: tf.Tensor):
         return tf.reduce_mean(tf.square(tensor_y - net_output))
 
     def _custom_prepare(self, sess):
         # TODO
         pass
 
-    def _create_optimizer(self, config: CealConfig, mse: tf.Tensor):
-        return GradientDescentOptimizer(config.learn_rate).minimize(mse)
+    def _create_optimizer(self, config: CealConfig, loss: tf.Tensor):
+        return GradientDescentOptimizer(config.learn_rate).minimize(loss)
 
     def _train_batch(self, sess, image_batch, target_batch, tensor_x: tf.Tensor, tensor_y: tf.Tensor,
-                     train_step: tf.Operation, mse: tf.Tensor, increment: int, iteration: int, total_it: int):
+                     train_step: tf.Operation, loss: tf.Tensor, increment: int, iteration: int, total_it: int):
 
         if increment == 0:
             self.dl_x = image_batch
             self.dl_y = target_batch
-            return self.sess.run([self.train_step, self.mse],
+            return self.sess.run([self.train_step, self.loss],
                                  feed_dict={self.tensor_x: image_batch, self.tensor_y: target_batch})
         else:
 
@@ -82,7 +82,7 @@ class CEALTrainer(Trainer):
             # In every t iterations
             if True:
                 # self.config.delta = self.config.delta - self.config.dr * t
-                return self.sess.run([self.train_step, self.mse],
+                return self.sess.run([self.train_step, self.loss],
                                      feed_dict={self.tensor_x: image_batch, self.tensor_y: target_batch})
 
         pass
