@@ -132,7 +132,7 @@ class ImagenetData(Data):
         if not testing:
             dataset = dataset.repeat(self.curr_config.epochs)
 
-        dataset.skip(skip_count)
+        #dataset.skip(skip_count)
 
         iterator = dataset.make_initializable_iterator()
         images_batch, target_batch = iterator.get_next()

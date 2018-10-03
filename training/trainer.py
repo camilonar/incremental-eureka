@@ -205,7 +205,8 @@ class Trainer(ABC):
                 test_images, test_target = self.sess.run([test_x, test_y])
                 self.streaming_accuracy = self.sess.run([self.streaming_accuracy_update],
                                                         feed_dict={self.tensor_x: test_images,
-                                                                   self.tensor_y: test_target})
+                                                                   self.tensor_y: test_target,
+                                                                   self.model.use_dropout:0.0})
             except OutOfRangeError:
                 print("Finished validation of iteration {}...".format(iteration))
                 break

@@ -34,14 +34,14 @@ class CifarData(Data):
 
     def build_train_data_tensor(self, shuffle=False, augmentation=False, skip_count=0):
         filename, _ = self.data_reader.load_training_data()
-        return self.__build_generic_data_tensor(filename, shuffle, augmentation, testing=False,
+        return self.__build_generic_data_tensor(filename, shuffle, True, testing=False,
                                                 skip_count=skip_count)
 
     def build_test_data_tensor(self, shuffle=False, augmentation=False):
         filename, _ = self.data_reader.load_test_data()
-        return self.__build_generic_data_tensor(filename, shuffle, augmentation, testing=True)
+        return self.__build_generic_data_tensor(filename, shuffle, True, testing=True)
 
-    def __build_generic_data_tensor(self, filename, shuffle, augmentation, testing, skip_count=0):
+    def __build_generic_data_tensor(self, filename, shuffle, augmentations, testing, skip_count=0):
         """
         Creates the input pipeline and performs some preprocessing.
 
@@ -72,6 +72,24 @@ class CifarData(Data):
             image = tf.image.convert_image_dtype(image,
                                                  dtype=tf.float32,
                                                  saturate=True) * (1 / 255.0)
+            # Data Augmentation
+            if augmentations:
+                distorted_image = tf.random_crop(image, [self.IMAGE_HEIGHT_RESIZE,self.IMAGE_WIDTH_RESIZE, 3])
+                # Randomly flip the image horizontally.
+                distorted_image = tf.image.random_flip_left_right(distorted_image)
+                # Because these operations are not commutative, consider randomizing
+                # the order their operation.
+                # NOTE: since per_image_standardization zeros the mean and makes
+                # the stddev unit, this likely has no effect see tensorflow#1458.
+                distorted_image = tf.image.random_brightness(distorted_image,
+                                                             max_delta=63)
+                distorted_image = tf.image.random_contrast(distorted_image,
+                                                           lower=0.2, upper=1.8)
+                # Subtract off the mean and divide by the variance of the pixels.
+                image = tf.image.per_image_standardization(distorted_image)
+
+                # Set the shapes of tensors.
+                image.set_shape([self.IMAGE_HEIGHT_RESIZE, self.IMAGE_WIDTH_RESIZE, 3])
 
             image = tf.image.resize_images(image, [self.IMAGE_WIDTH_RESIZE, self.IMAGE_HEIGHT_RESIZE])
 
@@ -84,6 +102,8 @@ class CifarData(Data):
         dataset = tf.data.TFRecordDataset(filename)
         dataset = dataset.map(parser, num_parallel_calls=self.batch_queue_capacity)
         print(dataset)
+
+
 
         if shuffle:
             dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=12345)
