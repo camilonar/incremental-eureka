@@ -98,25 +98,35 @@ class ImagenetData(Data):
 
             # load the jpg image according to path
             file_content = tf.read_file(single_path)
-            single_image = tf.image.decode_jpeg(file_content, channels=self.NUM_OF_CHANNELS)
+            image = tf.image.decode_jpeg(file_content, channels=self.NUM_OF_CHANNELS)
 
             # convert to [0, 1]
-            single_image = tf.image.convert_image_dtype(single_image,
+            image = tf.image.convert_image_dtype(image,
                                                         dtype=tf.float32,
                                                         saturate=True)
 
-            single_image = tf.image.resize_images(single_image, [self.IMAGE_HEIGHT, self.IMAGE_WIDTH])
+            image = tf.image.resize_images(image, [self.IMAGE_HEIGHT, self.IMAGE_WIDTH])
 
             # Data Augmentation
             if augmentation:
-                single_image = tf.image.resize_image_with_crop_or_pad(single_image, self.IMAGE_HEIGHT + 4,
-                                                                      self.IMAGE_WIDTH + 4)
-                single_image = tf.random_crop(single_image, [self.IMAGE_HEIGHT, self.IMAGE_WIDTH, self.NUM_OF_CHANNELS])
-                single_image = tf.image.random_flip_left_right(single_image)
+                distorted_image = tf.random_crop(image, [self.IMAGE_HEIGHT, self.IMAGE_WIDTH, 3])
+                # Randomly flip the image horizontally.
+                distorted_image = tf.image.random_flip_left_right(distorted_image)
+                # Because these operations are not commutative, consider randomizing
+                # the order their operation.
+                # NOTE: since per_image_standardization zeros the mean and makes
+                # the stddev unit, this likely has no effect see tensorflow#1458.
+                distorted_image = tf.image.random_brightness(distorted_image,
+                                                             max_delta=63)
+                distorted_image = tf.image.random_contrast(distorted_image,
+                                                           lower=0.2, upper=1.8)
+                # Subtract off the mean and divide by the variance of the pixels.
+                #image = tf.image.per_image_standardization(distorted_image)
 
-                single_image = tf.image.per_image_standardization(single_image)
+                # Set the shapes of tensors.
+                image.set_shape([self.IMAGE_HEIGHT, self.IMAGE_WIDTH, 3])
 
-            return single_image, single_target
+            return image, single_target
 
         # Creates the dataset
         filenames = tf.constant(all_img_paths)
