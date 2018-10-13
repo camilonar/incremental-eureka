@@ -1,14 +1,14 @@
 """
-Tester for Tiny Imagenet dataset using base RMSProp
+Tester for Cifar-10 dataset using base RMSProp
 """
-from tests.imagenet_tester import ImagenetTester
+from tests.cifar100_tester import Cifar100Tester
 from training.basic_trainer import RMSPropTrainer
 from training.train_conf import GeneralConfig, TrainConfig
 
 
-class ImagenetRMSPropTester(ImagenetTester):
+class Cifar100RMSPropTester(Cifar100Tester):
     """
-    Performs tests over Tiny Imagenet dataset using RMSProp
+    Performs tests over Cifar-100 dataset using RMSProp
     """
 
     def _prepare_trainer(self):
@@ -20,7 +20,7 @@ class ImagenetRMSPropTester(ImagenetTester):
                                               config_name=str_optimizer, model_name=self.dataset_name)
         # Creates configuration for 5 mega-batches
         for i in range(1):
-            train_conf = TrainConfig(100, batch_size=100)
+            train_conf = TrainConfig(100, batch_size=150)
             self.general_config.add_train_conf(train_conf)
 
     @property

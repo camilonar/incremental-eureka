@@ -11,6 +11,7 @@ from tests_impl.caltech_rms_tester import CaltechRMSPropTester
 from tests_impl.cifar_ceal_tester import CifarCEALTester
 from tests_impl.cifar_rep_tester import CifarRepTester
 from tests_impl.cifar_rms_tester import CifarRMSPropTester
+from tests_impl.cifar100_rms_tester import Cifar100RMSPropTester
 from tests_impl.imagenet_ceal_tester import ImagenetCEALTester
 from tests_impl.imagenet_rep_tester import ImagenetRepTester
 from tests_impl.imagenet_rms_tester import ImagenetRMSPropTester
@@ -31,7 +32,8 @@ class Testers(containers.DeclarativeContainer):
     testers = {const.TR_BASE: {const.DATA_CALTECH_101: providers.Factory(CaltechRMSPropTester),
                                const.DATA_CIFAR_10: providers.Factory(CifarRMSPropTester),
                                const.DATA_TINY_IMAGENET: providers.Factory(ImagenetRMSPropTester),
-                               const.DATA_MNIST: providers.Factory(MnistRMSPropTester)},
+                               const.DATA_MNIST: providers.Factory(MnistRMSPropTester),
+                               const.DATA_CIFAR_100: providers.Factory(Cifar100RMSPropTester)},
                const.TR_CEAL: {const.DATA_CALTECH_101: providers.Factory(CaltechCEALTester),
                                const.DATA_CIFAR_10: providers.Factory(CifarCEALTester),
                                const.DATA_TINY_IMAGENET: providers.Factory(ImagenetCEALTester),

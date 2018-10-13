@@ -50,8 +50,8 @@ class ImagenetData(Data):
     - builds batches
     """
     NUMBER_OF_CLASSES = 200
-    IMAGE_HEIGHT = 128
-    IMAGE_WIDTH = 128
+    IMAGE_HEIGHT = 256
+    IMAGE_WIDTH = 256
     NUM_OF_CHANNELS = 3
 
     def __init__(self, general_config,

@@ -55,6 +55,8 @@ class NiN(Network):
 class CaffeNet(Network):
     def setup(self):
         """
+        ESTA NO ES CAFFE LA MODIFIQUE PARA QUE FUERA LA M4 de este articulo
+        https://www.studocu.com/en/document/stanford-university/convolutional-neural-networks-for-visual-recognition/other/using-convolutional-neural-network-for-the-tiny-imagenet-challenge/751936/views
         Creates a Neural Net with a simplified CaffeNet architecture. The input data must have been previously set in
          the constructor of the object as 'data'.
          E.g.:
@@ -65,22 +67,70 @@ class CaffeNet(Network):
         :return: None
         """
         (self.feed('data')
-         .conv(11, 11, 96, 4, 4, padding='VALID', name='conv1')
-         .max_pool(3, 3, 2, 2, padding='VALID', name='pool1')
-         .lrn(2, 2e-05, 0.75, name='norm1')
-         .conv(5, 5, 256, 1, 1, group=2, name='conv2')
+         .conv(5, 5, 32, 1, 1, padding='VALID', name='conv1')
+         .conv(5, 5, 32, 1, 1, group=2, name='conv2')
          .max_pool(3, 3, 2, 2, padding='VALID', name='pool2')
-         .lrn(2, 2e-05, 0.75, name='norm2')
-         .conv(3, 3, 384, 1, 1, name='conv3')
-         .conv(3, 3, 384, 1, 1, group=2, name='conv4')
-         .conv(3, 3, 256, 1, 1, group=2, name='conv5')
+         .conv(3, 3, 64, 1, 1, name='conv3')
+         .conv(3, 3, 64, 1, 1, name='conv4')
          .max_pool(3, 3, 2, 2, padding='VALID', name='pool5')
-         .fc(1000, name='fc6')
-         .dropout(0.6, name='drop7')
-         .fc(1000, name='fc8')
+         .conv(3, 3, 64, 1, 1, name='conv5')
+         .conv(3, 3, 128, 1, 1, name='conv6')
+         .max_pool(3, 3, 2, 2, padding='VALID', name='pool7')
+         .fc(256, name='fc8')
          .dropout(0.6, name='drop9')
-         .fc(200, relu=False, name='fc10'))
+         .fc(200, name='fc10'))
          #  .softmax(name='prob'))
+
+
+
+class FastNet(Network):
+    def setup(self):
+        """
+            to 256 d 256 images
+
+        :return: None
+        """
+        (self.feed('data')
+         .batch_normalization(name="BN1")
+         .conv(3, 3, 64, 1, 1, padding='SAME', name='conv2')
+         .batch_normalization(name="BN3")
+         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv4')
+         .batch_normalization(name="BN5")
+         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv6')
+         .batch_normalization(name="BN7")
+         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv8')
+         .max_pool(2, 2, 2, 2, padding='SAME', name='pool9')
+         .batch_normalization(name="BN10")
+         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv11')
+         .batch_normalization(name="BN12")
+         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv13')
+         .batch_normalization(name="BN14")
+         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv15')
+         .max_pool(2, 2, 2, 2, padding='SAME', name='pool6')
+         .batch_normalization(name="BN17")
+         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv18')
+         .batch_normalization(name="BN19")
+         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv20')
+         .batch_normalization(name="BN21")
+         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv22')
+         .max_pool(2, 2, 2, 2, padding='SAME', name='pool23')
+         .batch_normalization(name="BN24")
+         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv25')
+         .batch_normalization(name="BN26")
+         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv27')
+         .max_pool(2, 2, 2, 2, padding='SAME', name='pool28')
+         .batch_normalization(name="BN29")
+         .conv(1, 1, 128, 1, 1, padding='SAME', name='conv30')
+         .batch_normalization(name="BN31")
+         .conv(1, 1, 128, 1, 1, padding='SAME', name='conv32')
+         .batch_normalization(name="BN33")
+         .conv(1, 1, 100, 1, 1, padding='SAME', name='conv34')
+         .avg_pool(2, 2, 2, 2, name="pol35") )
+
+    def get_output(self):
+        return tf.squeeze(self.terminals[-1])
+
+
 
 
 class VGGNet(Network):
