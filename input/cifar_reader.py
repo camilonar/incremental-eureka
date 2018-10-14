@@ -7,6 +7,7 @@ import numpy as np
 from input.reader import Reader
 
 size_image = 32
+# TODO documentación, formato y cambiar nombres de variables a inglés
 numero_canales = 3
 
 number_of_classes = 10
@@ -113,7 +114,8 @@ class CifarReader(Reader):
         return _get_human_readable_labels()
 
     def load_training_data(self):
-        return self.curr_path, None
+        return self.tr_paths, None
+        # return self.curr_path, None
 
     def load_test_data(self):
         return self.test_path, None

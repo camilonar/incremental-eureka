@@ -2,7 +2,7 @@
 Tester for MNIST dataset using base RMSProp
 """
 from tests.mnist_tester import MnistTester
-from training.basic_trainer import RMSPropTrainer
+from training.rms_trainer import RMSPropTrainer
 from training.train_conf import GeneralConfig, TrainConfig
 
 
@@ -20,7 +20,7 @@ class MnistRMSPropTester(MnistTester):
                                               config_name=str_optimizer, model_name=self.dataset_name)
         # Creates configuration for 5 mega-batches
         for i in range(5):
-            train_conf = TrainConfig(1, batch_size=128)
+            train_conf = TrainConfig(50, batch_size=128)
             self.general_config.add_train_conf(train_conf)
 
     @property

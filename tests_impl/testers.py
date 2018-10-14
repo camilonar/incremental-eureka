@@ -5,17 +5,17 @@ import dependency_injector.containers as containers
 import dependency_injector.providers as providers
 
 import utils.constants as const
-from tests_impl.caltech_ceal_tester import CaltechCEALTester
+from tests_impl.caltech_dcgan_tester import CaltechDCGANTester
 from tests_impl.caltech_rep_tester import CaltechRepTester
 from tests_impl.caltech_rms_tester import CaltechRMSPropTester
-from tests_impl.cifar_ceal_tester import CifarCEALTester
+from tests_impl.cifar_dcgan_tester import CifarDCGANTester
 from tests_impl.cifar_rep_tester import CifarRepTester
 from tests_impl.cifar_rms_tester import CifarRMSPropTester
 from tests_impl.cifar100_rms_tester import Cifar100RMSPropTester
-from tests_impl.imagenet_ceal_tester import ImagenetCEALTester
+from tests_impl.imagenet_dcgan_tester import ImagenetDCGANTester
 from tests_impl.imagenet_rep_tester import ImagenetRepTester
 from tests_impl.imagenet_rms_tester import ImagenetRMSPropTester
-from tests_impl.mnist_ceal_tester import MnistCEALTester
+from tests_impl.mnist_dcgan_tester import MnistDCGANTester
 from tests_impl.mnist_rep_tester import MnistRepTester
 from tests_impl.mnist_rms_tester import MnistRMSPropTester
 
@@ -34,10 +34,10 @@ class Testers(containers.DeclarativeContainer):
                                const.DATA_TINY_IMAGENET: providers.Factory(ImagenetRMSPropTester),
                                const.DATA_MNIST: providers.Factory(MnistRMSPropTester),
                                const.DATA_CIFAR_100: providers.Factory(Cifar100RMSPropTester)},
-               const.TR_CEAL: {const.DATA_CALTECH_101: providers.Factory(CaltechCEALTester),
-                               const.DATA_CIFAR_10: providers.Factory(CifarCEALTester),
-                               const.DATA_TINY_IMAGENET: providers.Factory(ImagenetCEALTester),
-                               const.DATA_MNIST: providers.Factory(MnistCEALTester)},
+               const.TR_DCGAN: {const.DATA_CALTECH_101: providers.Factory(CaltechDCGANTester),
+                                const.DATA_CIFAR_10: providers.Factory(CifarDCGANTester),
+                                const.DATA_TINY_IMAGENET: providers.Factory(ImagenetDCGANTester),
+                                const.DATA_MNIST: providers.Factory(MnistDCGANTester)},
                const.TR_REP: {const.DATA_CALTECH_101: providers.Factory(CaltechRepTester),
                               const.DATA_CIFAR_10: providers.Factory(CifarRepTester),
                               const.DATA_TINY_IMAGENET: providers.Factory(ImagenetRepTester),

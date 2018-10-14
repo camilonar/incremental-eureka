@@ -121,7 +121,7 @@ class ImagenetData(Data):
                 distorted_image = tf.image.random_contrast(distorted_image,
                                                            lower=0.2, upper=1.8)
                 # Subtract off the mean and divide by the variance of the pixels.
-                #image = tf.image.per_image_standardization(distorted_image)
+                # image = tf.image.per_image_standardization(distorted_image)
 
                 # Set the shapes of tensors.
                 image.set_shape([self.IMAGE_HEIGHT, self.IMAGE_WIDTH, 3])
@@ -142,7 +142,7 @@ class ImagenetData(Data):
         if not testing:
             dataset = dataset.repeat(self.curr_config.epochs)
 
-        #dataset.skip(skip_count)
+        # dataset.skip(skip_count)
 
         iterator = dataset.make_initializable_iterator()
         images_batch, target_batch = iterator.get_next()

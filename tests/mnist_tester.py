@@ -15,6 +15,7 @@ class MnistTester(Tester):
     """
     Performs tests over MNIST according to the User input and pre-established configurations
     """
+
     @abstractmethod
     def _prepare_trainer(self):
         pass

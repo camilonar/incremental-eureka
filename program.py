@@ -16,8 +16,7 @@ def print_menu():
     print("[1] Select Dataset and associated Neural Network")
     print("[2] Select Optimizer")
     print("[3] Select Checkpoint to Load (Optional)")
-    print("[4] Select Learning Rate (If it isn't provided then the default value will be used)")
-    print("[5] Select Summary and Checkpoint interval (If not provided then the default values will be used)")
+    print("[4] Select Summary and Checkpoint interval (If not provided then the default values will be used)")
     print("[0] Finish configuration and execute Test")
     print("[X] Exit")
     print("------------------------------------------------------------------")
@@ -35,16 +34,16 @@ def ask_for_configuration():
     -Learning Rate (Optional)
     -Summary Interval (Optional)
     -Checkpoint Interval (Optional)
-    :return: a tuple containing 3 strings, a float and 3 ints: name of the dataset (str), name of the optimizer (str),
-    representation of a checkpoint (str), learning rate (float), summary interval (int) and checkpoint interval (int),
+    :return: a tuple containing 3 strings and 3 ints: name of the dataset (str), name of the optimizer (str),
+    representation of a checkpoint (str), summary interval (int) and checkpoint interval (int),
     in that order. The representation of a checkpoint will be returned as None if the user doesn't configure it.
-    An example of a return value is: ('TINY_IMAGENET', 'BASE', None, 0.05, 100, 300).
+    An example of a return value is: ('MNIST', 'TR_BASE', None, 100, 300).
     """
 
     # Creation of variables
     response = "s"
     dataset, optimizer, checkpoint = None, None, None
-    learning_rate, summary_interval, ckp_interval = const.LEARNING_RATE, const.SUMMARY_INTERVAL, const.CKP_INTERVAL
+    summary_interval, ckp_interval = const.SUMMARY_INTERVAL, const.CKP_INTERVAL
 
     while response:
         response = print_menu()
@@ -56,12 +55,10 @@ def ask_for_configuration():
         elif response == "3":
             checkpoint = configure_checkpoint(checkpoint)
         elif response == "4":
-            learning_rate = configure_learning_rate(learning_rate)
-        elif response == "5":
             summary_interval, ckp_interval = configure_intervals(summary_interval, ckp_interval)
         elif response == "0":
             if dataset and optimizer:
-                return dataset, optimizer, checkpoint, learning_rate, summary_interval, ckp_interval
+                return dataset, optimizer, checkpoint, summary_interval, ckp_interval
             else:
                 print("Both the Dataset and Optimizer must be configured before performing a test")
                 continue
@@ -92,7 +89,7 @@ def configure_dataset_and_neural_net(curr_dataset: str):
         print("[L] CALTECH-101 (uses NiN)")
         print("[I] TINY IMAGENET (uses CaffeNet)")
         print("[X] Cancel Operation and return to Main Menu")
-        response = input("Select an optimizer: ").upper()
+        response = input("Select a dataset: ").upper()
         if response == 'M':
             response = const.DATA_MNIST
         elif response == 'C':
@@ -128,14 +125,14 @@ def configure_optimizer(curr_optimizer: str):
     while True:
         # TODO cambiar nuestro algoritmo a un nombre más apropiado, y remover -NOT SUPPORTED YET-
         print("[B] Simple RMSProp (Base optimizer)")
-        print("[C] CEAL Algorithm (Active Learning) -NOT SUPPORTED YET-")
+        print("[D] Artificial Sampling with DCGAN -NOT SUPPORTED YET-")
         print("[R] Incremental Representative Sampling (The proposed method) -NOT SUPPORTED YET-")
         print("[X] Cancel Operation and return to Main Menu")
         response = input("Select an optimizer: ").upper()
         if response == 'B':
             response = const.TR_BASE
-        elif response == 'C':
-            response = const.TR_CEAL
+        elif response == 'D':
+            response = const.TR_DCGAN
         elif response == 'R':
             response = const.TR_REP
         elif response == 'X':
@@ -236,36 +233,6 @@ def reset_checkpoint(curr_ckp: str):
             continue
 
 
-def configure_learning_rate(curr_lr: float):
-    """
-    Configures the learning rate appropriately
-    :param curr_lr: the current learning rate that has been configured by the user
-    :return: a float representing the new learning rate if the user has changed it to a valid value, otherwise, the
-    current learning rate will be returned
-    """
-    response = "s"
-    print()
-    print("----------------------------Configure the Learning Rate----------------------------")
-    print("Press [X] if you want to cancel the operation")
-
-    while True:
-        response = input("Set a value for the learning rate (must be a floating value between 0 and 1): ")
-        if response.upper() == "X":
-            break
-        try:
-            lr = float(response)
-            if 0 < lr < 1:
-                print("The learning rate has been set to {}".format(lr))
-                return lr
-            else:
-                print("Invalid value for the learning rate. Must be a float between 0 and 1, non-inclusive")
-        except ValueError:
-            print("Invalid value for the learning rate. Must be a float")
-
-    print("The learning rate hasn't been changed and the current configured value is {}".format(curr_lr))
-    return curr_lr
-
-
 def configure_intervals(curr_s_interval: int, curr_ckp_interval: int):
     """
     Configures the summary interval and checkpoint interval
@@ -325,13 +292,12 @@ def get_checkpoint_multiplier():
             print("Invalid value for the checkpoint interval multiplier. Must be an int")
 
 
-def print_config(dataset: str, optimizer: str, checkpoint: str, lr: float, s_interval: int, ckp_interval: int):
+def print_config(dataset: str, optimizer: str, checkpoint: str, s_interval: int, ckp_interval: int):
     """
         Prints the configuration selected by the user
         :param dataset: a string representing the dataset that has been configured by the user
         :param optimizer: a string representing the optimizer that has been configured by the user
         :param checkpoint: a string representing a checkpoint. Must be None if no checkpoint has been configured
-        :param lr: the learning rate that has been configured by the user
         :param s_interval: the summary interval that has been configured by the user
         :param ckp_interval: the checkpoint interval that has been configured by the user
         if the dataset doesn't have any dataset-specific path.
@@ -341,7 +307,6 @@ def print_config(dataset: str, optimizer: str, checkpoint: str, lr: float, s_int
     print("Dataset: {}".format(dataset))
     print("Optimizer: {}".format(optimizer))
     print("Checkpoint: {}".format(checkpoint))
-    print("Learning rate: {}".format(lr))
     print("Summary interval: {} iterations".format(s_interval))
     print("Checkpoint interval: {} iterations".format(ckp_interval))
     print("\n")
@@ -349,14 +314,13 @@ def print_config(dataset: str, optimizer: str, checkpoint: str, lr: float, s_int
     input("To continue with the test press any key...")
 
 
-def perform_test(dataset: str, optimizer: str, checkpoint: str, lr: float, s_interval: int, ckp_interval: int,
+def perform_test(dataset: str, optimizer: str, checkpoint: str, s_interval: int, ckp_interval: int,
                  train_dirs: [str], validation_dir: str, extras: [str]):
     """
     Prepares and performs the test according to the configuration given by the user
     :param dataset: a string representing the dataset that has been configured by the user
     :param optimizer: a string representing the optimizer that has been configured by the user
     :param checkpoint: a string representing a checkpoint. Must be None if no checkpoint has been configured
-    :param lr: the learning rate that has been configured by the user
     :param s_interval: the summary interval that has been configured by the user
     :param ckp_interval: the checkpoint interval that has been configured by the user
     :param train_dirs: array of strings corresponding to the paths of each one of the mega-batches for training
@@ -367,7 +331,7 @@ def perform_test(dataset: str, optimizer: str, checkpoint: str, lr: float, s_int
     """
 
     factory = Testers.get_tester(optimizer, dataset)
-    tester = factory(lr, train_dirs, validation_dir, extras, s_interval, ckp_interval, checkpoint)
+    tester = factory(train_dirs, validation_dir, extras, s_interval, ckp_interval, checkpoint)
 
     tester.prepare_all(optimizer)
     tester.execute_test()
@@ -379,10 +343,10 @@ def main():
     Executes the program
     :return: None
     """
-    dataset, optimizer, checkpoint, lr, s_interval, ckp_interval = ask_for_configuration()
+    dataset, optimizer, checkpoint, s_interval, ckp_interval = ask_for_configuration()
     train_dirs, validation_dir, extras = paths.get_paths_from_dataset(dataset)
-    print_config(dataset, optimizer, checkpoint, lr, s_interval, ckp_interval)
-    perform_test(dataset, optimizer, checkpoint, lr, s_interval, ckp_interval, train_dirs, validation_dir, extras)
+    print_config(dataset, optimizer, checkpoint, s_interval, ckp_interval)
+    perform_test(dataset, optimizer, checkpoint, s_interval, ckp_interval, train_dirs, validation_dir, extras)
 
 
 if __name__ == '__main__':

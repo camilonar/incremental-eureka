@@ -15,6 +15,7 @@ class ImagenetTester(Tester):
     """
     Performs tests over Imagenet according to the User input and pre-established configurations
     """
+
     @abstractmethod
     def _prepare_trainer(self):
         pass

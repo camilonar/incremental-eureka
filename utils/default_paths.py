@@ -50,7 +50,8 @@ def __get_caltech_paths():
     """
     base_folder = "../datasets/101_ObjectCategories/"
     base = base_folder + "train/"
-    paths = [base + "Lote{}/".format(x) for x in range(0, 5)]
+    # paths = [base + "Lote{}/".format(x) for x in range(0, 5)]
+    paths = [base]
     validation_dir = base_folder + "test/"
     return paths, validation_dir, []
 
@@ -66,6 +67,7 @@ def __get_tiny_imagenet_paths():
     base = base_folder + "train_split/"
     train_dirs = [base + "Lote{}/".format(x) for x in range(0, 5)]
     validation_dir = base_folder + "val/"
+    # validation_dir = train_dirs[0]
     labels_file = base_folder + "wnids.txt"
     metadata_file = base_folder + "words.txt"
     return train_dirs, validation_dir, [labels_file, metadata_file]

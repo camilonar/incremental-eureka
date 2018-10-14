@@ -8,6 +8,8 @@ from abc import ABC, abstractmethod
 from errors import TestNotPreparedError
 
 import utils.dir_utils as dir
+import tensorflow as tf
+import numpy as np
 
 
 class Tester(ABC):
@@ -15,25 +17,23 @@ class Tester(ABC):
     This class helps with the configuration of the pre-established tests.
     """
 
-    def __init__(self, lr: float, train_dirs: [str], validation_dir: str, extras: [str],
+    def __init__(self, train_dirs: [str], validation_dir: str, extras: [str],
                  summary_interval=100, ckp_interval=200, inc_ckp_path: str = None):
         """
         It creates a Tester object
         :param train_dirs: array of strings corresponding to the paths of each one of the mega-batches for training
         :param validation_dir: a string corresponding to the path of the testing data
         :param extras: an array of strings corresponding to paths specific for each dataset. It should be an empty array
-        :param lr: the learning rate to be used in the training
         :param summary_interval: the interval of iterations at which the summaries are going to be performed
         :param ckp_interval: the interval of iterations at which the evaluations and checkpoints are going to be
         performed. Must be an integer multiple of summary_interval
-        :param inc_ckp_path: a string contsining the checkpoint's corresponding mega-batch and iteration if it's
+        :param inc_ckp_path: a string containing the checkpoint's corresponding mega-batch and iteration if it's
         required to start the training from a checkpoint. It is expected to follow the format
         "[mega-batch]-[iteration]", e.g. "0-50".
         If there is no checkpoint to be loaded then its value should be None. The default value is None.
 
         This must be called by the constructors of the subclasses.
         """
-        self.lr = lr
         self.train_dirs = train_dirs
         self.validation_dir = validation_dir
         self.extras = extras
@@ -114,6 +114,9 @@ class Tester(ABC):
                     and select samples based in clustering
         :return: None
         """
+        tf.reset_default_graph()
+        tf.set_random_seed(12345)
+        np.random.seed(12345)
         self._prepare_config(str_trainer)
         self._prepare_data_pipeline()
         self._prepare_neural_network()

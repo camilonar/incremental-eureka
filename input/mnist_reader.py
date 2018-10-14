@@ -17,7 +17,8 @@ class MnistReader(Reader):
         print("TRAIN PATHS ", train_dirs)
 
     def load_training_data(self):
-        return self.curr_path, None
+        # return self.curr_path, None
+        return self.tr_paths, None
 
     def load_test_data(self):
         return self.test_path, None

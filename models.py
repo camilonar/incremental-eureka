@@ -2,7 +2,7 @@
 Module containing various useful neural networks models
 """
 import tensorflow as tf
-from network import Network
+from libs.caffe_tensorflow.network import Network
 
 
 class LeNet(Network):
@@ -29,15 +29,24 @@ class LeNet(Network):
 
 class NiN(Network):
     def setup(self):
+        """
+        Creates a Neural Net with NiN architecture. The input data must have been previously set in
+        the constructor of the object as 'data'.
+        E.g.:
+            net = NiN({'data': input_tensor})
+        :return: None
+        """
         (self.feed('data')
          .conv(11, 11, 96, 4, 4, padding='VALID', name='conv1')
          .conv(1, 1, 96, 1, 1, name='mlp1')
          .conv(1, 1, 96, 1, 1, name='mlp2')
          .max_pool(3, 3, 2, 2, name='pool1')
+         .dropout(0.5, name='drop1')
          .conv(5, 5, 256, 1, 1, name='conv2')
          .conv(1, 1, 256, 1, 1, name='mlp3')
          .conv(1, 1, 256, 1, 1, name='mlp4')
          .max_pool(3, 3, 2, 2, padding='VALID', name='pool2')
+         .dropout(0.5, name='drop2')
          .conv(3, 3, 384, 1, 1, name='conv3')
          .conv(1, 1, 384, 1, 1, name='mlp5')
          .conv(1, 1, 384, 1, 1, name='mlp6')
@@ -46,7 +55,6 @@ class NiN(Network):
          .conv(1, 1, 1024, 1, 1, name='mlp7')
          .conv(1, 1, 101, 1, 1, name='mlp8')
          .avg_pool(6, 6, 1, 1, padding='VALID', name='pool4'))
-        #  .softmax(name='prob'))
 
     def get_output(self):
         return tf.squeeze(self.terminals[-1])
@@ -55,9 +63,7 @@ class NiN(Network):
 class CaffeNet(Network):
     def setup(self):
         """
-        ESTA NO ES CAFFE LA MODIFIQUE PARA QUE FUERA LA M4 de este articulo
-        https://www.studocu.com/en/document/stanford-university/convolutional-neural-networks-for-visual-recognition/other/using-convolutional-neural-network-for-the-tiny-imagenet-challenge/751936/views
-        Creates a Neural Net with a simplified CaffeNet architecture. The input data must have been previously set in
+         Creates a Neural Net with a simplified CaffeNet architecture. The input data must have been previously set in
          the constructor of the object as 'data'.
          E.g.:
             net = CaffeNet({'data': input_tensor})
@@ -73,14 +79,9 @@ class CaffeNet(Network):
          .conv(3, 3, 64, 1, 1, name='conv3')
          .conv(3, 3, 64, 1, 1, name='conv4')
          .max_pool(3, 3, 2, 2, padding='VALID', name='pool5')
-         .conv(3, 3, 64, 1, 1, name='conv5')
-         .conv(3, 3, 128, 1, 1, name='conv6')
-         .max_pool(3, 3, 2, 2, padding='VALID', name='pool7')
-         .fc(256, name='fc8')
-         .dropout(0.6, name='drop9')
-         .fc(200, name='fc10'))
-         #  .softmax(name='prob'))
-
+         .fc(512, name='fc6')
+         .dropout(0.5, name='drop6')
+         .fc(200, relu=False, name='fc8'))
 
 
 class FastNet(Network):
@@ -125,12 +126,10 @@ class FastNet(Network):
          .conv(1, 1, 128, 1, 1, padding='SAME', name='conv32')
          .batch_normalization(name="BN33")
          .conv(1, 1, 100, 1, 1, padding='SAME', name='conv34')
-         .avg_pool(2, 2, 2, 2, name="pol35") )
+         .avg_pool(2, 2, 2, 2, name="pol35"))
 
     def get_output(self):
         return tf.squeeze(self.terminals[-1])
-
-
 
 
 class VGGNet(Network):
@@ -164,7 +163,6 @@ class VGGNet(Network):
          .fc(4096, name='fc6')
          .fc(4096, name='fc7')
          .fc(101, name='fc8'))
-         #  .softmax(name='prob'))
 
 
 class AlexNet(Network):
@@ -192,25 +190,23 @@ class AlexNet(Network):
          .fc(4096, name='fc6')
          .fc(4096, name='fc7')
          .fc(10, relu=False, name='fc8'))
-         #  .softmax(name='prob'))
 
 
 class CifarTFNet(Network):
- def setup(self):
-  """
-   Architecture taken from:
-      https://www.tensorflow.org/tutorials/images/deep_cnn#model_training
-  :return: None
-  """
-  (self.feed('data')
-   .conv(5, 5, 64, 1, 1, padding='VALID', name='conv1')
-   .max_pool(3, 3, 2, 2, padding='VALID', name='pool1')
-   .lrn(4,(0.001 / 9.0), 0.75, name='norm1')
-   .conv(5, 5, 64, 1, 1, name='conv2')
-   .lrn(4, (0.001 / 9.0), 0.75, name='norm2')
-   .max_pool(3, 3, 2, 2, padding='VALID', name='pool2')
-   .fc(384, name='fc3')
-   .dropout(0.6, name="drop4")
-   .fc(192, name='fc5')
-   .fc(10, relu=False, name='fc6'))
-   #  .softmax(name='prob'))
+    def setup(self):
+        """
+         Architecture taken from:
+            https://www.tensorflow.org/tutorials/images/deep_cnn#model_training
+        :return: None
+        """
+        (self.feed('data')
+         .conv(5, 5, 64, 1, 1, padding='VALID', name='conv1')
+         .max_pool(3, 3, 2, 2, padding='VALID', name='pool1')
+         .lrn(4, (0.001 / 9.0), 0.75, name='norm1')
+         .conv(5, 5, 64, 1, 1, name='conv2')
+         .lrn(4, (0.001 / 9.0), 0.75, name='norm2')
+         .max_pool(3, 3, 2, 2, padding='VALID', name='pool2')
+         .fc(384, name='fc3')
+         .dropout(0.6, name="drop4")
+         .fc(192, name='fc5')
+         .fc(10, relu=False, name='fc6'))

@@ -1,19 +1,19 @@
 """
-Tester for Caltech-101 dataset using the proposed representative-selection algorithm
+Tester for Caltech-101 dataset using the training algorithm that uses artificial sampling with DCGAN
 """
 from tests.caltech_tester import CaltechTester
-from training.rep_trainer import RepresentativesTrainer
-from training.train_conf import GeneralConfig, TrainConfig
+from training.dcgan_trainer import DCGANTrainer
+from training.train_conf import TrainConfig, GeneralConfig
 
 
-class CaltechRepTester(CaltechTester):
+class CaltechDCGANTester(CaltechTester):
     """
-    Performs tests over Caltech-101 dataset using the proposed representative-selection algorithm
+    Performs tests over Caltech-101 dataset using the training algorithm that uses artificial sampling with DCGAN
     """
 
     def _prepare_trainer(self):
-        self.trainer = RepresentativesTrainer(self.general_config, self.neural_net, self.data_input, self.input_tensor,
-                                              self.output_tensor, self.ckp_path)
+        self.trainer = DCGANTrainer(self.general_config, self.neural_net, self.data_input, self.input_tensor,
+                                    self.output_tensor, self.ckp_path)
 
     def _prepare_config(self, str_optimizer: str):
         self.__general_config = GeneralConfig(0.0001, self.summary_interval, self.ckp_interval,

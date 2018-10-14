@@ -4,19 +4,16 @@ Features:
 1. It's independent of the dataset, or model used for training
 2. Does all the needed preparations for the training (e.g. creating a session)
 """
-from collections import Counter
 
-import numpy
 import os
 import time
-import matplotlib.pyplot as plt
 from abc import ABC, abstractmethod
 
 import tensorflow as tf
 from tensorflow.python.framework.errors_impl import OutOfRangeError
 
 from input.data import Data
-from network import Network
+from libs.caffe_tensorflow.network import Network
 from training.train_conf import GeneralConfig
 import utils.dir_utils as utils
 
@@ -76,6 +73,7 @@ class Trainer(ABC):
         # Creates the session
         sess = tf.get_default_session()
         if sess:
+            print("CERRANDO SESIÓN")
             sess.close()
         self.sess = tf.InteractiveSession()
 
@@ -114,7 +112,7 @@ class Trainer(ABC):
             self.writer = tf.summary.FileWriter(os.path.join(self.summaries_path, "increment_{}".format(i)),
                                                 tf.get_default_graph())
             self.pipeline.change_dataset_part(i)
-            training_iterator, data_x, data_y = self.pipeline.build_train_data_tensor(skip_count)
+            training_iterator, data_x, data_y = self.pipeline.build_train_data_tensor(skip_count=skip_count)
             self.sess.run(training_iterator.initializer)
             iteration = self.train_increment(i, skip_count, iteration, start_time,
                                              self.config.train_configurations[i].ttime,
@@ -206,7 +204,7 @@ class Trainer(ABC):
                 self.streaming_accuracy = self.sess.run([self.streaming_accuracy_update],
                                                         feed_dict={self.tensor_x: test_images,
                                                                    self.tensor_y: test_target,
-                                                                   self.model.use_dropout:0.0})
+                                                                   self.model.use_dropout: 0.0})
             except OutOfRangeError:
                 print("Finished validation of iteration {}...".format(iteration))
                 break

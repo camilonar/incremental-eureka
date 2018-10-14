@@ -32,7 +32,7 @@ class MnistData(Data):
         self.batch_queue_capacity = batch_queue_capacity
         self.data_reader.check_if_downloaded()
 
-    def build_train_data_tensor(self, shuffle=False, augmentation=False, skip_count=0):
+    def build_train_data_tensor(self, shuffle=True, augmentation=False, skip_count=0):
         filename, _ = self.data_reader.load_training_data()
         return self.__build_generic_data_tensor(filename, shuffle, augmentation, testing=False,
                                                 skip_count=skip_count)

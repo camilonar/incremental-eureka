@@ -32,7 +32,7 @@ class CifarData(Data):
         self.data_reader.check_if_downloaded()
         self.batch_queue_capacity = batch_queue_capacity
 
-    def build_train_data_tensor(self, shuffle=False, augmentation=False, skip_count=0):
+    def build_train_data_tensor(self, shuffle=True, augmentation=False, skip_count=0):
         filename, _ = self.data_reader.load_training_data()
         return self.__build_generic_data_tensor(filename, shuffle, True, testing=False,
                                                 skip_count=skip_count)
@@ -101,7 +101,6 @@ class CifarData(Data):
         # Creates the dataset
         dataset = tf.data.TFRecordDataset(filename)
         dataset = dataset.map(parser, num_parallel_calls=self.batch_queue_capacity)
-        print(dataset)
 
 
 

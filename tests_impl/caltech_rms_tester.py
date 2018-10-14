@@ -2,7 +2,7 @@
 Tester for Caltech-101 dataset using base RMSProp
 """
 from tests.caltech_tester import CaltechTester
-from training.basic_trainer import RMSPropTrainer
+from training.rms_trainer import RMSPropTrainer
 from training.train_conf import GeneralConfig, TrainConfig
 
 
@@ -20,7 +20,7 @@ class CaltechRMSPropTester(CaltechTester):
                                               config_name=str_optimizer, model_name=self.dataset_name)
         # Creates configuration for 5 mega-batches
         for i in range(5):
-            train_conf = TrainConfig(120, batch_size=128, ttime=6000)
+            train_conf = TrainConfig(150, batch_size=128, ttime=10000)
             self.general_config.add_train_conf(train_conf)
 
     @property

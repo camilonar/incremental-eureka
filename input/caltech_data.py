@@ -32,7 +32,7 @@ class CaltechData(Data):
         self.batch_queue_capacity = batch_queue_capacity + 3 * self.curr_config.batch_size
         self.data_reader.check_if_downloaded()
 
-    def build_train_data_tensor(self, shuffle=False, augmentation=False, skip_count=0):
+    def build_train_data_tensor(self, shuffle=True, augmentation=False, skip_count=0):
         img_path, cls = self.data_reader.load_training_data()
         return self.__build_generic_data_tensor(img_path, cls, shuffle, augmentation, testing=False,
                                                 skip_count=skip_count)
@@ -95,7 +95,7 @@ class CaltechData(Data):
         if not testing:
             dataset = dataset.repeat(self.curr_config.epochs)
 
-        dataset.skip(skip_count)
+        # dataset.skip(skip_count)
 
         iterator = dataset.make_initializable_iterator()
         images_batch, target_batch = iterator.get_next()

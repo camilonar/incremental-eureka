@@ -16,6 +16,7 @@ class Cifar100Tester(Tester):
     """
     Performs tests over CIFAR-100 according to the User input and pre-established configurations
     """
+
     @abstractmethod
     def _prepare_trainer(self):
         pass

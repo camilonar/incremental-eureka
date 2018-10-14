@@ -2,7 +2,7 @@
 Tester for Tiny Imagenet dataset using base RMSProp
 """
 from tests.imagenet_tester import ImagenetTester
-from training.basic_trainer import RMSPropTrainer
+from training.rms_trainer import RMSPropTrainer
 from training.train_conf import GeneralConfig, TrainConfig
 
 

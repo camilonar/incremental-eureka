@@ -2,7 +2,7 @@
 Tester for Cifar-10 dataset using base RMSProp
 """
 from tests.cifar100_tester import Cifar100Tester
-from training.basic_trainer import RMSPropTrainer
+from training.rms_trainer import RMSPropTrainer
 from training.train_conf import GeneralConfig, TrainConfig
 
 
