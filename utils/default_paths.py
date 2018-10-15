@@ -41,6 +41,7 @@ def __get_cifar_paths():
     return tr_paths, test_path, [metadata_file]
 
 
+
 def __get_caltech_paths():
     """
     It gives the default paths to the training and testing data of CALTECH-101
@@ -54,6 +55,23 @@ def __get_caltech_paths():
     paths = [base]
     validation_dir = base_folder + "test/"
     return paths, validation_dir, []
+
+
+
+def __get_caltech_256_paths():
+    """
+    It gives the default paths to the training and testing data of CALTECH-101
+    :return: a tuple, where the first value is an array of strings corresponding to the paths of each one of the
+    mega-batches for training, the second value is a string corresponding to the path of the testing data and the third
+    value is an empty array
+    """
+    base_folder = "../datasets/256_ObjectCategories_split/"
+    base = base_folder + "train/"
+    #paths = [base + "Lote{}/".format(x) for x in range(0, 5)]
+    paths = [base]
+    validation_dir = base_folder + "test/"
+    return paths, validation_dir, []
+
 
 
 def __get_tiny_imagenet_paths():
@@ -91,5 +109,7 @@ def get_paths_from_dataset(dataset: str):
     options = {const.DATA_MNIST: __get_mnist_paths,
                const.DATA_CIFAR_10: __get_cifar_paths,
                const.DATA_CALTECH_101: __get_caltech_paths,
-               const.DATA_TINY_IMAGENET: __get_tiny_imagenet_paths}
+               const.DATA_TINY_IMAGENET: __get_tiny_imagenet_paths,
+               const.DATA_CALTECH_256:__get_caltech_256_paths
+               }
     return options.get(dataset, __get_not_supported_dataset)()

@@ -85,8 +85,8 @@ def configure_dataset_and_neural_net(curr_dataset: str):
     while True:
         print("[M] MNIST (uses LeNet)")
         print("[C] CIFAR-10 (uses AlexNet)")
-        print("[D] CIFAR-100 (uses FastNet)")
         print("[L] CALTECH-101 (uses NiN)")
+        print("[D] CALTECH-101 (uses AlexNet)")
         print("[I] TINY IMAGENET (uses CaffeNet)")
         print("[X] Cancel Operation and return to Main Menu")
         response = input("Select a dataset: ").upper()
@@ -99,7 +99,7 @@ def configure_dataset_and_neural_net(curr_dataset: str):
         elif response == 'I':
             response = const.DATA_TINY_IMAGENET
         elif response == 'D':
-            response = const.DATA_CIFAR_100
+            response = const.DATA_CALTECH_256
         elif response.upper() == 'X':
             break
         else:

@@ -1,20 +1,19 @@
 """
-Module for performing tests over CIFAR-10
+Module for performing tests over Caltech-101
 """
 from abc import abstractmethod
 
 import tensorflow as tf
 
 from tests.tester import Tester
-from models import FastNet
-from models import CifarTFNet
-from input.cifar100_data import Cifar100Data
+from models import NiN, AlexNet
+from input.caltech_256_data import Caltech256Data
 import utils.constants as const
 
 
-class Cifar100Tester(Tester):
+class Caltech256Tester(Tester):
     """
-    Performs tests over CIFAR-100 according to the User input and pre-established configurations
+    Performs tests over Caltech-256 according to the User input and pre-established configurations
     """
 
     @abstractmethod
@@ -22,12 +21,12 @@ class Cifar100Tester(Tester):
         pass
 
     def _prepare_data_pipeline(self):
-        self.data_pipeline = Cifar100Data(self.general_config, self.train_dirs, self.validation_dir, self.extras)
+        self.data_pipeline = Caltech256Data(self.general_config, self.train_dirs, self.validation_dir)
 
     def _prepare_neural_network(self):
-        self.__input_tensor = tf.placeholder(tf.float32, [None, 32, 32, 3])
-        self.__output_tensor = tf.placeholder(tf.float32, [None, 100])
-        self.__neural_net = FastNet({'data': self.input_tensor})
+        self.__input_tensor = tf.placeholder(tf.float32, [None, 224, 224, 3])
+        self.__output_tensor = tf.placeholder(tf.float32, [None, 256])
+        self.__neural_net = AlexNet({'data': self.input_tensor})
 
     @abstractmethod
     def _prepare_config(self, str_optimizer: str):
@@ -35,7 +34,7 @@ class Cifar100Tester(Tester):
 
     @property
     def dataset_name(self):
-        return const.DATA_CIFAR_100
+        return const.DATA_CALTECH_101
 
     @property
     def data_input(self):

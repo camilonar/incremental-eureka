@@ -5,13 +5,14 @@ import dependency_injector.containers as containers
 import dependency_injector.providers as providers
 
 import utils.constants as const
+from tests_impl.caltech_256_rms_tester import Caltech256RMSPropTester
 from tests_impl.caltech_dcgan_tester import CaltechDCGANTester
 from tests_impl.caltech_rep_tester import CaltechRepTester
 from tests_impl.caltech_rms_tester import CaltechRMSPropTester
 from tests_impl.cifar_dcgan_tester import CifarDCGANTester
 from tests_impl.cifar_rep_tester import CifarRepTester
 from tests_impl.cifar_rms_tester import CifarRMSPropTester
-from tests_impl.cifar100_rms_tester import Cifar100RMSPropTester
+#from tests_impl.cifar100_rms_tester import Cifar100RMSPropTester
 from tests_impl.imagenet_dcgan_tester import ImagenetDCGANTester
 from tests_impl.imagenet_rep_tester import ImagenetRepTester
 from tests_impl.imagenet_rms_tester import ImagenetRMSPropTester
@@ -33,7 +34,8 @@ class Testers(containers.DeclarativeContainer):
                                const.DATA_CIFAR_10: providers.Factory(CifarRMSPropTester),
                                const.DATA_TINY_IMAGENET: providers.Factory(ImagenetRMSPropTester),
                                const.DATA_MNIST: providers.Factory(MnistRMSPropTester),
-                               const.DATA_CIFAR_100: providers.Factory(Cifar100RMSPropTester)},
+                               const.DATA_CALTECH_256:providers.Factory(Caltech256RMSPropTester)
+                                },
                const.TR_DCGAN: {const.DATA_CALTECH_101: providers.Factory(CaltechDCGANTester),
                                 const.DATA_CIFAR_10: providers.Factory(CifarDCGANTester),
                                 const.DATA_TINY_IMAGENET: providers.Factory(ImagenetDCGANTester),

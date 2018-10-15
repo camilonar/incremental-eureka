@@ -2,6 +2,7 @@
 Module containing various useful neural networks models
 """
 import tensorflow as tf
+
 from libs.caffe_tensorflow.network import Network
 
 
@@ -84,52 +85,33 @@ class CaffeNet(Network):
          .fc(200, relu=False, name='fc8'))
 
 
-class FastNet(Network):
+class DenseNet(Network):
+
     def setup(self):
+        growth_k = 12
+        num_class= 100
         """
             to 256 d 256 images
-
         :return: None
         """
         (self.feed('data')
-         .batch_normalization(name="BN1")
-         .conv(3, 3, 64, 1, 1, padding='SAME', name='conv2')
-         .batch_normalization(name="BN3")
-         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv4')
-         .batch_normalization(name="BN5")
-         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv6')
-         .batch_normalization(name="BN7")
-         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv8')
-         .max_pool(2, 2, 2, 2, padding='SAME', name='pool9')
-         .batch_normalization(name="BN10")
-         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv11')
-         .batch_normalization(name="BN12")
-         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv13')
-         .batch_normalization(name="BN14")
-         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv15')
-         .max_pool(2, 2, 2, 2, padding='SAME', name='pool6')
-         .batch_normalization(name="BN17")
-         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv18')
-         .batch_normalization(name="BN19")
-         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv20')
-         .batch_normalization(name="BN21")
-         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv22')
-         .max_pool(2, 2, 2, 2, padding='SAME', name='pool23')
-         .batch_normalization(name="BN24")
-         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv25')
-         .batch_normalization(name="BN26")
-         .conv(3, 3, 128, 1, 1, padding='SAME', name='conv27')
-         .max_pool(2, 2, 2, 2, padding='SAME', name='pool28')
-         .batch_normalization(name="BN29")
-         .conv(1, 1, 128, 1, 1, padding='SAME', name='conv30')
-         .batch_normalization(name="BN31")
-         .conv(1, 1, 128, 1, 1, padding='SAME', name='conv32')
-         .batch_normalization(name="BN33")
-         .conv(1, 1, 100, 1, 1, padding='SAME', name='conv34')
-         .avg_pool(2, 2, 2, 2, name="pol35"))
+         .conv(7, 7, growth_k * 2, 2, 2, name="conv_1")
+         .dense_block(nb_layers=6, growth_k=growth_k, dropout_rate=0.2, name="dense_1")
+         .transition_layer(growth_k=growth_k,dropout_rate=0.2,name="trans_1")
 
-    def get_output(self):
-        return tf.squeeze(self.terminals[-1])
+         .dense_block(nb_layers=12, growth_k=growth_k, dropout_rate=0.2, name="dense_2")
+         .transition_layer(growth_k=growth_k, dropout_rate=0.2, name="trans_2")
+
+         .dense_block(nb_layers=48, growth_k=growth_k, dropout_rate=0.2, name="dense_3")
+         .transition_layer(growth_k=growth_k, dropout_rate=0.2, name="trans_3")
+         .dense_block(nb_layers=32, growth_k=growth_k, dropout_rate=0.2, name="dense_final")
+
+         .batch_normalization(name="linear_batch")
+         .relu(name="relu")
+         .global_average_pooling()
+         .flatten()
+         .linear(class_num=num_class, name='linear')
+         )
 
 
 class VGGNet(Network):
@@ -187,9 +169,11 @@ class AlexNet(Network):
          .conv(3, 3, 384, 1, 1, name='conv3')
          .conv(3, 3, 384, 1, 1, group=2, name='conv4')
          .conv(3, 3, 256, 1, 1, group=2, name='conv5')
-         .fc(4096, name='fc6')
+         .max_pool(3, 3, 2, 2, padding='VALID', name='pool6')
          .fc(4096, name='fc7')
-         .fc(10, relu=False, name='fc8'))
+         .dropout(0.5, name='drop8')
+         .fc(4096, name='fc9')
+         .fc(256, relu=False, name='fc10'))
 
 
 class CifarTFNet(Network):
@@ -210,3 +194,5 @@ class CifarTFNet(Network):
          .dropout(0.6, name="drop4")
          .fc(192, name='fc5')
          .fc(10, relu=False, name='fc6'))
+
+

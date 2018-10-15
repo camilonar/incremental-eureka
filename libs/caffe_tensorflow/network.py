@@ -8,6 +8,15 @@ import tensorflow as tf
 DEFAULT_PADDING = 'SAME'
 
 
+def include_original(dec):
+    def meta_decorator(f):
+        decorated = dec(f)
+        decorated._original = f
+        return decorated
+    return meta_decorator
+
+
+@include_original
 def layer(op):
     '''Decorator for composable network layers.'''
 
@@ -245,3 +254,61 @@ class Network(object):
     def dropout(self, input, keep_prob, name):
         keep = 1 - self.use_dropout + (self.use_dropout * keep_prob)
         return tf.nn.dropout(input, keep, name=name)
+
+    # ++++++++++++++++++++++++++++++++++==
+    # ++ SPECIAL LAYERS FOR DENSENET
+    # +++++++++++++++++++++++++++++++++
+
+    @layer
+    def global_average_pooling(self, input, name, stride=1):
+        width = np.shape(input)[1]
+        height = np.shape(input)[2]
+        pool_size = [width, height]
+        return tf.layers.average_pooling2d(inputs=input, pool_size=pool_size, strides=stride, name=name)
+
+    def concatenation(self, layers):
+        return tf.concat(layers, axis=3)
+
+    def bottleneck_layer(self, input, growth_k, dropout_rate, name):
+        # print(x)
+        with tf.variable_scope(name) as scope:
+            x = self.batch_normalization._original(self, input=input, name=name + '_batch1')
+            x = self.conv._original(self, x, 1, 1, growth_k * 4, 1, 1, name=name + '_conv1')
+            x = self.dropout._original(self, input, dropout_rate, name=name + '_dropout1')
+            x = self.batch_normalization._original(self, input, name=name + '_batch2')
+            x = self.conv._original(self, input, 3, 3, growth_k, 1, 1, name=name + '_conv2')
+            x = self.dropout._original(self, input, dropout_rate, name=name + '_dropout2')
+
+            return x
+
+    @layer
+    def linear(self, input, class_num, name):
+        return tf.layers.dense(inputs=input, units=class_num, name=name)
+
+    @layer
+    def flatten(self, input, name):
+        return tf.layers.flatten(input, name=name)
+
+    @layer
+    def dense_block(self, input, nb_layers, growth_k, dropout_rate, name):
+        with tf.variable_scope(name) as scope:
+            layers_concat = list()
+            layers_concat.append(input)
+            x = self.bottleneck_layer(input, growth_k, dropout_rate, name=name + "_bottleN_" + str(0))
+            layers_concat.append(x)
+            for i in range(nb_layers - 1):
+                x = self.concatenation(layers_concat)
+                x = self.bottleneck_layer(x, growth_k, dropout_rate, name=name + "_bottleN_" + str(i + 1))
+                layers_concat.append(x)
+
+            x = self.concatenation(layers_concat)
+            return x
+
+    @layer
+    def transition_layer(self, input, growth_k, dropout_rate, name):
+        with tf.variable_scope(name) as scope:
+            x = self.batch_normalization._original(self, input, name=name + '_batch1')
+            x = self.conv._original(self, x, 1, 1, growth_k, 1, 1, name=name + '_conv1')
+            x = self.dropout._original(self, x, dropout_rate, name=name + '_dropout1')
+            x = self.avg_pool._original(self, x, 2, 2, 2, 2, name=name + "_avg_pool1")
+            return x
