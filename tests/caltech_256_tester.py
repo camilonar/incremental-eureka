@@ -34,7 +34,7 @@ class Caltech256Tester(Tester):
 
     @property
     def dataset_name(self):
-        return const.DATA_CALTECH_101
+        return const.DATA_CALTECH_256
 
     @property
     def data_input(self):
