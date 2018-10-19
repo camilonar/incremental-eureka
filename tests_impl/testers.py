@@ -12,7 +12,6 @@ from tests_impl.caltech_rms_tester import CaltechRMSPropTester
 from tests_impl.cifar_dcgan_tester import CifarDCGANTester
 from tests_impl.cifar_rep_tester import CifarRepTester
 from tests_impl.cifar_rms_tester import CifarRMSPropTester
-#from tests_impl.cifar100_rms_tester import Cifar100RMSPropTester
 from tests_impl.imagenet_dcgan_tester import ImagenetDCGANTester
 from tests_impl.imagenet_rep_tester import ImagenetRepTester
 from tests_impl.imagenet_rms_tester import ImagenetRMSPropTester

@@ -29,7 +29,7 @@ class MnistTester(Tester):
         self.__neural_net = LeNet({'data': self.input_tensor})
 
     @abstractmethod
-    def _prepare_config(self, str_optimizer: str):
+    def _prepare_config(self, str_optimizer: str, is_incremental: bool):
         pass
 
     @property

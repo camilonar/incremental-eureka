@@ -6,6 +6,7 @@ import tensorflow as tf
 
 from input import caltech_256_reader as caltech256
 from input.data import Data
+import utils.constants as const
 
 
 class Caltech256Data(Data):
@@ -88,7 +89,7 @@ class Caltech256Data(Data):
         dataset = dataset.map(load_images)
 
         if shuffle:
-            dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=12345)
+            dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=const.SEED)
         dataset = dataset.batch(self.curr_config.batch_size)
 
         # Only does multiple epochs if the dataset is going to be used for training

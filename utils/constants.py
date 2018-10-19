@@ -23,4 +23,5 @@ Default parameters for test
 """
 SUMMARY_INTERVAL = 500
 CKP_INTERVAL = 2000
-
+SEED = 12345
+IS_INCREMENTAL = True

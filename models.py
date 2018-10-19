@@ -173,6 +173,7 @@ class AlexNet(Network):
          .fc(4096, name='fc7')
          .dropout(0.5, name='drop8')
          .fc(4096, name='fc9')
+         .dropout(0.5, name='drop9')
          .fc(256, relu=False, name='fc10'))
 
 

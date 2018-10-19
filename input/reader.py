@@ -50,7 +50,12 @@ class Reader(ABC):
         :return: None
         :raises Exception: if the data is not found
         """
-        for i, path in enumerate(self.tr_paths):
+        aux_tr_paths = self.tr_paths
+        # This is used for non-incremental trainings (multiple TFRecords or directories correspond to one training)
+        if type(aux_tr_paths[0]) == list:
+            aux_tr_paths = aux_tr_paths[0]
+
+        for i, path in enumerate(aux_tr_paths):
             if os.path.exists(path):
                 print("Train directory for batch {} seems to exist".format(i))
             else:

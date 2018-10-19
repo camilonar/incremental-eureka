@@ -29,7 +29,7 @@ class CifarTester(Tester):
         self.__neural_net = CifarTFNet({'data': self.input_tensor})
 
     @abstractmethod
-    def _prepare_config(self, str_optimizer: str):
+    def _prepare_config(self, str_optimizer: str, is_incremental: bool):
         pass
 
     @property

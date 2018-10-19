@@ -1,6 +1,9 @@
 """
 This module acts as an interface for performing the tests
 """
+import asyncio
+import sys
+
 import utils.constants as const
 import utils.default_paths as paths
 from tests_impl.testers import Testers
@@ -17,6 +20,7 @@ def print_menu():
     print("[2] Select Optimizer")
     print("[3] Select Checkpoint to Load (Optional)")
     print("[4] Select Summary and Checkpoint interval (If not provided then the default values will be used)")
+    print("[5] Select Seed (If not provided then the default value will be used)")
     print("[0] Finish configuration and execute Test")
     print("[X] Exit")
     print("------------------------------------------------------------------")
@@ -34,16 +38,18 @@ def ask_for_configuration():
     -Learning Rate (Optional)
     -Summary Interval (Optional)
     -Checkpoint Interval (Optional)
-    :return: a tuple containing 3 strings and 3 ints: name of the dataset (str), name of the optimizer (str),
-    representation of a checkpoint (str), summary interval (int) and checkpoint interval (int),
+    -Seed for random numbers (Optional)
+    :return: a tuple containing 3 strings, 2 ints and a float: name of the dataset (str), name of the optimizer (str),
+    representation of a checkpoint (str), summary interval (int), checkpoint interval (int) and seed (float)
     in that order. The representation of a checkpoint will be returned as None if the user doesn't configure it.
-    An example of a return value is: ('MNIST', 'TR_BASE', None, 100, 300).
+    An example of a return value is: ('MNIST', 'TR_BASE', None, 100, 300, 12345).
     """
 
     # Creation of variables
     response = "s"
     dataset, optimizer, checkpoint = None, None, None
     summary_interval, ckp_interval = const.SUMMARY_INTERVAL, const.CKP_INTERVAL
+    seed = const.SEED
 
     while response:
         response = print_menu()
@@ -56,9 +62,11 @@ def ask_for_configuration():
             checkpoint = configure_checkpoint(checkpoint)
         elif response == "4":
             summary_interval, ckp_interval = configure_intervals(summary_interval, ckp_interval)
+        elif response == "5":
+            seed = configure_seed(seed)
         elif response == "0":
             if dataset and optimizer:
-                return dataset, optimizer, checkpoint, summary_interval, ckp_interval
+                return dataset, optimizer, checkpoint, summary_interval, ckp_interval, seed
             else:
                 print("Both the Dataset and Optimizer must be configured before performing a test")
                 continue
@@ -86,7 +94,7 @@ def configure_dataset_and_neural_net(curr_dataset: str):
         print("[M] MNIST (uses LeNet)")
         print("[C] CIFAR-10 (uses AlexNet)")
         print("[L] CALTECH-101 (uses NiN)")
-        print("[D] CALTECH-101 (uses AlexNet)")
+        print("[D] CALTECH-256 (uses AlexNet)")
         print("[I] TINY IMAGENET (uses CaffeNet)")
         print("[X] Cancel Operation and return to Main Menu")
         response = input("Select a dataset: ").upper()
@@ -96,10 +104,10 @@ def configure_dataset_and_neural_net(curr_dataset: str):
             response = const.DATA_CIFAR_10
         elif response == 'L':
             response = const.DATA_CALTECH_101
-        elif response == 'I':
-            response = const.DATA_TINY_IMAGENET
         elif response == 'D':
             response = const.DATA_CALTECH_256
+        elif response == 'I':
+            response = const.DATA_TINY_IMAGENET
         elif response.upper() == 'X':
             break
         else:
@@ -262,7 +270,7 @@ def configure_intervals(curr_s_interval: int, curr_ckp_interval: int):
         except ValueError:
             print("Invalid value for the summary interval. Must be an int")
 
-    print("The summary interval hasn't been changed and the current configured value is {}".format(curr_s_interval))
+    print("The summary inxterval hasn't been changed and the current configured value is {}".format(curr_s_interval))
     print(
         "The checkpoint interval hasn't been changed and the current configured value is {}".format(curr_ckp_interval))
     return curr_s_interval, curr_ckp_interval
@@ -292,7 +300,30 @@ def get_checkpoint_multiplier():
             print("Invalid value for the checkpoint interval multiplier. Must be an int")
 
 
-def print_config(dataset: str, optimizer: str, checkpoint: str, s_interval: int, ckp_interval: int):
+def configure_seed(curr_seed: float):
+    """
+    Asks the user for the seed for random number generators
+    :param curr_seed: the current value of the seed
+    :return: a float correspondig to the new seed if the user has changed it to a valid value, otherwise, the current
+    seed will be returned
+    """
+    print()
+    print("----------------------------Configure the Seed----------------------------")
+    print("Press [X] if you want to cancel the operation")
+
+    while True:
+        response = input("Set a value for the seed (must be a float): ")
+        if response.upper() == "X":
+            return curr_seed
+        try:
+            seed = float(response)
+            return seed
+        except ValueError:
+            print("Invalid value for the seed. Must be a float")
+
+
+def print_config(dataset: str, optimizer: str, checkpoint: str, s_interval: int, ckp_interval: int, seed: float,
+                 is_incremental: bool):
     """
         Prints the configuration selected by the user
         :param dataset: a string representing the dataset that has been configured by the user
@@ -301,6 +332,8 @@ def print_config(dataset: str, optimizer: str, checkpoint: str, s_interval: int,
         :param s_interval: the summary interval that has been configured by the user
         :param ckp_interval: the checkpoint interval that has been configured by the user
         if the dataset doesn't have any dataset-specific path.
+        :param seed: the seed for random numbers
+        :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
     """
     print("--------------------------------------------------------")
     print("\n\nStarting test with the following configuration:\n")
@@ -309,13 +342,15 @@ def print_config(dataset: str, optimizer: str, checkpoint: str, s_interval: int,
     print("Checkpoint: {}".format(checkpoint))
     print("Summary interval: {} iterations".format(s_interval))
     print("Checkpoint interval: {} iterations".format(ckp_interval))
+    print("Seed: {}".format(seed))
+    print("The test is {}".format("INCREMENTAL " if is_incremental else "NOT incremental"))
     print("\n")
 
     input("To continue with the test press any key...")
 
 
-def perform_test(dataset: str, optimizer: str, checkpoint: str, s_interval: int, ckp_interval: int,
-                 train_dirs: [str], validation_dir: str, extras: [str]):
+def perform_test(dataset: str, optimizer: str, checkpoint: str, s_interval: int, ckp_interval: int, seed: float,
+                 is_incremental: bool, train_dirs: [str], validation_dir: str, extras: [str]):
     """
     Prepares and performs the test according to the configuration given by the user
     :param dataset: a string representing the dataset that has been configured by the user
@@ -323,17 +358,19 @@ def perform_test(dataset: str, optimizer: str, checkpoint: str, s_interval: int,
     :param checkpoint: a string representing a checkpoint. Must be None if no checkpoint has been configured
     :param s_interval: the summary interval that has been configured by the user
     :param ckp_interval: the checkpoint interval that has been configured by the user
+    :param seed: the seed for random numbers
+    :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
     :param train_dirs: array of strings corresponding to the paths of each one of the mega-batches for training
     :param validation_dir: a string corresponding to the path of the testing data
     :param extras: an array of strings corresponding to paths specific for each dataset. It should be an empty array
     if the dataset doesn't have any dataset-specific path.
     :return: None
     """
-
+    const.SEED = seed
     factory = Testers.get_tester(optimizer, dataset)
     tester = factory(train_dirs, validation_dir, extras, s_interval, ckp_interval, checkpoint)
 
-    tester.prepare_all(optimizer)
+    tester.prepare_all(optimizer, is_incremental)
     tester.execute_test()
 
 
@@ -343,10 +380,12 @@ def main():
     Executes the program
     :return: None
     """
-    dataset, optimizer, checkpoint, s_interval, ckp_interval = ask_for_configuration()
-    train_dirs, validation_dir, extras = paths.get_paths_from_dataset(dataset)
-    print_config(dataset, optimizer, checkpoint, s_interval, ckp_interval)
-    perform_test(dataset, optimizer, checkpoint, s_interval, ckp_interval, train_dirs, validation_dir, extras)
+    is_incremental = const.IS_INCREMENTAL
+    dataset, optimizer, checkpoint, s_interval, ckp_interval, seed = ask_for_configuration()
+    train_dirs, validation_dir, extras = paths.get_paths_from_dataset(dataset, is_incremental)
+    print_config(dataset, optimizer, checkpoint, s_interval, ckp_interval, seed, is_incremental)
+    perform_test(dataset, optimizer, checkpoint, s_interval, ckp_interval, seed, is_incremental,
+                 train_dirs, validation_dir, extras)
 
 
 if __name__ == '__main__':

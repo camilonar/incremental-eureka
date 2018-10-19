@@ -6,7 +6,7 @@ from abc import abstractmethod
 import tensorflow as tf
 
 from tests.tester import Tester
-from models import NiN, AlexNet
+from models import NiN, AlexNet, CaffeNet
 from input.caltech_256_data import Caltech256Data
 import utils.constants as const
 
@@ -26,10 +26,10 @@ class Caltech256Tester(Tester):
     def _prepare_neural_network(self):
         self.__input_tensor = tf.placeholder(tf.float32, [None, 224, 224, 3])
         self.__output_tensor = tf.placeholder(tf.float32, [None, 256])
-        self.__neural_net = AlexNet({'data': self.input_tensor})
+        self.__neural_net = CaffeNet({'data': self.input_tensor})
 
     @abstractmethod
-    def _prepare_config(self, str_optimizer: str):
+    def _prepare_config(self, str_optimizer: str, is_incremental: bool):
         pass
 
     @property

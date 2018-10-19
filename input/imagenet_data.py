@@ -29,6 +29,7 @@ import tensorflow as tf
 
 from input import imagenet_reader as imagenet
 from input.data import Data
+import utils.constants as const
 
 
 class ImagenetData(Data):
@@ -136,7 +137,7 @@ class ImagenetData(Data):
         dataset = dataset.map(load_images)
 
         if shuffle:
-            dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=12345)
+            dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=const.SEED)
         dataset = dataset.batch(self.curr_config.batch_size)
 
         if not testing:

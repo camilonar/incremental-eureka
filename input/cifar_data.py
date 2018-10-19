@@ -5,6 +5,7 @@ import tensorflow as tf
 
 from input import cifar_reader as cifar
 from input.data import Data
+import utils.constants as const
 
 
 class CifarData(Data):
@@ -102,10 +103,8 @@ class CifarData(Data):
         dataset = tf.data.TFRecordDataset(filename)
         dataset = dataset.map(parser, num_parallel_calls=self.batch_queue_capacity)
 
-
-
         if shuffle:
-            dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=12345)
+            dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=const.SEED)
 
         dataset = dataset.batch(self.curr_config.batch_size)
         # Only does multiple epochs if the dataset is going to be used for training

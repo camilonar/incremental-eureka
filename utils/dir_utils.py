@@ -31,6 +31,8 @@ def prepare_directories(config: GeneralConfig):
     """
     ckpt_path = os.path.join('checkpoints', config.model_name, config.config_name)
     summaries_path = os.path.join('summaries', config.model_name, config.config_name, get_unique_logdir())
+    print("\nFor creating a session of Tensorboard to visualize the data of this training use the following command: ")
+    print("tensorboard --logdir=\"{}\"\n".format(os.path.abspath(summaries_path)))
 
     if not os.path.isdir(ckpt_path):
         os.makedirs(ckpt_path)

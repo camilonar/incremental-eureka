@@ -10,6 +10,7 @@ from errors import TestNotPreparedError
 import utils.dir_utils as dir
 import tensorflow as tf
 import numpy as np
+import utils.constants as const
 
 
 class Tester(ABC):
@@ -71,11 +72,12 @@ class Tester(ABC):
         """
 
     @abstractmethod
-    def _prepare_config(self, str_optimizer: str):
+    def _prepare_config(self, str_optimizer: str, is_incremental: bool):
         """
         This method creates and saves the proper Configuration for the training according to the pre-established
         conditions of each dataset
-        :type str_optimizer: a string that represents the chosen Trainer.
+        :param str_optimizer: a string that represents the chosen Trainer.
+        :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
         :return: None
         """
         raise NotImplementedError("The subclass hasn't implemented the _prepare_config method")
@@ -100,24 +102,25 @@ class Tester(ABC):
         print("No checkpoint has been loaded...")
         return None
 
-    def prepare_all(self, str_trainer: str):
+    def prepare_all(self, str_trainer: str, is_incremental: bool):
         """
         It prepares the Tester object for the test, according to the various parameters given up to this point and
         also according to the corresponding dataset to which the concrete Tester is associated.
         This method calls ALL the _prepare methods defined in the base class.
         :param str_trainer: a string that represents the chosen Trainer. Currently supported strings are:
             -OPT_BASE: for a simple RMSProp
-            -OPT_CEAL: for the OPT_CEAL algorithm (See: Keze Wang, Dongyu Zhang, Ya Li, Ruimao Zhang, and Liang Lin.
-                    Cost-effective active learning for deep image classification.
-                    IEEE Transactions on Circuits and Systems for Video Technology, 2016)
+            -OPT_DCGAN: for the Trainer that uses the algorithm presented in "Evolutive deep models for online learning
+                    on data streams with no storage"
+                    See: http://ceur-ws.org/Vol-1958/IOTSTREAMING2.pdf
             -OPT_REPRESENTATIVES: for the proposed approach of this work, i.e. an incremental algorithm that uses RMSProp
                     and select samples based in clustering
+        :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
         :return: None
         """
         tf.reset_default_graph()
-        tf.set_random_seed(12345)
-        np.random.seed(12345)
-        self._prepare_config(str_trainer)
+        tf.set_random_seed(const.SEED)
+        np.random.seed(const.SEED)
+        self._prepare_config(str_trainer, is_incremental)
         self._prepare_data_pipeline()
         self._prepare_neural_network()
         self.ckp_path = self._prepare_checkpoint_if_required(self.inc_ckp_path, str_trainer)

@@ -29,7 +29,7 @@ class CaltechTester(Tester):
         self.__neural_net = NiN({'data': self.input_tensor})
 
     @abstractmethod
-    def _prepare_config(self, str_optimizer: str):
+    def _prepare_config(self, str_optimizer: str, is_incremental: bool):
         pass
 
     @property
@@ -44,10 +44,6 @@ class CaltechTester(Tester):
     def neural_net(self):
         return self.__neural_net
 
-    @property
-    @abstractmethod
-    def general_config(self):
-        pass
 
     @property
     def input_tensor(self):
