@@ -4,6 +4,7 @@ From https://github.com/ethereon/caffe-tensorflow/tree/master/kaffe/tensorflow
 """
 import numpy as np
 import tensorflow as tf
+from keras.applications import MobileNet, MobileNetV2, xception
 
 DEFAULT_PADDING = 'SAME'
 
@@ -13,6 +14,7 @@ def include_original(dec):
         decorated = dec(f)
         decorated._original = f
         return decorated
+
     return meta_decorator
 
 
@@ -63,22 +65,25 @@ class Network(object):
         '''Construct the network. '''
         raise NotImplementedError('Must be implemented by the subclass.')
 
-    def load(self, data_path, session, ignore_missing=False):
+    def load(self, data_path, session, train_layers=[], ignore_missing=False):
         '''Load network weights.
         data_path: The path to the numpy-serialized network weights
         session: The current TensorFlow session
         ignore_missing: If true, serialized weights for missing layers are ignored.
         '''
-        data_dict = np.load(data_path).item()
+        # Loop over all layer names stored in the weights dict
+        # Load the weights into memory
+        data_dict = np.load(data_path, encoding='bytes').item()
         for op_name in data_dict:
-            with tf.variable_scope(op_name, reuse=True):
-                for param_name, data in data_dict[op_name].iteritems():
-                    try:
-                        var = tf.get_variable(param_name)
-                        session.run(var.assign(data))
-                    except ValueError:
-                        if not ignore_missing:
-                            raise
+            if op_name not in train_layers:
+                with tf.variable_scope(op_name, reuse=True):
+                    for data in data_dict[op_name]:
+                        if len(data.shape) == 1:
+                            var = tf.get_variable('biases', trainable=False)
+                            session.run(var.assign(data))
+                        else:
+                            var = tf.get_variable('weights', trainable=False)
+                            session.run(var.assign(data))
 
     def feed(self, *args):
         '''Set the input(s) for the next operation by replacing the terminal nodes.
@@ -255,60 +260,16 @@ class Network(object):
         keep = 1 - self.use_dropout + (self.use_dropout * keep_prob)
         return tf.nn.dropout(input, keep, name=name)
 
-    # ++++++++++++++++++++++++++++++++++==
-    # ++ SPECIAL LAYERS FOR DENSENET
-    # +++++++++++++++++++++++++++++++++
+    @layer
+    def mobile_net_base(self, input, name):
+        with tf.variable_scope(name) as scope:
+            model_base = MobileNetV2(weights='imagenet', include_top=False, input_tensor=input)
+        return model_base.output
 
     @layer
     def global_average_pooling(self, input, name, stride=1):
+        print(input)
         width = np.shape(input)[1]
         height = np.shape(input)[2]
         pool_size = [width, height]
         return tf.layers.average_pooling2d(inputs=input, pool_size=pool_size, strides=stride, name=name)
-
-    def concatenation(self, layers):
-        return tf.concat(layers, axis=3)
-
-    def bottleneck_layer(self, input, growth_k, dropout_rate, name):
-        # print(x)
-        with tf.variable_scope(name) as scope:
-            x = self.batch_normalization._original(self, input=input, name=name + '_batch1')
-            x = self.conv._original(self, x, 1, 1, growth_k * 4, 1, 1, name=name + '_conv1')
-            x = self.dropout._original(self, input, dropout_rate, name=name + '_dropout1')
-            x = self.batch_normalization._original(self, input, name=name + '_batch2')
-            x = self.conv._original(self, input, 3, 3, growth_k, 1, 1, name=name + '_conv2')
-            x = self.dropout._original(self, input, dropout_rate, name=name + '_dropout2')
-
-            return x
-
-    @layer
-    def linear(self, input, class_num, name):
-        return tf.layers.dense(inputs=input, units=class_num, name=name)
-
-    @layer
-    def flatten(self, input, name):
-        return tf.layers.flatten(input, name=name)
-
-    @layer
-    def dense_block(self, input, nb_layers, growth_k, dropout_rate, name):
-        with tf.variable_scope(name) as scope:
-            layers_concat = list()
-            layers_concat.append(input)
-            x = self.bottleneck_layer(input, growth_k, dropout_rate, name=name + "_bottleN_" + str(0))
-            layers_concat.append(x)
-            for i in range(nb_layers - 1):
-                x = self.concatenation(layers_concat)
-                x = self.bottleneck_layer(x, growth_k, dropout_rate, name=name + "_bottleN_" + str(i + 1))
-                layers_concat.append(x)
-
-            x = self.concatenation(layers_concat)
-            return x
-
-    @layer
-    def transition_layer(self, input, growth_k, dropout_rate, name):
-        with tf.variable_scope(name) as scope:
-            x = self.batch_normalization._original(self, input, name=name + '_batch1')
-            x = self.conv._original(self, x, 1, 1, growth_k, 1, 1, name=name + '_conv1')
-            x = self.dropout._original(self, x, dropout_rate, name=name + '_dropout1')
-            x = self.avg_pool._original(self, x, 2, 2, 2, 2, name=name + "_avg_pool1")
-            return x

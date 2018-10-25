@@ -84,7 +84,18 @@ class Trainer(ABC):
         self.streaming_accuracy, self.streaming_accuracy_update = tf.metrics.mean(accuracy)
         self.streaming_accuracy_scalar = tf.summary.scalar('accuracy', self.streaming_accuracy)
 
-        self.train_step = self._create_optimizer(self.config, self.loss)
+        #TODO: CAMBIAR PARA QUE QUEDE BONITO
+        variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="fc7")
+        train  = [tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="fc7")]
+        train.extend(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="fc8"))
+        print(train)
+        for i in variables :
+            print(i)
+            train.append(i)
+
+
+
+        self.train_step = self._create_optimizer(self.config, self.loss, train)
 
         self._prepare_variables_for_checkpoints()
 
@@ -94,6 +105,8 @@ class Trainer(ABC):
 
         self.sess.run(tf.local_variables_initializer())
         self.sess.run(tf.global_variables_initializer())
+
+        self.model.load("pesos/bvlc_alexnet.npy",self.sess,["fc7","fc8"])
 
         print("Finished preparations for training...")
 
@@ -292,7 +305,7 @@ class Trainer(ABC):
         raise NotImplementedError("The subclass hasn't implemented the _create_loss method")
 
     @abstractmethod
-    def _create_optimizer(self, config: GeneralConfig, loss: tf.Tensor):
+    def _create_optimizer(self, config: GeneralConfig, loss: tf.Tensor, var_list=None):
         """
         Creates the Optimizer for the training (e.g. AdaGradOptimizer)
         :param config: the configuration for the Optimizer

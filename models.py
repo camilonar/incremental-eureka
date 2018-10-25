@@ -2,7 +2,7 @@
 Module containing various useful neural networks models
 """
 import tensorflow as tf
-
+from keras.applications import xception
 from libs.caffe_tensorflow.network import Network
 
 
@@ -82,7 +82,7 @@ class CaffeNet(Network):
          .max_pool(3, 3, 2, 2, padding='VALID', name='pool5')
          .fc(512, name='fc6')
          .dropout(0.5, name='drop6')
-         .fc(200, relu=False, name='fc8'))
+         .fc(12, relu=False, name='fc8'))
 
 
 class DenseNet(Network):
@@ -169,12 +169,12 @@ class AlexNet(Network):
          .conv(3, 3, 384, 1, 1, name='conv3')
          .conv(3, 3, 384, 1, 1, group=2, name='conv4')
          .conv(3, 3, 256, 1, 1, group=2, name='conv5')
-         .max_pool(3, 3, 2, 2, padding='VALID', name='pool6')
-         .fc(4096, name='fc7')
-         .dropout(0.5, name='drop8')
-         .fc(4096, name='fc9')
-         .dropout(0.5, name='drop9')
-         .fc(256, relu=False, name='fc10'))
+         .max_pool(3, 3, 2, 2, padding='VALID', name='pool5')
+         .fc(4096, name='fc6')
+         .dropout(keep_prob=0.5,name="dp1")
+         .fc(2000, name='fc7')
+         .dropout(keep_prob=0.5, name="dp2")
+         .fc(101, relu=False, name='fc8'))
 
 
 class CifarTFNet(Network):
@@ -195,5 +195,3 @@ class CifarTFNet(Network):
          .dropout(0.6, name="drop4")
          .fc(192, name='fc5')
          .fc(10, relu=False, name='fc6'))
-
-

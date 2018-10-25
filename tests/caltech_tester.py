@@ -6,7 +6,7 @@ from abc import abstractmethod
 import tensorflow as tf
 
 from tests.tester import Tester
-from models import NiN
+from models import NiN, AlexNet
 from input.caltech_data import CaltechData
 import utils.constants as const
 
@@ -24,9 +24,9 @@ class CaltechTester(Tester):
         self.data_pipeline = CaltechData(self.general_config, self.train_dirs, self.validation_dir)
 
     def _prepare_neural_network(self):
-        self.__input_tensor = tf.placeholder(tf.float32, [None, 224, 224, 3])
+        self.__input_tensor = tf.placeholder(tf.float32, [None, 227, 227, 3])
         self.__output_tensor = tf.placeholder(tf.float32, [None, 101])
-        self.__neural_net = NiN({'data': self.input_tensor})
+        self.__neural_net = AlexNet({'data': self.input_tensor})
 
     @abstractmethod
     def _prepare_config(self, str_optimizer: str, is_incremental: bool):
