@@ -73,7 +73,7 @@ class Trainer(ABC):
         # Creates the session
         sess = tf.get_default_session()
         if sess:
-            print("CERRANDO SESIÓN")
+            print("Closing previous Session...")
             sess.close()
         self.sess = tf.InteractiveSession()
 
@@ -84,29 +84,18 @@ class Trainer(ABC):
         self.streaming_accuracy, self.streaming_accuracy_update = tf.metrics.mean(accuracy)
         self.streaming_accuracy_scalar = tf.summary.scalar('accuracy', self.streaming_accuracy)
 
-        #TODO: CAMBIAR PARA QUE QUEDE BONITO
-        variables = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="fc7")
-        train  = [tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="fc7")]
-        train.extend(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope="fc8"))
-        print(train)
-        for i in variables :
-            print(i)
-            train.append(i)
+        self.train_step = self._create_optimizer(self.config, self.loss, self.model.trainable_variables)
 
-
-
-        self.train_step = self._create_optimizer(self.config, self.loss, train)
-
+        # Prepares checkpoints and initializes variables
         self._prepare_variables_for_checkpoints()
-
         self.saver = tf.train.Saver()
-
         self._custom_prepare(self.sess)
 
         self.sess.run(tf.local_variables_initializer())
         self.sess.run(tf.global_variables_initializer())
 
-        self.model.load("pesos/bvlc_alexnet.npy",self.sess,["fc7","fc8"])
+        # Loading model for transfer learning, if applies
+        self.model.maybe_load_model(self.sess)
 
         print("Finished preparations for training...")
 
@@ -310,6 +299,7 @@ class Trainer(ABC):
         Creates the Optimizer for the training (e.g. AdaGradOptimizer)
         :param config: the configuration for the Optimizer
         :param loss: a tensor representing the loss function
+        :param var_list: a list with the variables that are going to be trained
         :return: a tf.Optimizer
         """
         raise NotImplementedError("The subclass hasn't implemented the _create_optimizer method")

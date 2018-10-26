@@ -4,6 +4,7 @@ Module containing various useful neural networks models
 import tensorflow as tf
 from keras.applications import xception
 from libs.caffe_tensorflow.network import Network
+from utils import default_paths as paths
 
 
 class LeNet(Network):
@@ -172,9 +173,22 @@ class AlexNet(Network):
          .max_pool(3, 3, 2, 2, padding='VALID', name='pool5')
          .fc(4096, name='fc6')
          .dropout(keep_prob=0.5,name="dp1")
-         .fc(2000, name='fc7')
+         .fc(1024, name='fc7')
          .dropout(keep_prob=0.5, name="dp2")
          .fc(101, relu=False, name='fc8'))
+
+    @property
+    def data_path(self):
+        # TODO ver si esto se puede poner en otra parte para no usar default_paths en el framework principal
+        return paths.get_alexnet_weights_path()
+
+    @property
+    def has_transfer_learning(self):
+        return True
+
+    @property
+    def trainable_layers(self):
+        return ["fc7", "fc8"]
 
 
 class CifarTFNet(Network):

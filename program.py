@@ -300,7 +300,7 @@ def get_checkpoint_multiplier():
             print("Invalid value for the checkpoint interval multiplier. Must be an int")
 
 
-def configure_seed(curr_seed: float):
+def configure_seed(curr_seed: int):
     """
     Asks the user for the seed for random number generators
     :param curr_seed: the current value of the seed
@@ -316,13 +316,13 @@ def configure_seed(curr_seed: float):
         if response.upper() == "X":
             return curr_seed
         try:
-            seed = float(response)
+            seed = int(response)
             return seed
         except ValueError:
             print("Invalid value for the seed. Must be a float")
 
 
-def print_config(dataset: str, optimizer: str, checkpoint: str, s_interval: int, ckp_interval: int, seed: float,
+def print_config(dataset: str, optimizer: str, checkpoint: str, s_interval: int, ckp_interval: int, seed: int,
                  is_incremental: bool):
     """
         Prints the configuration selected by the user
@@ -349,7 +349,7 @@ def print_config(dataset: str, optimizer: str, checkpoint: str, s_interval: int,
     input("To continue with the test press any key...")
 
 
-def perform_test(dataset: str, optimizer: str, checkpoint: str, s_interval: int, ckp_interval: int, seed: float,
+def perform_test(dataset: str, optimizer: str, checkpoint: str, s_interval: int, ckp_interval: int, seed: int,
                  is_incremental: bool, train_dirs: [str], validation_dir: str, extras: [str]):
     """
     Prepares and performs the test according to the configuration given by the user

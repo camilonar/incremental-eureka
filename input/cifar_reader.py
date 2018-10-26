@@ -22,7 +22,6 @@ def _convert_raw_to_image(raw):
     :return: array of 4 dimensions [number of images,heigth, width, number of color chanels]
     '''
 
-    
     raw_float = np.array(raw, dtype=float) / 255.0
 
     # reshape
@@ -45,7 +44,7 @@ def _to_one_hot(class_numbers, num_classes=None):
     if num_classes is None:
         num_classes = np.max(class_numbers) + 1
 
-    one_hot=np.eye(num_classes, dtype=float)[class_numbers]
+    one_hot = np.eye(num_classes, dtype=float)[class_numbers]
 
     return one_hot
 

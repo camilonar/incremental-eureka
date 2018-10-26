@@ -4,12 +4,23 @@ This module has the default paths for the four datasets supported in the base ve
 -CIFAR-10
 -CALTECH-101
 -TINY IMAGENET
+
+It also contains paths to the weights of some networks that use transfer learning
 """
+# TODO actualizar documentación
 import utils.constants as const
 from errors import OptionNotSupportedError
 
 
 # TODO revisar si unir las direcciones de los TFRecords es similar a tener el dataset completo
+def get_alexnet_weights_path():
+    """
+    It gives the default path of the weights of an AlexNet network previously trained over Imagenet
+    :return: a string corresponding to a relative path
+    """
+    return "../transfer_learning/bvlc_alexnet.npy"
+
+
 def __get_mnist_paths(is_incremental: bool):
     """
     It gives the default paths to the training and testing data of MNIST
@@ -60,7 +71,7 @@ def __get_caltech_paths(is_incremental: bool):
     mega-batches for training, the second value is a string corresponding to the path of the testing data and the third
     value is an empty array
     """
-    base_folder = "../datasets/101_ObjectCategories/"
+    base_folder = "../datasets/101_ObjectCategories_2/"
     base = base_folder + "train/"
     if is_incremental:
         paths = [base + "Lote{}/".format(x) for x in range(0, 5)]

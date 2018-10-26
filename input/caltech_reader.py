@@ -6,6 +6,7 @@ import random
 import os
 
 from input.reader import Reader
+from utils import constants as const
 
 valid_ext = [".jpg", ".gif", ".png", ".jpeg"]
 
@@ -36,7 +37,7 @@ def _find_image_files(path, categories):
             label_curr = i
             labels.append(label_curr)
     shuffled_index = list(range(len(filenames)))
-    random.seed(12345)
+    random.seed(const.SEED)
     random.shuffle(shuffled_index)
     filenames = [filenames[i] for i in shuffled_index]
     labels = [labels[i] for i in shuffled_index]

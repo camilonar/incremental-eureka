@@ -65,14 +65,18 @@ class Network(object):
         '''Construct the network. '''
         raise NotImplementedError('Must be implemented by the subclass.')
 
-    def load(self, data_path, session, train_layers=[], ignore_missing=False):
+    def load(self, data_path, session, train_layers=None):
         '''Load network weights.
         data_path: The path to the numpy-serialized network weights
         session: The current TensorFlow session
-        ignore_missing: If true, serialized weights for missing layers are ignored.
+        train_layers: a list with the names of the layers that are going to be trained. Any other layer that is loaded
+        is going to have its weights, biases and all variables freezed
         '''
         # Loop over all layer names stored in the weights dict
         # Load the weights into memory
+        print("Loading networks weights for transfer learning from {}".format(data_path))
+        if not train_layers:
+            train_layers = []
         data_dict = np.load(data_path, encoding='bytes').item()
         for op_name in data_dict:
             if op_name not in train_layers:
@@ -273,3 +277,55 @@ class Network(object):
         height = np.shape(input)[2]
         pool_size = [width, height]
         return tf.layers.average_pooling2d(inputs=input, pool_size=pool_size, strides=stride, name=name)
+
+    def maybe_load_model(self, sess: tf.InteractiveSession):
+        """
+        This operation allows to load a network in case that transfer learning is used (i.e. loading the weights of a
+        network previously trained in other dataset). If has_transfer_learning property is set to True then the model
+        is model, otherwise no operation is performed.
+        :param sess: the current Session
+        :return: None
+        """
+        if self.has_transfer_learning:
+            self.load(self.data_path, sess, self.trainable_layers)
+
+    @property
+    def data_path(self):
+        """
+        Contains the path to the weights and biases of the network that is going to be loaded for transfer learning
+        :return: a string with the path where the weights of the network are stored, if transfer learning is used. The
+        default implementation returns None.
+        """
+        return None
+
+    @property
+    def trainable_layers(self):
+        """
+        Contains a list with the names of the layers that are going to be trained. This is useful for transfer learning
+        :return: a list. The default implementation returns an empty list
+        """
+        return []
+
+    @property
+    def trainable_variables(self):
+        """
+        Contains the list of Trainable variables
+        :return: the list of Trainable variables. Returns None if has_transfer_learning is set to False, and the list of
+         variables of the layers whose names are in trainable_layers if it's set to True
+        """
+        if self.has_transfer_learning:
+            var_list = []
+            for layer in self.trainable_layers:
+                var_list.extend(tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES, scope=layer))
+            return var_list
+        else:
+            return None
+
+    @property
+    def has_transfer_learning(self):
+        """
+        Indicates whether or not, transfer learning is going to be used with the model.
+        :return: True if the model weights should be loaded from a network previously trained in another dataset. By
+        default it returns False.
+        """
+        return False
