@@ -20,6 +20,13 @@ def get_alexnet_weights_path():
     """
     return "../transfer_learning/bvlc_alexnet.npy"
 
+def get_vgg16_weights_path():
+    """
+    It gives the default path of the weights of an AlexNet network previously trained over Imagenet
+    :return: a string corresponding to a relative path
+    """
+    return "../transfer_learning/vgg16_weights.npz"
+
 
 def __get_mnist_paths(is_incremental: bool):
     """
@@ -63,6 +70,27 @@ def __get_cifar_paths(is_incremental: bool):
     return tr_paths, test_path, [metadata_file]
 
 
+def __get_cifar100_paths(is_incremental: bool):
+    """
+    It gives the default paths to the training and testing data of CIFAR-10
+    :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
+    :return: a tuple, where the first value is an array of strings corresponding to the paths of each one of the
+    mega-batches for training, the second value is a string corresponding to the path of the testing data, and the third
+    value is an array of this form: [metadata_file_path]
+    """
+    base_folder = "../datasets/cifar-100"
+    base = base_folder + "/train"
+    ext = ".tfrecords"
+    tr_paths = [base+ext]
+
+    if not is_incremental:
+        tr_paths = [tr_paths]
+
+    test_path = base_folder + "/test" + ext
+    metadata_file = base_folder + "/meta"
+    return tr_paths, test_path, [metadata_file]
+
+
 def __get_caltech_paths(is_incremental: bool):
     """
     It gives the default paths to the training and testing data of CALTECH-101
@@ -71,7 +99,7 @@ def __get_caltech_paths(is_incremental: bool):
     mega-batches for training, the second value is a string corresponding to the path of the testing data and the third
     value is an empty array
     """
-    base_folder = "../datasets/101_ObjectCategories_2/"
+    base_folder = "../datasets/101_ObjectCategories/"
     base = base_folder + "train/"
     if is_incremental:
         paths = [base + "Lote{}/".format(x) for x in range(0, 5)]
@@ -79,7 +107,6 @@ def __get_caltech_paths(is_incremental: bool):
         paths = [base]
     validation_dir = base_folder + "test/"
     return paths, validation_dir, []
-
 
 def __get_caltech_256_paths(is_incremental: bool):
     """
@@ -142,6 +169,7 @@ def get_paths_from_dataset(dataset: str, is_incremental: bool):
                const.DATA_CIFAR_10: __get_cifar_paths,
                const.DATA_CALTECH_101: __get_caltech_paths,
                const.DATA_TINY_IMAGENET: __get_tiny_imagenet_paths,
-               const.DATA_CALTECH_256: __get_caltech_256_paths
+               const.DATA_CALTECH_256: __get_caltech_256_paths,
+               const.DATA_CIFAR_100:__get_cifar100_paths
                }
     return options.get(dataset, __get_not_supported_dataset)(is_incremental)

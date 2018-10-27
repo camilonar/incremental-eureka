@@ -55,7 +55,7 @@ class NiN(Network):
          .max_pool(3, 3, 2, 2, padding='VALID', name='pool3')
          .conv(3, 3, 1024, 1, 1, name='conv4')
          .conv(1, 1, 1024, 1, 1, name='mlp7')
-         .conv(1, 1, 101, 1, 1, name='mlp8')
+         .conv(1, 1, 100, 1, 1, name='mlp8')
          .avg_pool(6, 6, 1, 1, padding='VALID', name='pool4'))
 
     def get_output(self):
@@ -143,9 +143,24 @@ class VGGNet(Network):
          .conv(3, 3, 512, 1, 1, padding='SAME', name='conv5_2')
          .conv(3, 3, 512, 1, 1, padding='SAME', name='conv5_3')
          .max_pool(2, 2, 2, 2, padding='SAME', name='pool5')
-         .fc(4096, name='fc6')
-         .fc(4096, name='fc7')
+         .fc(256, name='fc7')
          .fc(101, name='fc8'))
+
+    @property
+    def data_path(self):
+        # TODO ver si esto se puede poner en otra parte para no usar default_paths en el framework principal
+        return paths.get_vgg16_weights_path()
+
+    @property
+    def has_transfer_learning(self):
+        return True
+
+    @property
+    def trainable_layers(self):
+        return ["fc7", "fc8"]
+
+    def load(self, data_path, session, train_layers=None):
+        print("LOADD CORRECTO ")
 
 
 class AlexNet(Network):
@@ -171,7 +186,7 @@ class AlexNet(Network):
          .conv(3, 3, 384, 1, 1, group=2, name='conv4')
          .conv(3, 3, 256, 1, 1, group=2, name='conv5')
          .max_pool(3, 3, 2, 2, padding='VALID', name='pool5')
-         .fc(4096, name='fc6')
+         .fc(2048, name='fc6')
          .dropout(keep_prob=0.5,name="dp1")
          .fc(1024, name='fc7')
          .dropout(keep_prob=0.5, name="dp2")
@@ -188,7 +203,7 @@ class AlexNet(Network):
 
     @property
     def trainable_layers(self):
-        return ["fc7", "fc8"]
+        return ["fc6","fc7", "fc8"]
 
 
 class CifarTFNet(Network):

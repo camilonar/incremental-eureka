@@ -3,20 +3,19 @@ Module for the data pipeline of Cifar-10 dataset
 """
 import tensorflow as tf
 
-from input import cifar_reader as cifar
+from input import cifar100_reader as cifar100
 from input.data import Data
-import utils.constants as const
 
 
-class CifarData(Data):
+class Cifar100Data(Data):
     """
-    Data pipeline for Cifar-10
+    Data pipeline for Cifar-100
     """
-    NUMBER_OF_CLASSES = 10
+    NUMBER_OF_CLASSES = 100
     IMAGE_HEIGHT = 32
     IMAGE_WIDTH = 32
-    IMAGE_WIDTH_RESIZE = 32
-    IMAGE_HEIGHT_RESIZE = 32
+    IMAGE_WIDTH_RESIZE = 224
+    IMAGE_HEIGHT_RESIZE = 224
 
     def __init__(self, general_config,
                  train_dirs: [str],
@@ -26,14 +25,14 @@ class CifarData(Data):
                  image_height=IMAGE_HEIGHT,
                  image_width=IMAGE_WIDTH):
         """ Downloads the data if necessary. """
-        print("Loading Cifar-10 data...")
-        cifar.CifarReader.set_parameters(train_dirs, validation_dir, extras)
-        my_cifar = cifar.CifarReader.get_data()
+        print("Loading Cifar-100 data...")
+        cifar100.Cifar100Reader.set_parameters(train_dirs, validation_dir, extras)
+        my_cifar = cifar100.Cifar100Reader.get_data()
         super().__init__(general_config, my_cifar, image_height, image_width)
         self.data_reader.check_if_downloaded()
         self.batch_queue_capacity = batch_queue_capacity
 
-    def build_train_data_tensor(self, shuffle=True, augmentation=False, skip_count=0):
+    def build_train_data_tensor(self, shuffle=False, augmentation=False, skip_count=0):
         filename, _ = self.data_reader.load_training_data()
         return self.__build_generic_data_tensor(filename, shuffle, True, testing=False,
                                                 skip_count=skip_count)
@@ -75,7 +74,7 @@ class CifarData(Data):
                                                  saturate=True) * (1 / 255.0)
             # Data Augmentation
             if augmentations:
-                distorted_image = tf.random_crop(image, [self.IMAGE_HEIGHT, self.IMAGE_WIDTH, 3])
+                distorted_image = tf.random_crop(image, [self.IMAGE_HEIGHT,self.IMAGE_WIDTH, 3])
                 # Randomly flip the image horizontally.
                 distorted_image = tf.image.random_flip_left_right(distorted_image)
                 # Because these operations are not commutative, consider randomizing
@@ -90,7 +89,7 @@ class CifarData(Data):
                 image = tf.image.per_image_standardization(distorted_image)
 
                 # Set the shapes of tensors.
-                image.set_shape([self.IMAGE_HEIGHT, self.IMAGE_WIDTH, 3])
+                image.set_shape([self.IMAGE_HEIGHT,self.IMAGE_WIDTH, 3])
 
             image = tf.image.resize_images(image, [self.IMAGE_WIDTH_RESIZE, self.IMAGE_HEIGHT_RESIZE])
 
@@ -102,9 +101,12 @@ class CifarData(Data):
         # Creates the dataset
         dataset = tf.data.TFRecordDataset(filename)
         dataset = dataset.map(parser, num_parallel_calls=self.batch_queue_capacity)
+        print(dataset)
+
+
 
         if shuffle:
-            dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=const.SEED)
+            dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=12345)
 
         dataset = dataset.batch(self.curr_config.batch_size)
         # Only does multiple epochs if the dataset is going to be used for training
