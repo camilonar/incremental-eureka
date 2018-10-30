@@ -7,8 +7,7 @@ import tensorflow as tf
 
 from tests.tester import Tester
 from models import NiN
-from models import CifarTFNet
-from input.cifar100_data import Cifar100Data
+from input.data.cifar100_data import Cifar100Data
 import utils.constants as const
 
 
@@ -16,6 +15,7 @@ class Cifar100Tester(Tester):
     """
     Performs tests over CIFAR-100 according to the User input and pre-established configurations
     """
+
     @abstractmethod
     def _prepare_trainer(self):
         pass
@@ -29,7 +29,7 @@ class Cifar100Tester(Tester):
         self.__neural_net = NiN({'data': self.input_tensor})
 
     @abstractmethod
-    def _prepare_config(self, str_optimizer: str):
+    def _prepare_config(self, str_optimizer: str, is_incremental: bool):
         pass
 
     @property

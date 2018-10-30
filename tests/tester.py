@@ -19,7 +19,7 @@ class Tester(ABC):
     """
 
     def __init__(self, train_dirs: [str], validation_dir: str, extras: [str],
-                 summary_interval=100, ckp_interval=200, inc_ckp_path: str = None):
+                 summary_interval=100, ckp_interval=200, checkpoint_key: str = None):
         """
         It creates a Tester object
         :param train_dirs: array of strings corresponding to the paths of each one of the mega-batches for training
@@ -28,7 +28,7 @@ class Tester(ABC):
         :param summary_interval: the interval of iterations at which the summaries are going to be performed
         :param ckp_interval: the interval of iterations at which the evaluations and checkpoints are going to be
         performed. Must be an integer multiple of summary_interval
-        :param inc_ckp_path: a string containing the checkpoint's corresponding mega-batch and iteration if it's
+        :param checkpoint_key: a string containing the checkpoint's corresponding mega-batch and iteration if it's
         required to start the training from a checkpoint. It is expected to follow the format
         "[mega-batch]-[iteration]", e.g. "0-50".
         If there is no checkpoint to be loaded then its value should be None. The default value is None.
@@ -40,7 +40,7 @@ class Tester(ABC):
         self.extras = extras
         self.summary_interval = summary_interval
         self.ckp_interval = ckp_interval
-        self.inc_ckp_path = inc_ckp_path
+        self.checkpoint_key = checkpoint_key
         self.ckp_path = None
         self.trainer = None
 
@@ -82,11 +82,11 @@ class Tester(ABC):
         """
         raise NotImplementedError("The subclass hasn't implemented the _prepare_config method")
 
-    def _prepare_checkpoint_if_required(self, inc_ckp_path: str, str_optimizer: str):
+    def _prepare_checkpoint_if_required(self, checkpoint_key: str, str_optimizer: str):
         """
         This method prepares the checkpoint path given an incomplete checkpoint path. It also checks if the created
         checkpoint path is a valid path.
-        :param inc_ckp_path: the checkpoint path if it's required to start the training from a checkpoint. It is
+        :param checkpoint_key: the checkpoint key if it's required to start the training from a checkpoint. It is
          expected to follow the format "[increment]-[iteration]", e.g. "0-50".
         If there is no checkpoint to be loaded then its value should be None.
         :param str_optimizer: a string that represents the selected trainer/optimizer
@@ -94,8 +94,8 @@ class Tester(ABC):
         path to the checkpoint. If no checkpoint has been requested or if the generated path doesn't exists
         then this method returns None
         """
-        if inc_ckp_path:
-            path, valid = dir.create_full_checkpoint_path(self.dataset_name, str_optimizer, self.inc_ckp_path)
+        if checkpoint_key:
+            path, valid = dir.create_full_checkpoint_path(self.dataset_name, str_optimizer, checkpoint_key)
             if valid:
                 print("The checkpoint will be loaded from: {}".format(path))
                 return path
@@ -123,7 +123,7 @@ class Tester(ABC):
         self._prepare_config(str_trainer, is_incremental)
         self._prepare_data_pipeline()
         self._prepare_neural_network()
-        self.ckp_path = self._prepare_checkpoint_if_required(self.inc_ckp_path, str_trainer)
+        self.ckp_path = self._prepare_checkpoint_if_required(self.checkpoint_key, str_trainer)
         self._prepare_trainer()
 
     def execute_test(self):
@@ -212,7 +212,7 @@ class Tester(ABC):
         checkpoint has been requested. It should return false if a checkpoint has been requested but hasn't been loaded
         into the net
         """
-        if self.inc_ckp_path is None:
+        if self.checkpoint_key is None:
             return True
         return self.ckp_path
 

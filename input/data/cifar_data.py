@@ -3,7 +3,7 @@ Module for the data pipeline of Cifar-10 dataset
 """
 import tensorflow as tf
 
-from input import cifar_reader as cifar
+from input.reader import cifar_reader as cifar
 from input.data import Data
 import utils.constants as const
 
@@ -33,14 +33,14 @@ class CifarData(Data):
         self.data_reader.check_if_downloaded()
         self.batch_queue_capacity = batch_queue_capacity
 
-    def build_train_data_tensor(self, shuffle=True, augmentation=False, skip_count=0):
+    def build_train_data_tensor(self, shuffle=True, augmentation=True, skip_count=0):
         filename, _ = self.data_reader.load_training_data()
-        return self.__build_generic_data_tensor(filename, shuffle, True, testing=False,
+        return self.__build_generic_data_tensor(filename, shuffle, augmentation, testing=False,
                                                 skip_count=skip_count)
 
     def build_test_data_tensor(self, shuffle=False, augmentation=False):
         filename, _ = self.data_reader.load_test_data()
-        return self.__build_generic_data_tensor(filename, shuffle, True, testing=True)
+        return self.__build_generic_data_tensor(filename, shuffle, augmentation, testing=True)
 
     def __build_generic_data_tensor(self, filename, shuffle, augmentations, testing, skip_count=0):
         """

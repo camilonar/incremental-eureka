@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from tests.tester import Tester
 from models import CaffeNet
-from input.imagenet_data import ImagenetData
+from input.data.imagenet_data import ImagenetData
 import utils.constants as const
 
 

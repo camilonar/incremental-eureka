@@ -6,8 +6,8 @@ from abc import abstractmethod
 import tensorflow as tf
 
 from tests.tester import Tester
-from models import LeNet, AlexNet
-from input.mnist_data import MnistData
+from models import LeNet
+from input.data.mnist_data import MnistData
 import utils.constants as const
 
 

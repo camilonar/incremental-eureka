@@ -2,7 +2,7 @@
 Module for the data pipeline of MNIST dataset.
 """
 import tensorflow as tf
-from input import mnist_reader as mnist
+from input.reader import mnist_reader as mnist
 
 from input.data import Data
 import utils.constants as const

@@ -6,8 +6,8 @@ from abc import abstractmethod
 import tensorflow as tf
 
 from tests.tester import Tester
-from models import NiN, AlexNet
-from input.caltech_data import CaltechData
+from models import AlexNet
+from input.data.caltech_data import CaltechData
 import utils.constants as const
 
 
@@ -43,7 +43,6 @@ class CaltechTester(Tester):
     @property
     def neural_net(self):
         return self.__neural_net
-
 
     @property
     def input_tensor(self):

@@ -4,7 +4,7 @@ Module for the data pipeline of Caltech-101 dataset
 
 import tensorflow as tf
 
-from input import caltech_reader as caltech
+from input.reader import caltech_reader as caltech
 from input.data import Data
 import utils.constants as const
 
@@ -78,7 +78,8 @@ class CaltechData(Data):
                 single_image = tf.random_crop(single_image, [self.IMAGE_HEIGHT, self.IMAGE_WIDTH, self.NUM_OF_CHANNELS])
                 single_image = tf.image.random_flip_left_right(single_image)
 
-                single_image = tf.image.per_image_standardization(single_image)
+            single_image = tf.image.per_image_standardization(single_image)
+
             return single_image, single_target
 
         # Creates the dataset

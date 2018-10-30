@@ -4,7 +4,7 @@ Module for the data pipeline of Caltech-101 dataset
 
 import tensorflow as tf
 
-from input import caltech_256_reader as caltech256
+from input.reader import caltech_256_reader as caltech256
 from input.data import Data
 import utils.constants as const
 

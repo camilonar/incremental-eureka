@@ -28,7 +28,6 @@ class Cifar100RMSPropTester(Cifar100Tester):
             train_conf = TrainConfig(100, batch_size=128)
             self.general_config.add_train_conf(train_conf)
 
-
     @property
     def general_config(self):
         return self.__general_config

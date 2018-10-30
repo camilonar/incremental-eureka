@@ -27,7 +27,7 @@ print(target_batch.shape)
 
 import tensorflow as tf
 
-from input import imagenet_reader as imagenet
+from input.reader import imagenet_reader as imagenet
 from input.data import Data
 import utils.constants as const
 

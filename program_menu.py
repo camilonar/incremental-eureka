@@ -1,12 +1,10 @@
 """
-This module acts as an interface for performing the tests
+This module acts as a menu interface for performing the tests
 """
-import asyncio
-import sys
 
 import utils.constants as const
 import utils.default_paths as paths
-from tests_impl.testers import Testers
+import utils.test_helper as helper
 
 
 def print_menu():
@@ -322,58 +320,6 @@ def configure_seed(curr_seed: int):
             print("Invalid value for the seed. Must be a float")
 
 
-def print_config(dataset: str, optimizer: str, checkpoint: str, s_interval: int, ckp_interval: int, seed: int,
-                 is_incremental: bool):
-    """
-        Prints the configuration selected by the user
-        :param dataset: a string representing the dataset that has been configured by the user
-        :param optimizer: a string representing the optimizer that has been configured by the user
-        :param checkpoint: a string representing a checkpoint. Must be None if no checkpoint has been configured
-        :param s_interval: the summary interval that has been configured by the user
-        :param ckp_interval: the checkpoint interval that has been configured by the user
-        if the dataset doesn't have any dataset-specific path.
-        :param seed: the seed for random numbers
-        :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
-    """
-    print("--------------------------------------------------------")
-    print("\n\nStarting test with the following configuration:\n")
-    print("Dataset: {}".format(dataset))
-    print("Optimizer: {}".format(optimizer))
-    print("Checkpoint: {}".format(checkpoint))
-    print("Summary interval: {} iterations".format(s_interval))
-    print("Checkpoint interval: {} iterations".format(ckp_interval))
-    print("Seed: {}".format(seed))
-    print("The test is {}".format("INCREMENTAL " if is_incremental else "NOT incremental"))
-    print("\n")
-
-    input("To continue with the test press any key...")
-
-
-def perform_test(dataset: str, optimizer: str, checkpoint: str, s_interval: int, ckp_interval: int, seed: int,
-                 is_incremental: bool, train_dirs: [str], validation_dir: str, extras: [str]):
-    """
-    Prepares and performs the test according to the configuration given by the user
-    :param dataset: a string representing the dataset that has been configured by the user
-    :param optimizer: a string representing the optimizer that has been configured by the user
-    :param checkpoint: a string representing a checkpoint. Must be None if no checkpoint has been configured
-    :param s_interval: the summary interval that has been configured by the user
-    :param ckp_interval: the checkpoint interval that has been configured by the user
-    :param seed: the seed for random numbers
-    :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
-    :param train_dirs: array of strings corresponding to the paths of each one of the mega-batches for training
-    :param validation_dir: a string corresponding to the path of the testing data
-    :param extras: an array of strings corresponding to paths specific for each dataset. It should be an empty array
-    if the dataset doesn't have any dataset-specific path.
-    :return: None
-    """
-    const.SEED = seed
-    factory = Testers.get_tester(optimizer, dataset)
-    tester = factory(train_dirs, validation_dir, extras, s_interval, ckp_interval, checkpoint)
-
-    tester.prepare_all(optimizer, is_incremental)
-    tester.execute_test()
-
-
 # TODO permitir que el usuario escoja los paths para el dataset
 def main():
     """
@@ -383,9 +329,11 @@ def main():
     is_incremental = const.IS_INCREMENTAL
     dataset, optimizer, checkpoint, s_interval, ckp_interval, seed = ask_for_configuration()
     train_dirs, validation_dir, extras = paths.get_paths_from_dataset(dataset, is_incremental)
-    print_config(dataset, optimizer, checkpoint, s_interval, ckp_interval, seed, is_incremental)
-    perform_test(dataset, optimizer, checkpoint, s_interval, ckp_interval, seed, is_incremental,
+    helper.print_config(dataset, optimizer, checkpoint, s_interval, ckp_interval, seed, is_incremental,
+                 train_dirs, validation_dir)
+    helper.perform_test(dataset, optimizer, checkpoint, s_interval, ckp_interval, seed, is_incremental,
                  train_dirs, validation_dir, extras)
+    return 0
 
 
 if __name__ == '__main__':

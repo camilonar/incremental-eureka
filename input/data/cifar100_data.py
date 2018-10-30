@@ -3,7 +3,7 @@ Module for the data pipeline of Cifar-10 dataset
 """
 import tensorflow as tf
 
-from input import cifar100_reader as cifar100
+from input.reader import cifar100_reader as cifar100
 from input.data import Data
 
 
@@ -32,20 +32,21 @@ class Cifar100Data(Data):
         self.data_reader.check_if_downloaded()
         self.batch_queue_capacity = batch_queue_capacity
 
-    def build_train_data_tensor(self, shuffle=False, augmentation=False, skip_count=0):
+    def build_train_data_tensor(self, shuffle=False, augmentation=True, skip_count=0):
         filename, _ = self.data_reader.load_training_data()
-        return self.__build_generic_data_tensor(filename, shuffle, True, testing=False,
+        return self.__build_generic_data_tensor(filename, shuffle, augmentation, testing=False,
                                                 skip_count=skip_count)
 
     def build_test_data_tensor(self, shuffle=False, augmentation=False):
         filename, _ = self.data_reader.load_test_data()
-        return self.__build_generic_data_tensor(filename, shuffle, True, testing=True)
+        return self.__build_generic_data_tensor(filename, shuffle, augmentation, testing=True)
 
     def __build_generic_data_tensor(self, filename, shuffle, augmentations, testing, skip_count=0):
         """
         Creates the input pipeline and performs some preprocessing.
 
         """
+
         def parser(serialized_example):
             """
             Parses a single tf.Example into image and label tensors.
@@ -74,7 +75,7 @@ class Cifar100Data(Data):
                                                  saturate=True) * (1 / 255.0)
             # Data Augmentation
             if augmentations:
-                distorted_image = tf.random_crop(image, [self.IMAGE_HEIGHT,self.IMAGE_WIDTH, 3])
+                distorted_image = tf.random_crop(image, [self.IMAGE_HEIGHT, self.IMAGE_WIDTH, 3])
                 # Randomly flip the image horizontally.
                 distorted_image = tf.image.random_flip_left_right(distorted_image)
                 # Because these operations are not commutative, consider randomizing
@@ -89,9 +90,10 @@ class Cifar100Data(Data):
                 image = tf.image.per_image_standardization(distorted_image)
 
                 # Set the shapes of tensors.
-                image.set_shape([self.IMAGE_HEIGHT,self.IMAGE_WIDTH, 3])
+                image.set_shape([self.IMAGE_HEIGHT, self.IMAGE_WIDTH, 3])
 
             image = tf.image.resize_images(image, [self.IMAGE_WIDTH_RESIZE, self.IMAGE_HEIGHT_RESIZE])
+            image = tf.image.per_image_standardization(image)
 
             label = tf.cast(features['label'], tf.int32)
             label = tf.one_hot(label, depth=self.NUMBER_OF_CLASSES)
@@ -101,9 +103,6 @@ class Cifar100Data(Data):
         # Creates the dataset
         dataset = tf.data.TFRecordDataset(filename)
         dataset = dataset.map(parser, num_parallel_calls=self.batch_queue_capacity)
-        print(dataset)
-
-
 
         if shuffle:
             dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=12345)

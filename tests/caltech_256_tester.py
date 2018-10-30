@@ -6,8 +6,8 @@ from abc import abstractmethod
 import tensorflow as tf
 
 from tests.tester import Tester
-from models import NiN, AlexNet, CaffeNet
-from input.caltech_256_data import Caltech256Data
+from models import CaffeNet
+from input.data.caltech_256_data import Caltech256Data
 import utils.constants as const
 
 
