@@ -22,6 +22,5 @@ class RMSPropTrainer(Trainer):
         return tf.losses.softmax_cross_entropy(tensor_y, net_output)
 
     def _create_optimizer(self, config: GeneralConfig, loss: tf.Tensor, var_list=None):
-
         return tf.train.RMSPropOptimizer(config.learn_rate).minimize(loss, var_list=var_list)
 

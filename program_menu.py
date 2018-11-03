@@ -333,9 +333,9 @@ def main():
     dataset, optimizer, checkpoint, s_interval, ckp_interval, seed = ask_for_configuration()
     train_dirs, validation_dir, extras = paths.get_paths_from_dataset(dataset, is_incremental)
     helper.print_config(dataset, optimizer, checkpoint, s_interval, ckp_interval, seed, is_incremental,
-                 train_dirs, validation_dir)
+                        train_dirs, validation_dir)
     helper.perform_test(dataset, optimizer, checkpoint, s_interval, ckp_interval, seed, is_incremental,
-                 train_dirs, validation_dir, extras)
+                        train_dirs, validation_dir, extras)
     return 0
 
 

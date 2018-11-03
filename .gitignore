@@ -104,3 +104,5 @@ ENV/
 checkpoints/
 summaries/
 \.idea/
+
+checkpoint/

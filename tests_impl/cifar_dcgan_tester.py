@@ -21,10 +21,10 @@ class CifarDCGANTester(CifarTester):
         # Creates configuration for 5 mega-batches
         if is_incremental:
             for i in range(5):
-                train_conf = TrainConfig(300, batch_size=128)
+                train_conf = TrainConfig(300, batch_size=64)
                 self.general_config.add_train_conf(train_conf)
         else:
-            train_conf = TrainConfig(300, batch_size=128)
+            train_conf = TrainConfig(300, batch_size=64)
             self.general_config.add_train_conf(train_conf)
 
     @property

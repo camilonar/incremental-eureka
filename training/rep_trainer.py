@@ -16,7 +16,7 @@ class RepresentativesTrainer(Trainer):
     def _create_loss(self, tensor_y: tf.Tensor, net_output: tf.Tensor):
         pass
 
-    def _create_optimizer(self, config: GeneralConfig, loss: tf.Tensor):
+    def _create_optimizer(self, config: GeneralConfig, loss: tf.Tensor, var_list=None):
         pass
 
     def _train_batch(self, sess, image_batch, target_batch, tensor_x: tf.Tensor, tensor_y: tf.Tensor,

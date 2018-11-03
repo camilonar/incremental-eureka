@@ -48,8 +48,6 @@ class GeneralConfig(object):
         self.config_name = config_name
         self.model_name = model_name
         self.train_configurations = []  # It stores the configurations for each mega batch of training data
-        # model_name = 'vgg_16'  # choose model
-        # model = staticmethod(globals()[model_name])  # gets model by name
 
     def add_train_conf(self, train_conf: TrainConfig):
         """
