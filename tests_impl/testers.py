@@ -19,6 +19,7 @@ from tests_impl.imagenet_rms_tester import ImagenetRMSPropTester
 from tests_impl.mnist_dcgan_tester import MnistDCGANTester
 from tests_impl.mnist_rep_tester import MnistRepTester
 from tests_impl.mnist_rms_tester import MnistRMSPropTester
+from tests_impl.fashion_mnist_rms_tester import FashionMnistRMSPropTester
 
 
 
@@ -36,7 +37,8 @@ class Testers(containers.DeclarativeContainer):
                                const.DATA_TINY_IMAGENET: providers.Factory(ImagenetRMSPropTester),
                                const.DATA_MNIST: providers.Factory(MnistRMSPropTester),
                                const.DATA_CALTECH_256:providers.Factory(Caltech256RMSPropTester),
-                               const.DATA_CIFAR_100: providers.Factory(Cifar100RMSPropTester)
+                               const.DATA_CIFAR_100: providers.Factory(Cifar100RMSPropTester),
+                               const.DATA_FASHION_MNIST: providers.Factory(FashionMnistRMSPropTester)
                                 },
                const.TR_DCGAN: {const.DATA_CALTECH_101: providers.Factory(CaltechDCGANTester),
                                 const.DATA_CIFAR_10: providers.Factory(CifarDCGANTester),

@@ -52,6 +52,27 @@ def __get_mnist_paths(is_incremental: bool, base_folder: str = const.MNIST_PATH)
     return tr_paths, test_path, []
 
 
+def __get_fashion_mnist_paths(is_incremental: bool, base_folder: str = const.FASHION_MNIST_PATH):
+    """
+    It gives the default paths to the training and testing data of FASHIONMNIST
+    :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
+    :param base_folder: the directory where the datasets are being stored. E.g. if a dataset is stored in
+    ../datasets/FASHION-MNIST, then base_folder should be "../datasets/FASHION-MNIST"
+    :return: a tuple, where the first value is an array of strings corresponding to the paths of each one of the
+    mega-batches for training, the second value is a string corresponding to the path of the testing data, and the third
+    value is an empty array
+    """
+    base = "train-"
+    ext = ".tfrecords"
+    name_tr = os.path.join(base_folder, base)
+    tr_paths = [name_tr + "{}".format(x) + ext for x in range(1, 6)]
+
+    if not is_incremental:
+        tr_paths = [tr_paths]
+
+    test_path = os.path.join(base_folder, "test" + ext)
+    return tr_paths, test_path, []
+
 def __get_cifar_paths(is_incremental: bool, base_folder: str = const.CIFAR_10_PATH):
     """
     It gives the default paths to the training and testing data of CIFAR-10
@@ -181,7 +202,8 @@ def get_paths_from_dataset(dataset: str, is_incremental: bool, base_folder: str 
                const.DATA_CALTECH_101: __get_caltech_paths,
                const.DATA_TINY_IMAGENET: __get_tiny_imagenet_paths,
                const.DATA_CALTECH_256: __get_caltech_256_paths,
-               const.DATA_CIFAR_100: __get_cifar100_paths
+               const.DATA_CIFAR_100: __get_cifar100_paths,
+               const.DATA_FASHION_MNIST: __get_fashion_mnist_paths
                }
     if base_folder:
         return options.get(dataset, __get_not_supported_dataset)(is_incremental, base_folder)

@@ -1,19 +1,19 @@
 """
-Module for performing tests over CIFAR-10
+Module for performing tests over MNIST
 """
 from abc import abstractmethod
 
 import tensorflow as tf
 
 from tests.tester import Tester
-from models import NiN, SimpleNet
-from input.data.cifar100_data import Cifar100Data
+from models import LeNet
+from input.data.fashion_mnist_data import   FashionMnistData
 import utils.constants as const
 
 
-class Cifar100Tester(Tester):
+class FashionMnistTester(Tester):
     """
-    Performs tests over CIFAR-100 according to the User input and pre-established configurations
+    Performs tests over Fashion-MNIST according to the User input and pre-established configurations
     """
 
     @abstractmethod
@@ -21,12 +21,12 @@ class Cifar100Tester(Tester):
         pass
 
     def _prepare_data_pipeline(self):
-        self.data_pipeline = Cifar100Data(self.general_config, self.train_dirs, self.validation_dir, self.extras)
+        self.data_pipeline = FashionMnistData(self.general_config, self.train_dirs, self.validation_dir, self.extras)
 
     def _prepare_neural_network(self):
-        self.__input_tensor = tf.placeholder(tf.float32, [None, 224, 224, 3])
-        self.__output_tensor = tf.placeholder(tf.float32, [None, 100])
-        self.__neural_net = SimpleNet({'data': self.input_tensor})
+        self.__input_tensor = tf.placeholder(tf.float32, [None, 32, 32, 1])
+        self.__output_tensor = tf.placeholder(tf.float32, [None, 10])
+        self.__neural_net = LeNet({'data': self.input_tensor})
 
     @abstractmethod
     def _prepare_config(self, str_optimizer: str, is_incremental: bool):
@@ -34,7 +34,7 @@ class Cifar100Tester(Tester):
 
     @property
     def dataset_name(self):
-        return const.DATA_CIFAR_100
+        return const.DATA_FASHION_MNIST
 
     @property
     def data_input(self):

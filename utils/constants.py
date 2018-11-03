@@ -7,6 +7,7 @@ import os
 Names for the datasets
 """
 DATA_MNIST = "MNIST"
+DATA_FASHION_MNIST = "FASHION-MNIST"
 DATA_CIFAR_10 = "CIFAR-10"
 DATA_CIFAR_100 = "CIFAR-100"
 DATA_CALTECH_101 = "CALTECH-101"
@@ -33,6 +34,7 @@ Default location for datasets
 """
 __DATASET_PATH = os.path.join("..", "datasets")
 MNIST_PATH = os.path.join(__DATASET_PATH, "MNIST")
+FASHION_MNIST_PATH = os.path.join(__DATASET_PATH, "FASHION-MNIST")
 CIFAR_10_PATH = os.path.join(__DATASET_PATH, "cifar10")
 CIFAR_100_PATH = os.path.join(__DATASET_PATH, "cifar-100")
 CALTECH_101_PATH = os.path.join(__DATASET_PATH, "101_ObjectCategories")

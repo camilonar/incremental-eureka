@@ -90,6 +90,7 @@ def configure_dataset_and_neural_net(curr_dataset: str):
 
     while True:
         print("[M] MNIST (uses LeNet)")
+        print("[F] FASHION-MNIST (uses LeNet)")
         print("[C] CIFAR-10 (uses TFModel)")
         print("[D] CIFAR-100 (uses NiN)")
         print("[L] CALTECH-101 (uses AlexNet)")
@@ -100,6 +101,8 @@ def configure_dataset_and_neural_net(curr_dataset: str):
             response = const.DATA_MNIST
         elif response == 'C':
             response = const.DATA_CIFAR_10
+        elif response == 'F':
+            response = const.DATA_FASHION_MNIST
         elif response == 'L':
             response = const.DATA_CALTECH_101
         elif response == 'D':
