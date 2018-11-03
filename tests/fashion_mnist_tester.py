@@ -6,7 +6,7 @@ from abc import abstractmethod
 import tensorflow as tf
 
 from tests.tester import Tester
-from models import LeNet
+from models import LeNet, FashionMnistNet
 from input.data.fashion_mnist_data import   FashionMnistData
 import utils.constants as const
 
@@ -24,7 +24,7 @@ class FashionMnistTester(Tester):
         self.data_pipeline = FashionMnistData(self.general_config, self.train_dirs, self.validation_dir, self.extras)
 
     def _prepare_neural_network(self):
-        self.__input_tensor = tf.placeholder(tf.float32, [None, 32, 32, 1])
+        self.__input_tensor = tf.placeholder(tf.float32, [None, 28, 28, 1])
         self.__output_tensor = tf.placeholder(tf.float32, [None, 10])
         self.__neural_net = LeNet({'data': self.input_tensor})
 

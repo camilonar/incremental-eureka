@@ -15,8 +15,8 @@ class FashionMnistData(Data):
     NUMBER_OF_CLASSES = 10
     IMAGE_HEIGHT = 28
     IMAGE_WIDTH = 28
-    IMAGE_WIDTH_RESIZE = 32
-    IMAGE_HEIGHT_RESIZE = 32
+    IMAGE_WIDTH_RESIZE = 28
+    IMAGE_HEIGHT_RESIZE = 28
 
     def __init__(self, general_config,
                  train_dirs: [str],
