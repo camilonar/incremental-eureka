@@ -6,7 +6,7 @@ from tests_impl.testers import Testers
 
 
 def print_config(dataset: str, optimizer: str, checkpoint_key: str, s_interval: int, ckp_interval: int, seed: int,
-                 is_incremental: bool, train_dirs: [str], validation_dir: str):
+                 is_incremental: bool, train_dirs: [str], validation_dir: str, is_menu: bool = True):
     """
         Prints the configuration selected by the user
         :param dataset: a string representing the dataset that has been configured by the user
@@ -19,6 +19,7 @@ def print_config(dataset: str, optimizer: str, checkpoint_key: str, s_interval: 
         :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
         :param train_dirs: array of strings corresponding to the paths of each one of the mega-batches for training
         :param validation_dir: a string corresponding to the path of the testing data
+        :param is_menu: boolean value. If set to True the menu version is used (asks for extra input)
     """
     print("\n--------------------------------------------------------")
     print("Starting test with the following configuration:\n")
@@ -33,7 +34,8 @@ def print_config(dataset: str, optimizer: str, checkpoint_key: str, s_interval: 
     print("-Validation data directory: \n\t{}".format(validation_dir))
     print("--------------------------------------------------------\n")
 
-    input("To continue with the test press any key...")
+    if is_menu:
+        input("To continue with the test press any key...")
 
 
 def perform_test(dataset: str, optimizer: str, checkpoint_key: str, s_interval: int, ckp_interval: int, seed: int,

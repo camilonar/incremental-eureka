@@ -16,7 +16,7 @@ def conv_out_size_same(size, stride):
 
 
 class DCGAN(object):
-    def __init__(self, sess, input_height=108, input_width=108, crop=True,
+    def __init__(self, sess, input_height=108, input_width=108,
                  batch_size=64, sample_num=64, output_height=64, output_width=64,
                  y_dim=None, z_dim=100, gf_dim=64, df_dim=64,
                  gfc_dim=1024, dfc_dim=1024, c_dim=3, dataset_name='default',
@@ -35,7 +35,6 @@ class DCGAN(object):
           c_dim: (optional) Dimension of image color. For grayscale input, set to 1. [3]
         """
         self.sess = sess
-        self.crop = crop
 
         self.batch_size = batch_size
         self.sample_num = sample_num
@@ -85,10 +84,7 @@ class DCGAN(object):
         else:
             self.y = None
 
-        if self.crop:
-            image_dims = [self.output_height, self.output_width, self.c_dim]
-        else:
-            image_dims = [self.input_height, self.input_width, self.c_dim]
+        image_dims = [self.input_height, self.input_width, self.c_dim]
 
         self.inputs = tf.placeholder(
             tf.float32, [self.batch_size] + image_dims, name='real_images')
