@@ -16,7 +16,7 @@ class MnistRepTester(MnistTester):
                                               self.output_tensor, self.ckp_path)
 
     def _prepare_config(self, str_optimizer: str, is_incremental: bool):
-        self.__general_config = GeneralConfig(0.01, self.summary_interval, self.ckp_interval,
+        self.__general_config = GeneralConfig(0.0001, self.summary_interval, self.ckp_interval,
                                               config_name=str_optimizer, model_name=self.dataset_name)
         # Creates configuration for 5 mega-batches
         if is_incremental:
