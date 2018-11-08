@@ -1,19 +1,19 @@
 """
-Module for performing tests over Imagenet
+Module for performing experiments over Caltech-101
 """
 from abc import abstractmethod
 
 import tensorflow as tf
 
-from tests.tester import Tester
+from experiments.experiment import Experiment
 from models import CaffeNet
-from input.data.imagenet_data import ImagenetData
+from input.data.caltech_256_data import Caltech256Data
 import utils.constants as const
 
 
-class ImagenetTester(Tester):
+class Caltech256Experiment(Experiment):
     """
-    Performs tests over Imagenet according to the User input and pre-established configurations
+    Performs experiments over Caltech-256 according to the User input and pre-established configurations
     """
 
     @abstractmethod
@@ -21,11 +21,11 @@ class ImagenetTester(Tester):
         pass
 
     def _prepare_data_pipeline(self):
-        self.data_pipeline = ImagenetData(self.general_config, self.train_dirs, self.validation_dir, self.extras)
+        self.data_pipeline = Caltech256Data(self.general_config, self.train_dirs, self.validation_dir)
 
     def _prepare_neural_network(self):
-        self.__input_tensor = tf.placeholder(tf.float32, [None, 128, 128, 3])
-        self.__output_tensor = tf.placeholder(tf.float32, [None, 200])
+        self.__input_tensor = tf.placeholder(tf.float32, [None, 224, 224, 3])
+        self.__output_tensor = tf.placeholder(tf.float32, [None, 256])
         self.__neural_net = CaffeNet({'data': self.input_tensor})
 
     @abstractmethod
@@ -34,7 +34,7 @@ class ImagenetTester(Tester):
 
     @property
     def dataset_name(self):
-        return const.DATA_TINY_IMAGENET
+        return const.DATA_CALTECH_256
 
     @property
     def data_input(self):

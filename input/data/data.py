@@ -8,7 +8,7 @@ training
 """
 from abc import abstractmethod, ABC
 from input.reader import Reader
-from training.train_conf import GeneralConfig
+from training.general_config import GeneralConfig
 
 
 class Data(ABC):

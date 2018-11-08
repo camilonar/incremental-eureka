@@ -2,7 +2,7 @@
 Module with useful functions for performing a test
 """
 import utils.constants as const
-from tests_impl.testers import Testers
+from experiments_impl.experiments import Experiments
 
 
 def print_config(dataset: str, optimizer: str, checkpoint_key: str, s_interval: int, ckp_interval: int, seed: int,
@@ -56,7 +56,7 @@ def perform_test(dataset: str, optimizer: str, checkpoint_key: str, s_interval: 
     :return: None
     """
     const.SEED = seed
-    factory = Testers.get_tester(optimizer, dataset)
+    factory = Experiments.get_experiment(optimizer, dataset)
     tester = factory(train_dirs, validation_dir, extras, s_interval, ckp_interval, checkpoint_key)
 
     tester.prepare_all(optimizer, is_incremental)

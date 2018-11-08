@@ -31,7 +31,7 @@ class Caltech256Data(Data):
         my_caltech = caltech256.Caltech256Reader.get_data()
         super().__init__(general_config, my_caltech, image_height, image_width)
         self.batch_queue_capacity = batch_queue_capacity + 3 * self.curr_config.batch_size
-        self.data_reader.check_if_downloaded()
+        self.data_reader.check_if_data_exists()
 
     def build_train_data_tensor(self, shuffle=True, augmentation=False, skip_count=0):
         img_path, cls = self.data_reader.load_training_data()

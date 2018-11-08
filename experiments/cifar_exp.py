@@ -1,19 +1,19 @@
 """
-Module for performing tests over CIFAR-10
+Module for performing experiments over CIFAR-10
 """
 from abc import abstractmethod
 
 import tensorflow as tf
 
-from tests.tester import Tester
+from experiments.experiment import Experiment
 from models import CifarTFNet
 from input.data.cifar_data import CifarData
 import utils.constants as const
 
 
-class CifarTester(Tester):
+class CifarExperiment(Experiment):
     """
-    Performs tests over CIFAR-10 according to the User input and pre-established configurations
+    Performs experiments over CIFAR-10 according to the User input and pre-established configurations
     """
 
     @abstractmethod

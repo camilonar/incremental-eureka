@@ -1,14 +1,15 @@
 """
-Tester for Cifar-10 dataset using the training algorithm that uses artificial sampling with DCGAN
+Experiment for Tiny Imagenet dataset using the training algorithm that uses artificial sampling with DCGAN
 """
-from tests.cifar_tester import CifarTester
+from experiments.imagenet_exp import ImagenetExperiment
 from training.dcgan_trainer import DCGANTrainer
-from training.train_conf import GeneralConfig, TrainConfig
+from training.general_config import GeneralConfig
+from training.increment_config import IncrementConfig
 
 
-class CifarDCGANTester(CifarTester):
+class ImagenetDCGANExperiment(ImagenetExperiment):
     """
-    Performs tests over Cifar-10 dataset using the training algorithm that uses artificial sampling with DCGAN
+    Performs experiments over Tiny Imagenet dataset using the training algorithm that uses artificial sampling with DCGAN
     """
 
     def _prepare_trainer(self):
@@ -21,10 +22,10 @@ class CifarDCGANTester(CifarTester):
         # Creates configuration for 5 mega-batches
         if is_incremental:
             for i in range(5):
-                train_conf = TrainConfig(300, batch_size=64)
+                train_conf = IncrementConfig(100, batch_size=100)
                 self.general_config.add_train_conf(train_conf)
         else:
-            train_conf = TrainConfig(300, batch_size=64)
+            train_conf = IncrementConfig(100, batch_size=100)
             self.general_config.add_train_conf(train_conf)
 
     @property

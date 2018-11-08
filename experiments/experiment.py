@@ -1,5 +1,5 @@
 """
-Module that helps with the execution of tests.
+Module that helps with the execution of experiments.
 Features:
 1. Prepares the ambient for testing
 2. Executes a test training a neural network over a dataset according to a flexible configuration
@@ -13,15 +13,15 @@ import numpy as np
 import utils.constants as const
 
 
-class Tester(ABC):
+class Experiment(ABC):
     """
-    This class helps with the configuration of the pre-established tests.
+    This class helps with the configuration of the pre-established experiments.
     """
 
     def __init__(self, train_dirs: [str], validation_dir: str, extras: [str],
                  summary_interval=100, ckp_interval=200, checkpoint_key: str = None):
         """
-        It creates a Tester object
+        It creates an Experiment object
         :param train_dirs: array of strings corresponding to the paths of each one of the mega-batches for training
         :param validation_dir: a string corresponding to the path of the testing data
         :param extras: an array of strings corresponding to paths specific for each dataset. It should be an empty array
@@ -47,7 +47,7 @@ class Tester(ABC):
     @abstractmethod
     def _prepare_data_pipeline(self):
         """
-        It prepares the data pipeline according to the configuration of each Tester
+        It prepares the data pipeline according to the configuration of each Experiment
         :return: None
         """
         raise NotImplementedError("The subclass hasn't implemented the _prepare_data_pipeline method")
@@ -56,7 +56,7 @@ class Tester(ABC):
     def _prepare_neural_network(self):
         """
         It creates and stores the proper neural network according to the assigned dataset of the tester.
-        E.g. if the Tester performs tests over ImageNet then it should create a CaffeNet, but if the tests are over
+        E.g. if the Experiment performs experiments over ImageNet then it should create a CaffeNet, but if the experiments are over
         MNIST then it should create a LeNet.
         :return: None
         """
@@ -104,8 +104,8 @@ class Tester(ABC):
 
     def prepare_all(self, str_trainer: str, is_incremental: bool):
         """
-        It prepares the Tester object for the test, according to the various parameters given up to this point and
-        also according to the corresponding dataset to which the concrete Tester is associated.
+        It prepares the Experiment object for the test, according to the various parameters given up to this point and
+        also according to the corresponding dataset to which the concrete Experiment is associated.
         This method calls ALL the _prepare methods defined in the base class.
         :param str_trainer: a string that represents the chosen Trainer. Currently supported strings are:
             -OPT_BASE: for a simple RMSProp
@@ -131,14 +131,14 @@ class Tester(ABC):
         Calls the trainer to perform the test with the given configuration. It should raise an exception if the _prepare
         methods (or prepare_all) hasn't been executed before this method.
         :return: None
-        :raises TestNotPreparedError: if the Tester hasn't been prepared before the execution of this method
+        :raises TestNotPreparedError: if the Experiment hasn't been prepared before the execution of this method
         """
         self.__check_conditions_for_test()
         self.trainer.train()
 
     def __check_conditions_for_test(self):
         """
-        Checks if the Tester is ready to perform a test. The evaluated requirements are:
+        Checks if the Experiment is ready to perform a test. The evaluated requirements are:
         -The data pipeline
         -The Neural Network
         -The Optimizer
@@ -171,8 +171,8 @@ class Tester(ABC):
     @abstractmethod
     def dataset_name(self):
         """
-        Getter for the name of the dataset associated with the Tester
-        :return: the name of the dataset of the Tester
+        Getter for the name of the dataset associated with the Experiment
+        :return: the name of the dataset of the Experiment
         """
         pass
 
@@ -181,7 +181,7 @@ class Tester(ABC):
     def data_input(self):
         """
         Getter for the Data pipeline object
-        :return: the data pipeline object of the Tester
+        :return: the data pipeline object of the Experiment
         """
         pass
 
@@ -190,7 +190,7 @@ class Tester(ABC):
     def neural_net(self):
         """
         Getter for the Neural network object
-        :return: the Neural network object of the Tester
+        :return: the Neural network object of the Experiment
         """
         pass
 
@@ -199,7 +199,7 @@ class Tester(ABC):
     def general_config(self):
         """
         Getter for the GeneralTraining object
-        :return: the GeneralTraining object of the Testers
+        :return: the GeneralTraining object of the Experiments
         """
         pass
 
@@ -220,7 +220,7 @@ class Tester(ABC):
     @abstractmethod
     def input_tensor(self):
         """
-        Getter for the input tensor of the neural network used by the Tester
+        Getter for the input tensor of the neural network used by the Experiment
         :return: a Tensor that was assigned as 'data' when the network was created
         """
         pass

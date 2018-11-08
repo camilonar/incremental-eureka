@@ -31,7 +31,7 @@ class MnistData(Data):
         my_mnist = mnist.MnistReader.get_data()
         super().__init__(general_config, my_mnist, image_height, image_width)
         self.batch_queue_capacity = batch_queue_capacity
-        self.data_reader.check_if_downloaded()
+        self.data_reader.check_if_data_exists()
 
     def build_train_data_tensor(self, shuffle=True, augmentation=False, skip_count=0):
         filename, _ = self.data_reader.load_training_data()

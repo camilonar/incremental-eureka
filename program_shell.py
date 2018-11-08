@@ -1,5 +1,5 @@
 """
-This module acts as a shell interface for performing the tests
+This module acts as a shell interface for performing the experiments
 """
 import argparse
 import utils.constants as const

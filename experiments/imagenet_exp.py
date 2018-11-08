@@ -1,19 +1,19 @@
 """
-Module for performing tests over MNIST
+Module for performing experiments over Imagenet
 """
 from abc import abstractmethod
 
 import tensorflow as tf
 
-from tests.tester import Tester
-from models import LeNet
-from input.data.mnist_data import MnistData
+from experiments.experiment import Experiment
+from models import CaffeNet
+from input.data.imagenet_data import ImagenetData
 import utils.constants as const
 
 
-class MnistTester(Tester):
+class ImagenetExperiment(Experiment):
     """
-    Performs tests over MNIST according to the User input and pre-established configurations
+    Performs experiments over Imagenet according to the User input and pre-established configurations
     """
 
     @abstractmethod
@@ -21,12 +21,12 @@ class MnistTester(Tester):
         pass
 
     def _prepare_data_pipeline(self):
-        self.data_pipeline = MnistData(self.general_config, self.train_dirs, self.validation_dir, self.extras)
+        self.data_pipeline = ImagenetData(self.general_config, self.train_dirs, self.validation_dir, self.extras)
 
     def _prepare_neural_network(self):
-        self.__input_tensor = tf.placeholder(tf.float32, [None, 32, 32, 1])
-        self.__output_tensor = tf.placeholder(tf.float32, [None, 10])
-        self.__neural_net = LeNet({'data': self.input_tensor})
+        self.__input_tensor = tf.placeholder(tf.float32, [None, 128, 128, 3])
+        self.__output_tensor = tf.placeholder(tf.float32, [None, 200])
+        self.__neural_net = CaffeNet({'data': self.input_tensor})
 
     @abstractmethod
     def _prepare_config(self, str_optimizer: str, is_incremental: bool):
@@ -34,7 +34,7 @@ class MnistTester(Tester):
 
     @property
     def dataset_name(self):
-        return const.DATA_MNIST
+        return const.DATA_TINY_IMAGENET
 
     @property
     def data_input(self):

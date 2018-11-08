@@ -1,14 +1,15 @@
 """
-Tester for Cifar-10 dataset using base RMSProp
+Experiment for Cifar-10 dataset using base RMSProp
 """
-from tests.cifar_tester import CifarTester
+from experiments.cifar_exp import CifarExperiment
 from training.rms_trainer import RMSPropTrainer
-from training.train_conf import GeneralConfig, TrainConfig
+from training.general_config import GeneralConfig
+from training.increment_config import IncrementConfig
 
 
-class CifarRMSPropTester(CifarTester):
+class CifarRMSPropExperiment(CifarExperiment):
     """
-    Performs tests over Cifar-10 dataset using RMSProp
+    Performs experiments over Cifar-10 dataset using RMSProp
     """
 
     def _prepare_trainer(self):
@@ -21,10 +22,10 @@ class CifarRMSPropTester(CifarTester):
         # Creates configuration for 5 mega-batches
         if is_incremental:
             for i in range(5):
-                train_conf = TrainConfig(300, batch_size=128)
+                train_conf = IncrementConfig(300, batch_size=128)
                 self.general_config.add_train_conf(train_conf)
         else:
-            train_conf = TrainConfig(300, batch_size=128)
+            train_conf = IncrementConfig(300, batch_size=128)
             self.general_config.add_train_conf(train_conf)
 
     @property

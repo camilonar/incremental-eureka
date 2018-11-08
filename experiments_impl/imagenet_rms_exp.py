@@ -1,14 +1,15 @@
 """
-Tester for MNIST dataset using base RMSProp
+Experiment for Tiny Imagenet dataset using base RMSProp
 """
-from tests.mnist_tester import MnistTester
+from experiments.imagenet_exp import ImagenetExperiment
 from training.rms_trainer import RMSPropTrainer
-from training.train_conf import GeneralConfig, TrainConfig
+from training.general_config import GeneralConfig
+from training.increment_config import IncrementConfig
 
 
-class MnistRMSPropTester(MnistTester):
+class ImagenetRMSPropExperiment(ImagenetExperiment):
     """
-    Performs tests over MNIST dataset using RMSProp
+    Performs experiments over Tiny Imagenet dataset using RMSProp
     """
 
     def _prepare_trainer(self):
@@ -21,10 +22,10 @@ class MnistRMSPropTester(MnistTester):
         # Creates configuration for 5 mega-batches
         if is_incremental:
             for i in range(5):
-                train_conf = TrainConfig(50, batch_size=128)
+                train_conf = IncrementConfig(100, batch_size=100)
                 self.general_config.add_train_conf(train_conf)
         else:
-            train_conf = TrainConfig(50, batch_size=128)
+            train_conf = IncrementConfig(100, batch_size=100)
             self.general_config.add_train_conf(train_conf)
 
     @property

@@ -30,7 +30,7 @@ class CifarData(Data):
         cifar.CifarReader.set_parameters(train_dirs, validation_dir, extras)
         my_cifar = cifar.CifarReader.get_data()
         super().__init__(general_config, my_cifar, image_height, image_width)
-        self.data_reader.check_if_downloaded()
+        self.data_reader.check_if_data_exists()
         self.batch_queue_capacity = batch_queue_capacity
 
     def build_train_data_tensor(self, shuffle=True, augmentation=True, skip_count=0):

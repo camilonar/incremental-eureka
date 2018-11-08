@@ -3,7 +3,7 @@ Trainer with RMSProp Optimizer
 """
 import tensorflow as tf
 
-from training.train_conf import GeneralConfig
+from training.general_config import GeneralConfig
 from training.trainer import Trainer
 
 

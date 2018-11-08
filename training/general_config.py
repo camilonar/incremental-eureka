@@ -1,28 +1,8 @@
 """
 Module for the configuration of training that is going to be used.
-There are two classes:
-    1. GeneralConfig, which has the configuration data for the whole training (including the incremental learning)
-    2. TrainConfig, which has the configuration data for a specific increment of data
+GeneralConfig has the configuration data for the whole training (including the incremental learning)
 """
-
-
-class TrainConfig(object):
-    """
-    Configuration for training based on a batch of data. This is used for a specific increment of data
-    """
-
-    def __init__(self, epochs: int, ttime: int = None, batch_size=100):
-        """
-        Creates a TrainConfig object
-        :param epochs: number of epochs for the training. If None, then the dataset is repeated forever
-        :param ttime: number of seconds that the model should be trained. If None, then time restrictions are not used
-        :param batch_size: the sizes of the batches that are going to be used in training. This is different from the
-        number of instances of each incremental training. E.g. An incremental training may be of a total of 1000
-        samples using batches with batch_size 100
-        """
-        self.epochs = epochs
-        self.ttime = ttime
-        self.batch_size = batch_size
+from training.increment_config import IncrementConfig
 
 
 class GeneralConfig(object):
@@ -49,9 +29,9 @@ class GeneralConfig(object):
         self.model_name = model_name
         self.train_configurations = []  # It stores the configurations for each mega batch of training data
 
-    def add_train_conf(self, train_conf: TrainConfig):
+    def add_train_conf(self, train_conf: IncrementConfig):
         """
-        Adds a TrainConfig object to the list of mega-batch-specific configurations. The objects must be added in
+        Adds a IncrementConfig object to the list of mega-batch-specific configurations. The objects must be added in
         the same order as how they are going to be used (i.e. the configuration for the first batch must be added first,
         for the second batch must be added second, ...)
         :param train_conf: a configuration for a mega batch of data

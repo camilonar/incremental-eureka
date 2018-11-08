@@ -1,14 +1,15 @@
 """
-Tester for Tiny Imagenet dataset using the training algorithm that uses artificial sampling with DCGAN
+Experiment for Caltech-101 dataset using the training algorithm that uses artificial sampling with DCGAN
 """
-from tests.imagenet_tester import ImagenetTester
+from experiments.caltech_exp import CaltechExperiment
 from training.dcgan_trainer import DCGANTrainer
-from training.train_conf import GeneralConfig, TrainConfig
+from training.general_config import GeneralConfig
+from training.increment_config import IncrementConfig
 
 
-class ImagenetDCGANTester(ImagenetTester):
+class CaltechDCGANExperiment(CaltechExperiment):
     """
-    Performs tests over Tiny Imagenet dataset using the training algorithm that uses artificial sampling with DCGAN
+    Performs experiments over Caltech-101 dataset using the training algorithm that uses artificial sampling with DCGAN
     """
 
     def _prepare_trainer(self):
@@ -21,10 +22,10 @@ class ImagenetDCGANTester(ImagenetTester):
         # Creates configuration for 5 mega-batches
         if is_incremental:
             for i in range(5):
-                train_conf = TrainConfig(100, batch_size=100)
+                train_conf = IncrementConfig(1, batch_size=160)
                 self.general_config.add_train_conf(train_conf)
         else:
-            train_conf = TrainConfig(100, batch_size=100)
+            train_conf = IncrementConfig(1, batch_size=160)
             self.general_config.add_train_conf(train_conf)
 
     @property

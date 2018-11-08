@@ -13,7 +13,7 @@ import utils.constants as const
 from errors import OptionNotSupportedError
 
 
-# TODO revisar si unir las direcciones de los TFRecords es equivalente a tener el dataset completo
+# TODO revisar todos los paths para asegurar que funcione adecuadamente
 def get_alexnet_weights_path():
     """
     It gives the default path of the weights of an AlexNet network previously trained over Imagenet
@@ -46,6 +46,7 @@ def __get_mnist_paths(is_incremental: bool, base_folder: str = const.MNIST_PATH)
     tr_paths = [name_tr + "{}".format(x) + ext for x in range(1, 6)]
 
     if not is_incremental:
+        # tr_paths = [os.path.join(base_folder, base + "complete" + ext)]
         tr_paths = [tr_paths]
 
     test_path = os.path.join(base_folder, "validation" + ext)
@@ -54,7 +55,7 @@ def __get_mnist_paths(is_incremental: bool, base_folder: str = const.MNIST_PATH)
 
 def __get_fashion_mnist_paths(is_incremental: bool, base_folder: str = const.FASHION_MNIST_PATH):
     """
-    It gives the default paths to the training and testing data of FASHIONMNIST
+    It gives the default paths to the training and testing data of FASHION MNIST
     :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
     :param base_folder: the directory where the datasets are being stored. E.g. if a dataset is stored in
     ../datasets/FASHION-MNIST, then base_folder should be "../datasets/FASHION-MNIST"
@@ -72,6 +73,7 @@ def __get_fashion_mnist_paths(is_incremental: bool, base_folder: str = const.FAS
 
     test_path = os.path.join(base_folder, "test" + ext)
     return tr_paths, test_path, []
+
 
 def __get_cifar_paths(is_incremental: bool, base_folder: str = const.CIFAR_10_PATH):
     """
@@ -95,6 +97,7 @@ def __get_cifar_paths(is_incremental: bool, base_folder: str = const.CIFAR_10_PA
     return tr_paths, test_path, [metadata_file]
 
 
+# TODO versiones incrementales y no incrementales
 def __get_cifar100_paths(is_incremental: bool, base_folder: str = const.CIFAR_100_PATH):
     """
     It gives the default paths to the training and testing data of CIFAR-100
@@ -178,7 +181,7 @@ def __get_tiny_imagenet_paths(is_incremental: bool, base_folder: str = const.TIN
     return train_dirs, validation_dir, [labels_file, metadata_file]
 
 
-def __get_not_supported_dataset(is_incremental: bool):
+def __get_not_supported_dataset(*args):
     raise OptionNotSupportedError("The requested dataset doesn't have default paths in the current version of the "
                                   "program.")
 

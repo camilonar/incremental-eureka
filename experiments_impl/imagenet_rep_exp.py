@@ -1,14 +1,15 @@
 """
-Tester for Tiny Imagenet dataset using the proposed representative-selection algorithm
+Experiment for Tiny Imagenet dataset using the proposed representative-selection algorithm
 """
-from tests.imagenet_tester import ImagenetTester
+from experiments.imagenet_exp import ImagenetExperiment
 from training.rep_trainer import RepresentativesTrainer
-from training.train_conf import GeneralConfig, TrainConfig
+from training.general_config import GeneralConfig
+from training.increment_config import IncrementConfig
 
 
-class ImagenetRepTester(ImagenetTester):
+class ImagenetRepExperiment(ImagenetExperiment):
     """
-    Performs tests over Tiny Imagenet dataset using the proposed representative-selection algorithm
+    Performs experiments over Tiny Imagenet dataset using the proposed representative-selection algorithm
     """
 
     def _prepare_trainer(self):
@@ -21,10 +22,10 @@ class ImagenetRepTester(ImagenetTester):
         # Creates configuration for 5 mega-batches
         if is_incremental:
             for i in range(5):
-                train_conf = TrainConfig(100, batch_size=100)
+                train_conf = IncrementConfig(100, batch_size=100)
                 self.general_config.add_train_conf(train_conf)
         else:
-            train_conf = TrainConfig(100, batch_size=100)
+            train_conf = IncrementConfig(100, batch_size=100)
             self.general_config.add_train_conf(train_conf)
 
     @property

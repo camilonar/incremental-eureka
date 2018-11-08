@@ -1,5 +1,5 @@
 """
-This module acts as a menu interface for performing the tests
+This module acts as a menu interface for performing the experiments
 """
 
 import utils.constants as const

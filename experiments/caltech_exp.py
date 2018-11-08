@@ -1,19 +1,19 @@
 """
-Module for performing tests over Caltech-101
+Module for performing experiments over Caltech-101
 """
 from abc import abstractmethod
 
 import tensorflow as tf
 
-from tests.tester import Tester
+from experiments.experiment import Experiment
 from models import AlexNet
 from input.data.caltech_data import CaltechData
 import utils.constants as const
 
 
-class CaltechTester(Tester):
+class CaltechExperiment(Experiment):
     """
-    Performs tests over Caltech-101 according to the User input and pre-established configurations
+    Performs experiments over Caltech-101 according to the User input and pre-established configurations
     """
 
     @abstractmethod

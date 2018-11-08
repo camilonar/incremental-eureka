@@ -14,7 +14,7 @@ from tensorflow.python.framework.errors_impl import OutOfRangeError
 
 from input.data import Data
 from libs.caffe_tensorflow.network import Network
-from training.train_conf import GeneralConfig
+from training.general_config import GeneralConfig
 import utils.dir_utils as utils
 
 
@@ -30,6 +30,8 @@ class Trainer(ABC):
         :param config: the configuration for the whole training
         :param model: the neural net that is going to be trained
         :param pipeline: the data pipeline for the training
+        :param tensor_x: the tensor corresponding to the input of a training
+        :param tensor_y: the tensor corresponding to the output of a trainings
         :param checkpoint: the checkpoint path if it's required to start the training from a checkpoint. A data path
         with the following structure is expected: ./checkpoints/dataset_name/config_net_name/checkpoint_name.ckpt.
         If there is no checkpoint to be loaded then its value should be None. The default value is None.

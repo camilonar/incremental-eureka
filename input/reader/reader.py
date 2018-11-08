@@ -44,7 +44,7 @@ class Reader(ABC):
         """
         raise NotImplementedError("The subclass hasn't implemented the load_test_data method")
 
-    def check_if_downloaded(self):
+    def check_if_data_exists(self):
         """
         Checks if the directories or files with training and test data exists
         :return: None

@@ -1,15 +1,16 @@
 """
-Tester for MNIST dataset using the training algorithm that uses artificial sampling with DCGAN
+Experiment for MNIST dataset using the training algorithm that uses artificial sampling with DCGAN
 """
-from tests.mnist_tester import MnistTester
+from experiments.mnist_exp import MnistExperiment
 from training.dcgan_config import DCGANConfig
 from training.dcgan_trainer import DCGANTrainer
-from training.train_conf import GeneralConfig, TrainConfig
+from training.general_config import GeneralConfig
+from training.increment_config import IncrementConfig
 
 
-class MnistDCGANTester(MnistTester):
+class MnistDCGANExperiment(MnistExperiment):
     """
-    Performs tests over MNIST dataset using the training algorithm that uses artificial sampling with DCGAN
+    Performs experiments over MNIST dataset using the training algorithm that uses artificial sampling with DCGAN
     """
 
     def _prepare_trainer(self):
@@ -24,10 +25,10 @@ class MnistDCGANTester(MnistTester):
         # Creates configuration for 5 mega-batches
         if is_incremental:
             for i in range(5):
-                train_conf = TrainConfig(50, batch_size=64)
+                train_conf = IncrementConfig(50, batch_size=64)
                 self.general_config.add_train_conf(train_conf)
         else:
-            train_conf = TrainConfig(50, batch_size=64)
+            train_conf = IncrementConfig(50, batch_size=64)
             self.general_config.add_train_conf(train_conf)
 
     @property

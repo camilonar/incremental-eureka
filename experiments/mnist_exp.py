@@ -1,19 +1,19 @@
 """
-Module for performing tests over Caltech-101
+Module for performing experiments over MNIST
 """
 from abc import abstractmethod
 
 import tensorflow as tf
 
-from tests.tester import Tester
-from models import CaffeNet
-from input.data.caltech_256_data import Caltech256Data
+from experiments.experiment import Experiment
+from models import LeNet
+from input.data.mnist_data import MnistData
 import utils.constants as const
 
 
-class Caltech256Tester(Tester):
+class MnistExperiment(Experiment):
     """
-    Performs tests over Caltech-256 according to the User input and pre-established configurations
+    Performs experiments over MNIST according to the User input and pre-established configurations
     """
 
     @abstractmethod
@@ -21,12 +21,12 @@ class Caltech256Tester(Tester):
         pass
 
     def _prepare_data_pipeline(self):
-        self.data_pipeline = Caltech256Data(self.general_config, self.train_dirs, self.validation_dir)
+        self.data_pipeline = MnistData(self.general_config, self.train_dirs, self.validation_dir, self.extras)
 
     def _prepare_neural_network(self):
-        self.__input_tensor = tf.placeholder(tf.float32, [None, 224, 224, 3])
-        self.__output_tensor = tf.placeholder(tf.float32, [None, 256])
-        self.__neural_net = CaffeNet({'data': self.input_tensor})
+        self.__input_tensor = tf.placeholder(tf.float32, [None, 32, 32, 1])
+        self.__output_tensor = tf.placeholder(tf.float32, [None, 10])
+        self.__neural_net = LeNet({'data': self.input_tensor})
 
     @abstractmethod
     def _prepare_config(self, str_optimizer: str, is_incremental: bool):
@@ -34,7 +34,7 @@ class Caltech256Tester(Tester):
 
     @property
     def dataset_name(self):
-        return const.DATA_CALTECH_256
+        return const.DATA_MNIST
 
     @property
     def data_input(self):
