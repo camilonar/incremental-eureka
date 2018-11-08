@@ -37,8 +37,7 @@ def __get_mnist_paths(is_incremental: bool, base_folder: str = const.MNIST_PATH)
     :param base_folder: the directory where the datasets are being stored. E.g. if a dataset is stored in
     ../datasets/MNIST, then base_folder should be "../datasets/MNIST"
     :return: a tuple, where the first value is an array of strings corresponding to the paths of each one of the
-    mega-batches for training, the second value is a string corresponding to the path of the testing data, and the third
-    value is an empty array
+    mega-batches for training, and the second value is a string corresponding to the path of the testing data
     """
     base = "train-"
     ext = ".tfrecords"
@@ -50,7 +49,7 @@ def __get_mnist_paths(is_incremental: bool, base_folder: str = const.MNIST_PATH)
         tr_paths = [tr_paths]
 
     test_path = os.path.join(base_folder, "validation" + ext)
-    return tr_paths, test_path, []
+    return tr_paths, test_path
 
 
 def __get_fashion_mnist_paths(is_incremental: bool, base_folder: str = const.FASHION_MNIST_PATH):
@@ -60,8 +59,7 @@ def __get_fashion_mnist_paths(is_incremental: bool, base_folder: str = const.FAS
     :param base_folder: the directory where the datasets are being stored. E.g. if a dataset is stored in
     ../datasets/FASHION-MNIST, then base_folder should be "../datasets/FASHION-MNIST"
     :return: a tuple, where the first value is an array of strings corresponding to the paths of each one of the
-    mega-batches for training, the second value is a string corresponding to the path of the testing data, and the third
-    value is an empty array
+    mega-batches for training, and the second value is a string corresponding to the path of the testing data
     """
     base = "train-"
     ext = ".tfrecords"
@@ -72,7 +70,7 @@ def __get_fashion_mnist_paths(is_incremental: bool, base_folder: str = const.FAS
         tr_paths = [tr_paths]
 
     test_path = os.path.join(base_folder, "test" + ext)
-    return tr_paths, test_path, []
+    return tr_paths, test_path
 
 
 def __get_cifar_paths(is_incremental: bool, base_folder: str = const.CIFAR_10_PATH):
@@ -82,8 +80,7 @@ def __get_cifar_paths(is_incremental: bool, base_folder: str = const.CIFAR_10_PA
     :param base_folder: the directory where the datasets are being stored. E.g. if a dataset is stored in
     ../datasets/cifar10, then base_folder should be "../datasets/cifar10"
     :return: a tuple, where the first value is an array of strings corresponding to the paths of each one of the
-    mega-batches for training, the second value is a string corresponding to the path of the testing data, and the third
-    value is an array of this form: [metadata_file_path]
+    mega-batches for training, and the second value is a string corresponding to the path of the testing data
     """
     base = os.path.join(base_folder, "data_batch_")
     ext = ".tfrecords"
@@ -93,8 +90,7 @@ def __get_cifar_paths(is_incremental: bool, base_folder: str = const.CIFAR_10_PA
         tr_paths = [tr_paths]
 
     test_path = os.path.join(base_folder, "test_batch" + ext)
-    metadata_file = os.path.join(base_folder, "batches.meta")
-    return tr_paths, test_path, [metadata_file]
+    return tr_paths, test_path
 
 
 # TODO versiones incrementales y no incrementales
@@ -105,8 +101,7 @@ def __get_cifar100_paths(is_incremental: bool, base_folder: str = const.CIFAR_10
     :param base_folder: the directory where the datasets are being stored. E.g. if a dataset is stored in
     ../datasets/cifar-100, then base_folder should be "../datasets/cifar-100"
     :return: a tuple, where the first value is an array of strings corresponding to the paths of each one of the
-    mega-batches for training, the second value is a string corresponding to the path of the testing data, and the third
-    value is an array of this form: [metadata_file_path]
+    mega-batches for training, and the second value is a string corresponding to the path of the testing data
     """
     base = os.path.join(base_folder, "train")
     ext = ".tfrecords"
@@ -116,8 +111,7 @@ def __get_cifar100_paths(is_incremental: bool, base_folder: str = const.CIFAR_10
         tr_paths = [tr_paths]
 
     test_path = os.path.join(base_folder, "test" + ext)
-    metadata_file = os.path.join(base_folder, "meta")
-    return tr_paths, test_path, [metadata_file]
+    return tr_paths, test_path
 
 
 def __get_caltech_paths(is_incremental: bool, base_folder: str = const.CALTECH_101_PATH):
@@ -127,8 +121,7 @@ def __get_caltech_paths(is_incremental: bool, base_folder: str = const.CALTECH_1
     :param base_folder: the directory where the datasets are being stored. E.g. if a dataset is stored in
     ../datasets/101_ObjectCategories, then base_folder should be "../datasets/101_ObjectCategories"
     :return: a tuple, where the first value is an array of strings corresponding to the paths of each one of the
-    mega-batches for training, the second value is a string corresponding to the path of the testing data and the third
-    value is an empty array
+    mega-batches for training, and the second value is a string corresponding to the path of the testing data
     """
     base = os.path.join(base_folder, "train")
     if is_incremental:
@@ -136,7 +129,7 @@ def __get_caltech_paths(is_incremental: bool, base_folder: str = const.CALTECH_1
     else:
         paths = [base]
     validation_dir = os.path.join(base_folder, "test")
-    return paths, validation_dir, []
+    return paths, validation_dir
 
 
 def __get_caltech_256_paths(is_incremental: bool, base_folder: str = const.CALTECH_256_PATH):
@@ -146,8 +139,7 @@ def __get_caltech_256_paths(is_incremental: bool, base_folder: str = const.CALTE
     :param base_folder: the directory where the datasets are being stored. E.g. if a dataset is stored in
     ../datasets/256_ObjectCategories, then base_folder should be "../datasets/256_ObjectCategories"
     :return: a tuple, where the first value is an array of strings corresponding to the paths of each one of the
-    mega-batches for training, the second value is a string corresponding to the path of the testing data and the third
-    value is an empty array
+    mega-batches for training, and the second value is a string corresponding to the path of the testing data
     """
     base = os.path.join(base_folder, "train")
     if is_incremental:
@@ -155,7 +147,7 @@ def __get_caltech_256_paths(is_incremental: bool, base_folder: str = const.CALTE
     else:
         paths = [base]
     validation_dir = os.path.join(base_folder, "test")
-    return paths, validation_dir, []
+    return paths, validation_dir
 
 
 def __get_tiny_imagenet_paths(is_incremental: bool, base_folder: str = const.TINY_IMAGENET_PATH):
@@ -165,8 +157,7 @@ def __get_tiny_imagenet_paths(is_incremental: bool, base_folder: str = const.TIN
     :param base_folder: the directory where the datasets are being stored. E.g. if a dataset is stored in
     ../datasets/tiny-imagenet-200, then base_folder should be "../datasets/tiny-imagenet-200"
     :return: a tuple, where the first value is an array of strings corresponding to the paths of each one of the
-    mega-batches for training, the second value is a string corresponding to the path of the testing data and the third
-    value is an array of this form: [labels_file_path, metadata_file_path]
+    mega-batches for training, and the second value is a string corresponding to the path of the testing data
     """
     base = os.path.join(base_folder, "train_split")
     if is_incremental:
@@ -175,10 +166,8 @@ def __get_tiny_imagenet_paths(is_incremental: bool, base_folder: str = const.TIN
         train_dirs = [base]
 
     validation_dir = os.path.join(base_folder, "val")
-    # validation_dir = train_dirs[0]
-    labels_file = os.path.join(base_folder, "wnids.txt")
-    metadata_file = os.path.join(base_folder, "words.txt")
-    return train_dirs, validation_dir, [labels_file, metadata_file]
+
+    return train_dirs, validation_dir
 
 
 def __get_not_supported_dataset(*args):

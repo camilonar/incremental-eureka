@@ -2,10 +2,10 @@
 Module for the data pipeline of MNIST dataset.
 """
 import tensorflow as tf
-from input.reader import fashion_mnist_reader as fashion_mnist
 
 from input.data import Data
 import utils.constants as const
+from input.reader.tfrecords_reader import TFRecordsReader
 
 
 class FashionMnistData(Data):
@@ -21,14 +21,11 @@ class FashionMnistData(Data):
     def __init__(self, general_config,
                  train_dirs: [str],
                  validation_dir: str,
-                 extras: [str],
                  batch_queue_capacity=1000,
-                 image_height=IMAGE_HEIGHT,
-                 image_width=IMAGE_WIDTH):
-        """ Downloads the data if necessary. """
-        print("Loading mnist data...")
-        fashion_mnist.FashionMnistReader.set_parameters(train_dirs, validation_dir, extras)
-        my_f_mnist = fashion_mnist.FashionMnistReader.get_data()
+                 image_height=IMAGE_HEIGHT_RESIZE,
+                 image_width=IMAGE_WIDTH_RESIZE):
+        print("Loading fashion mnist data...")
+        my_f_mnist = TFRecordsReader(train_dirs, validation_dir)
         super().__init__(general_config, my_f_mnist, image_height, image_width)
         self.batch_queue_capacity = batch_queue_capacity
         self.data_reader.check_if_data_exists()
@@ -46,6 +43,7 @@ class FashionMnistData(Data):
         """
          Creates the input pipeline and performs some preprocessing.
         """
+
         def parser(serialized_example):
             '''
             Parses a single tf.Example into image and label tensors.
@@ -71,15 +69,11 @@ class FashionMnistData(Data):
                 tf.transpose(tf.reshape(image, [1, self.IMAGE_HEIGHT, self.IMAGE_WIDTH]), [1, 2, 0]),
                 tf.float32)
 
-
             image = tf.image.convert_image_dtype(image,
                                                  dtype=tf.float32,
                                                  saturate=True) * (1 / 255.0)
 
-            image = tf.image.resize_images(image, [self.IMAGE_WIDTH_RESIZE, self.IMAGE_HEIGHT_RESIZE])
-            image = tf.image.convert_image_dtype(image,
-                                                 dtype=tf.float32,
-                                                 saturate=True)
+            image = tf.image.resize_images(image, [self.image_width, self.image_height])
 
             label = tf.cast(features['label'], tf.int32)
             label = tf.one_hot(label, depth=self.NUMBER_OF_CLASSES)

@@ -94,11 +94,11 @@ def main():
     args = parser.parse_args()
     dataset, optimizer, checkpoint_key, s_interval, ckp_interval, seed, is_incremental, dataset_path = unpack_variables(
         **vars(args))
-    train_dirs, validation_dir, extras = paths.get_paths_from_dataset(dataset, is_incremental, dataset_path)
+    train_dirs, validation_dir = paths.get_paths_from_dataset(dataset, is_incremental, dataset_path)
     helper.print_config(dataset, optimizer, checkpoint_key, s_interval, ckp_interval, seed, is_incremental, train_dirs,
                         validation_dir, is_menu=False)
     helper.perform_test(dataset, optimizer, checkpoint_key, s_interval, ckp_interval, seed, is_incremental,
-                        train_dirs, validation_dir, extras)
+                        train_dirs, validation_dir)
     return 0
 
 

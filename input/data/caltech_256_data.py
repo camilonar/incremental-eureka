@@ -1,17 +1,17 @@
 """
-Module for the data pipeline of Caltech-101 dataset
+Module for the data pipeline of Caltech-256 dataset
 """
 
 import tensorflow as tf
 
-from input.reader import caltech_256_reader as caltech256
+from input.reader.directory_reader import DirectoryReader
 from input.data import Data
 import utils.constants as const
 
 
 class Caltech256Data(Data):
     """
-    Data pipeline for Caltech-101 dataset
+    Data pipeline for Caltech-256 dataset
     """
     NUMBER_OF_CLASSES = 256
     IMAGE_HEIGHT = 224
@@ -27,8 +27,7 @@ class Caltech256Data(Data):
 
         """ Downloads the data if necessary. """
         print("Loading caltech data...")
-        caltech256.Caltech256Reader.set_parameters(train_dirs, validation_dir)
-        my_caltech = caltech256.Caltech256Reader.get_data()
+        my_caltech = DirectoryReader(train_dirs, validation_dir)
         super().__init__(general_config, my_caltech, image_height, image_width)
         self.batch_queue_capacity = batch_queue_capacity + 3 * self.curr_config.batch_size
         self.data_reader.check_if_data_exists()
@@ -69,13 +68,13 @@ class Caltech256Data(Data):
                                                         dtype=tf.float32,
                                                         saturate=True)
 
-            single_image = tf.image.resize_images(single_image, [self.IMAGE_HEIGHT, self.IMAGE_WIDTH])
+            single_image = tf.image.resize_images(single_image, [self.image_height, self.image_width])
 
             # Data Augmentation
             if augmentation:
-                single_image = tf.image.resize_image_with_crop_or_pad(single_image, self.IMAGE_HEIGHT + 4,
-                                                                      self.IMAGE_WIDTH + 4)
-                single_image = tf.random_crop(single_image, [self.IMAGE_HEIGHT, self.IMAGE_WIDTH, self.NUM_OF_CHANNELS])
+                single_image = tf.image.resize_image_with_crop_or_pad(single_image, self.image_height + 4,
+                                                                      self.image_width + 4)
+                single_image = tf.random_crop(single_image, [self.image_height, self.image_width, self.NUM_OF_CHANNELS])
                 single_image = tf.image.random_flip_left_right(single_image)
 
                 single_image = tf.image.per_image_standardization(single_image)

@@ -18,13 +18,12 @@ class Experiment(ABC):
     This class helps with the configuration of the pre-established experiments.
     """
 
-    def __init__(self, train_dirs: [str], validation_dir: str, extras: [str],
+    def __init__(self, train_dirs: [str], validation_dir: str,
                  summary_interval=100, ckp_interval=200, checkpoint_key: str = None):
         """
         It creates an Experiment object
         :param train_dirs: array of strings corresponding to the paths of each one of the mega-batches for training
         :param validation_dir: a string corresponding to the path of the testing data
-        :param extras: an array of strings corresponding to paths specific for each dataset. It should be an empty array
         :param summary_interval: the interval of iterations at which the summaries are going to be performed
         :param ckp_interval: the interval of iterations at which the evaluations and checkpoints are going to be
         performed. Must be an integer multiple of summary_interval
@@ -37,7 +36,6 @@ class Experiment(ABC):
         """
         self.train_dirs = train_dirs
         self.validation_dir = validation_dir
-        self.extras = extras
         self.summary_interval = summary_interval
         self.ckp_interval = ckp_interval
         self.checkpoint_key = checkpoint_key

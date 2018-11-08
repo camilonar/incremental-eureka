@@ -2,7 +2,7 @@
 Module for the data pipeline of MNIST dataset.
 """
 import tensorflow as tf
-from input.reader import mnist_reader as mnist
+from input.reader.tfrecords_reader import TFRecordsReader
 
 from input.data import Data
 import utils.constants as const
@@ -21,14 +21,11 @@ class MnistData(Data):
     def __init__(self, general_config,
                  train_dirs: [str],
                  validation_dir: str,
-                 extras: [str],
                  batch_queue_capacity=1000,
-                 image_height=IMAGE_HEIGHT,
-                 image_width=IMAGE_WIDTH):
-        """ Downloads the data if necessary. """
+                 image_height=IMAGE_HEIGHT_RESIZE,
+                 image_width=IMAGE_WIDTH_RESIZE):
         print("Loading mnist data...")
-        mnist.MnistReader.set_parameters(train_dirs, validation_dir, extras)
-        my_mnist = mnist.MnistReader.get_data()
+        my_mnist = TFRecordsReader(train_dirs, validation_dir)
         super().__init__(general_config, my_mnist, image_height, image_width)
         self.batch_queue_capacity = batch_queue_capacity
         self.data_reader.check_if_data_exists()
@@ -46,6 +43,7 @@ class MnistData(Data):
         """
          Creates the input pipeline and performs some preprocessing.
         """
+
         def parser(serialized_example):
             '''
             Parses a single tf.Example into image and label tensors.
@@ -72,7 +70,7 @@ class MnistData(Data):
                 tf.transpose(tf.reshape(image, [1, self.IMAGE_HEIGHT, self.IMAGE_WIDTH]), [1, 2, 0]),
                 tf.float32)
 
-            image = tf.image.resize_images(image, [self.IMAGE_WIDTH_RESIZE, self.IMAGE_HEIGHT_RESIZE])
+            image = tf.image.resize_images(image, [self.image_width, self.image_height])
 
             image = tf.image.convert_image_dtype(image,
                                                  dtype=tf.float32,

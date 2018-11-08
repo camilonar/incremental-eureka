@@ -20,7 +20,7 @@ class Data(ABC):
     """
 
     def __init__(self, general_config: GeneralConfig, data_reader: Reader,
-                 image_height, image_width):
+                 image_height: int, image_width: int):
         """
         Creates a Data pipeline object for a dataset composed of images. It also sets the current configuration for
         training as the configuration for the first mega-batch.

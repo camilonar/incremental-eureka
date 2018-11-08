@@ -27,9 +27,9 @@ print(target_batch.shape)
 
 import tensorflow as tf
 
-from input.reader import imagenet_reader as imagenet
 from input.data import Data
 import utils.constants as const
+from input.reader.directory_reader import DirectoryReader
 
 
 class ImagenetData(Data):
@@ -58,14 +58,11 @@ class ImagenetData(Data):
     def __init__(self, general_config,
                  train_dirs: [str],
                  validation_dir: str,
-                 extras: [str],
                  batch_queue_capacity=1000,
                  image_height=IMAGE_HEIGHT,
                  image_width=IMAGE_WIDTH):
-        """ Downloads the data if necessary. """
         print("Loading imagenet data")
-        imagenet.ImagenetReader.set_parameters(train_dirs, validation_dir, extras)
-        my_imagenet = imagenet.ImagenetReader.get_data()
+        my_imagenet = DirectoryReader(train_dirs, validation_dir)
         super().__init__(general_config, my_imagenet, image_height, image_width)
         self.batch_queue_capacity = batch_queue_capacity + 3 * self.curr_config.batch_size
         self.data_reader.check_if_data_exists()
@@ -103,14 +100,14 @@ class ImagenetData(Data):
 
             # convert to [0, 1]
             image = tf.image.convert_image_dtype(image,
-                                                        dtype=tf.float32,
-                                                        saturate=True)
+                                                 dtype=tf.float32,
+                                                 saturate=True)
 
-            image = tf.image.resize_images(image, [self.IMAGE_HEIGHT, self.IMAGE_WIDTH])
+            image = tf.image.resize_images(image, [self.image_height, self.image_width])
 
             # Data Augmentation
             if augmentation:
-                distorted_image = tf.random_crop(image, [self.IMAGE_HEIGHT, self.IMAGE_WIDTH, 3])
+                distorted_image = tf.random_crop(image, [self.image_height, self.image_width, 3])
                 # Randomly flip the image horizontally.
                 distorted_image = tf.image.random_flip_left_right(distorted_image)
                 # Because these operations are not commutative, consider randomizing
@@ -125,7 +122,7 @@ class ImagenetData(Data):
                 # image = tf.image.per_image_standardization(distorted_image)
 
                 # Set the shapes of tensors.
-                image.set_shape([self.IMAGE_HEIGHT, self.IMAGE_WIDTH, 3])
+                image.set_shape([self.image_height, self.image_width, 3])
 
             return image, single_target
 

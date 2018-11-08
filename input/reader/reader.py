@@ -21,6 +21,7 @@ class Reader(ABC):
         :param tr_paths: a list of paths, where each one corresponds with the location of one part of the dataset,
         which means, that it has the location of each one of the mega-batches
         :param test_path: the path where the test/validation data is located
+        :param extras: an array with extra paths that may be used by some concrete Readers
 
         This must be called by the constructors of the subclasses.
         """

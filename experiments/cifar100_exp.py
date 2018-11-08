@@ -21,7 +21,7 @@ class Cifar100Experiment(Experiment):
         pass
 
     def _prepare_data_pipeline(self):
-        self.data_pipeline = Cifar100Data(self.general_config, self.train_dirs, self.validation_dir, self.extras)
+        self.data_pipeline = Cifar100Data(self.general_config, self.train_dirs, self.validation_dir)
 
     def _prepare_neural_network(self):
         self.__input_tensor = tf.placeholder(tf.float32, [None, 224, 224, 3])

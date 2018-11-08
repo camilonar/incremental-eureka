@@ -28,6 +28,7 @@ class LeNet(Network):
          .fc(84, name='fc2')
          .fc(10, relu=False, name='fc3'))
 
+
 class FashionMnistNet(Network):
     def setup(self):
         """
@@ -38,20 +39,20 @@ class FashionMnistNet(Network):
         (self.feed('data')
          .conv(2, 2, 64, 1, 1, padding='VALID', name='conv1')
          .max_pool(2, 2, 2, 2, padding='VALID', name='pool1')
-         .dropout(0.3,name="dp1")
+         .dropout(0.3, name="dp1")
          .conv(2, 2, 32, 1, 1, padding='VALID', name='conv2')
          .max_pool(2, 2, 2, 2, padding='VALID', name='pool2')
-         .dropout(0.3,name="dp1")
+         .dropout(0.3, name="dp1")
          .fc(256, name='fc1')
-         .dropout(0.5,name="dp2")
+         .dropout(0.5, name="dp2")
          .fc(10, relu=False, name='fc3'))
+
 
 class SimpleNet(Network):
     def setup(self):
-
         (self.feed('data')
          .conv(3, 3, 64, 1, 1, padding='VALID', name='conv1')
-         .batch_normalization( name="bn1")
+         .batch_normalization(name="bn1")
          .relu(name="rel1")
          .conv(3, 3, 128, 1, 1, padding='VALID', name='conv2')
          .batch_normalization(name="bn2")
@@ -65,7 +66,6 @@ class SimpleNet(Network):
 
          .max_pool(2, 2, 2, 2, name='pool1')
          .dropout(0.1, name='drop1')
-
 
          .conv(3, 3, 128, 1, 1, padding='VALID', name='conv5')
          .batch_normalization(name="bn5")
@@ -112,6 +112,7 @@ class SimpleNet(Network):
          .dropout(0.1, name='drop5')
 
          .fc(100, relu=False, name='fc3'))
+
 
 class NiN(Network):
     def setup(self):
@@ -167,14 +168,14 @@ class CaffeNet(Network):
          .max_pool(3, 3, 2, 2, padding='VALID', name='pool5')
          .fc(512, name='fc6')
          .dropout(0.5, name='drop6')
-         .fc(12, relu=False, name='fc8'))
+         .fc(200, relu=False, name='fc8'))
 
 
 class DenseNet(Network):
 
     def setup(self):
         growth_k = 12
-        num_class= 100
+        num_class = 100
         """
             to 256 d 256 images
         :return: None
@@ -182,7 +183,7 @@ class DenseNet(Network):
         (self.feed('data')
          .conv(7, 7, growth_k * 2, 2, 2, name="conv_1")
          .dense_block(nb_layers=6, growth_k=growth_k, dropout_rate=0.2, name="dense_1")
-         .transition_layer(growth_k=growth_k,dropout_rate=0.2,name="trans_1")
+         .transition_layer(growth_k=growth_k, dropout_rate=0.2, name="trans_1")
 
          .dense_block(nb_layers=12, growth_k=growth_k, dropout_rate=0.2, name="dense_2")
          .transition_layer(growth_k=growth_k, dropout_rate=0.2, name="trans_2")
@@ -271,7 +272,7 @@ class AlexNet(Network):
          .conv(3, 3, 256, 1, 1, group=2, name='conv5')
          .max_pool(3, 3, 2, 2, padding='VALID', name='pool5')
          .fc(2048, name='fc6')
-         .dropout(keep_prob=0.5,name="dp1")
+         .dropout(keep_prob=0.5, name="dp1")
          .fc(1024, name='fc7')
          .dropout(keep_prob=0.5, name="dp2")
          .fc(101, relu=False, name='fc8'))
@@ -287,7 +288,7 @@ class AlexNet(Network):
 
     @property
     def trainable_layers(self):
-        return ["fc6","fc7", "fc8"]
+        return ["fc6", "fc7", "fc8"]
 
 
 class CifarTFNet(Network):

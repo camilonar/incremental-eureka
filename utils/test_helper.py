@@ -39,7 +39,7 @@ def print_config(dataset: str, optimizer: str, checkpoint_key: str, s_interval: 
 
 
 def perform_test(dataset: str, optimizer: str, checkpoint_key: str, s_interval: int, ckp_interval: int, seed: int,
-                 is_incremental: bool, train_dirs: [str], validation_dir: str, extras: [str]):
+                 is_incremental: bool, train_dirs: [str], validation_dir: str):
     """
     Prepares and performs the test according to the configuration given by the user
     :param dataset: a string representing the dataset that has been configured by the user
@@ -57,7 +57,7 @@ def perform_test(dataset: str, optimizer: str, checkpoint_key: str, s_interval: 
     """
     const.SEED = seed
     factory = Experiments.get_experiment(optimizer, dataset)
-    tester = factory(train_dirs, validation_dir, extras, s_interval, ckp_interval, checkpoint_key)
+    tester = factory(train_dirs, validation_dir, s_interval, ckp_interval, checkpoint_key)
 
     tester.prepare_all(optimizer, is_incremental)
     tester.execute_test()

@@ -21,10 +21,10 @@ class ImagenetExperiment(Experiment):
         pass
 
     def _prepare_data_pipeline(self):
-        self.data_pipeline = ImagenetData(self.general_config, self.train_dirs, self.validation_dir, self.extras)
+        self.data_pipeline = ImagenetData(self.general_config, self.train_dirs, self.validation_dir)
 
     def _prepare_neural_network(self):
-        self.__input_tensor = tf.placeholder(tf.float32, [None, 128, 128, 3])
+        self.__input_tensor = tf.placeholder(tf.float32, [None, 256, 256, 3])
         self.__output_tensor = tf.placeholder(tf.float32, [None, 200])
         self.__neural_net = CaffeNet({'data': self.input_tensor})
 
