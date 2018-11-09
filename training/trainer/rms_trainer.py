@@ -3,8 +3,8 @@ Trainer with RMSProp Optimizer
 """
 import tensorflow as tf
 
-from training.general_config import GeneralConfig
-from training.trainer import Trainer
+from training.config.general_config import GeneralConfig
+from training.trainer.trainer import Trainer
 
 
 class RMSPropTrainer(Trainer):
@@ -14,9 +14,6 @@ class RMSPropTrainer(Trainer):
 
     def _train_batch(self, sess, image_batch, target_batch, tensor_x: tf.Tensor, tensor_y: tf.Tensor,
                      train_step: tf.Operation, loss: tf.Tensor, increment: int, iteration: int, total_it: int):
-        import matplotlib.pyplot as pyplot
-        pyplot.imshow(image_batch[0])
-        pyplot.show()
         return self.sess.run([self.train_step, self.loss],
                              feed_dict={self.tensor_x: image_batch, self.tensor_y: target_batch})
 

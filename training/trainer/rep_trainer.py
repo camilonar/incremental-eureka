@@ -6,8 +6,8 @@ import numpy as np
 
 from input.data import Data
 from libs.caffe_tensorflow.network import Network
-from training.general_config import GeneralConfig
-from training.trainer import Trainer
+from training.config.general_config import GeneralConfig
+from training.trainer.trainer import Trainer
 
 
 # TODO implementar

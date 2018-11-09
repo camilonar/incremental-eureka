@@ -2,7 +2,7 @@
 Module for the configuration of training that is going to be used.
 GeneralConfig has the configuration data for the whole training (including the incremental learning)
 """
-from training.increment_config import IncrementConfig
+from training.config.increment_config import IncrementConfig
 
 
 class GeneralConfig(object):

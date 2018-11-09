@@ -2,9 +2,9 @@
 Experiment for Caltech-101 dataset using the training algorithm that uses artificial sampling with DCGAN
 """
 from experiments.caltech_exp import CaltechExperiment
-from training.dcgan_trainer import DCGANTrainer
-from training.general_config import GeneralConfig
-from training.increment_config import IncrementConfig
+from training.trainer.dcgan_trainer import DCGANTrainer
+from training.config.general_config import GeneralConfig
+from training.config.increment_config import IncrementConfig
 
 
 class CaltechDCGANExperiment(CaltechExperiment):

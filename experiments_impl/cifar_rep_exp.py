@@ -2,9 +2,9 @@
 Experiment for Cifar-10 dataset using the proposed representative-selection algorithm
 """
 from experiments.cifar_exp import CifarExperiment
-from training.rep_trainer import RepresentativesTrainer
-from training.general_config import GeneralConfig
-from training.increment_config import IncrementConfig
+from training.trainer.rep_trainer import RepresentativesTrainer
+from training.config.general_config import GeneralConfig
+from training.config.increment_config import IncrementConfig
 
 
 class CifarRepExperiment(CifarExperiment):

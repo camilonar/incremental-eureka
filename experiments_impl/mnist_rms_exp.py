@@ -2,9 +2,9 @@
 Experiment for MNIST dataset using base RMSProp
 """
 from experiments.mnist_exp import MnistExperiment
-from training.rms_trainer import RMSPropTrainer
-from training.general_config import GeneralConfig
-from training.increment_config import IncrementConfig
+from training.trainer.rms_trainer import RMSPropTrainer
+from training.config.general_config import GeneralConfig
+from training.config.increment_config import IncrementConfig
 
 
 class MnistRMSPropExperiment(MnistExperiment):

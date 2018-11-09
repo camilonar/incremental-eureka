@@ -2,9 +2,9 @@
 Experiment for Tiny Imagenet dataset using base RMSProp
 """
 from experiments.imagenet_exp import ImagenetExperiment
-from training.rms_trainer import RMSPropTrainer
-from training.general_config import GeneralConfig
-from training.increment_config import IncrementConfig
+from training.trainer.rms_trainer import RMSPropTrainer
+from training.config.general_config import GeneralConfig
+from training.config.increment_config import IncrementConfig
 
 
 class ImagenetRMSPropExperiment(ImagenetExperiment):

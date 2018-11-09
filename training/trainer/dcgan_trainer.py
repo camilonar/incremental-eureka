@@ -4,8 +4,8 @@ Module for the training algorithm that uses artificial sampling with DCGAN
 import tensorflow as tf
 
 from libs.DCGAN_tensorflow.model import DCGAN
-from training.dcgan_config import DCGANConfig
-from training.trainer import Trainer
+from training.config.dcgan_config import DCGANConfig
+from training.trainer.trainer import Trainer
 import libs.DCGAN_tensorflow.utils as dc_utils
 from utils import constants as const
 

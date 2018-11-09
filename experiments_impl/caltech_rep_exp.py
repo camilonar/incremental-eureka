@@ -2,9 +2,9 @@
 Experiment for Caltech-101 dataset using the proposed representative-selection algorithm
 """
 from experiments.caltech_exp import CaltechExperiment
-from training.rep_trainer import RepresentativesTrainer
-from training.general_config import GeneralConfig
-from training.increment_config import IncrementConfig
+from training.trainer.rep_trainer import RepresentativesTrainer
+from training.config.general_config import GeneralConfig
+from training.config.increment_config import IncrementConfig
 
 
 class CaltechRepExperiment(CaltechExperiment):

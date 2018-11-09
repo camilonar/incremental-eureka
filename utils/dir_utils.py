@@ -3,8 +3,7 @@ Module with utility functions for directories and paths' management
 """
 from datetime import datetime
 import os
-import utils as utils
-from training.general_config import GeneralConfig
+from training.config.general_config import GeneralConfig
 
 
 def get_unique_logdir():

@@ -1,7 +1,7 @@
 """
 Configuration for the training algorithm that uses artificial sampling with DCGAN
 """
-from training.general_config import GeneralConfig
+from training.config.general_config import GeneralConfig
 
 
 class DCGANConfig(GeneralConfig):

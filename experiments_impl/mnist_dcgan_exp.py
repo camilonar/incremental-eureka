@@ -2,10 +2,9 @@
 Experiment for MNIST dataset using the training algorithm that uses artificial sampling with DCGAN
 """
 from experiments.mnist_exp import MnistExperiment
-from training.dcgan_config import DCGANConfig
-from training.dcgan_trainer import DCGANTrainer
-from training.general_config import GeneralConfig
-from training.increment_config import IncrementConfig
+from training.config.dcgan_config import DCGANConfig
+from training.trainer.dcgan_trainer import DCGANTrainer
+from training.config.increment_config import IncrementConfig
 
 
 class MnistDCGANExperiment(MnistExperiment):
