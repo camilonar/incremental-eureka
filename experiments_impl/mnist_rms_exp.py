@@ -17,7 +17,7 @@ class MnistRMSPropExperiment(MnistExperiment):
                                       self.output_tensor, self.ckp_path)
 
     def _prepare_config(self, str_optimizer: str, is_incremental: bool):
-        self.__general_config = GeneralConfig(0.001, self.summary_interval, self.ckp_interval,
+        self.__general_config = GeneralConfig(0.0001, self.summary_interval, self.ckp_interval,
                                               config_name=str_optimizer, model_name=self.dataset_name)
         # Creates configuration for 5 mega-batches
         if is_incremental:
@@ -26,7 +26,7 @@ class MnistRMSPropExperiment(MnistExperiment):
                 train_conf = IncrementConfig(50, batch_size=128)
                 self.general_config.add_train_conf(train_conf)
         else:
-            self.__general_config.learn_rate = 0.001
+            self.__general_config.learn_rate = 0.01
             train_conf = IncrementConfig(50, batch_size=128)
             self.general_config.add_train_conf(train_conf)
 
