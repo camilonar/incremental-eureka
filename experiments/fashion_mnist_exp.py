@@ -6,7 +6,8 @@ from abc import abstractmethod
 import tensorflow as tf
 
 from experiments.experiment import Experiment
-from models import LeNet, FashionMnistNet
+from networks.fashion_mnist_net import FashionMnistNet
+from networks.le_net import LeNet
 from input.data.fashion_mnist_data import   FashionMnistData
 import utils.constants as const
 

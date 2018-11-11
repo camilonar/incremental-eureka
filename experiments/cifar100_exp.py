@@ -6,7 +6,8 @@ from abc import abstractmethod
 import tensorflow as tf
 
 from experiments.experiment import Experiment
-from models import NiN, SimpleNet
+from networks.n_i_n import NiN
+from networks.simple_net import SimpleNet
 from input.data.cifar100_data import Cifar100Data
 import utils.constants as const
 

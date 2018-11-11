@@ -6,7 +6,7 @@ from abc import abstractmethod
 import tensorflow as tf
 
 from experiments.experiment import Experiment
-from models import CifarTFNet
+from networks.cifar_tfnet import CifarTFNet
 from input.data.cifar_data import CifarData
 import utils.constants as const
 

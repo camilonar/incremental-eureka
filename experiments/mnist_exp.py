@@ -6,7 +6,7 @@ from abc import abstractmethod
 import tensorflow as tf
 
 from experiments.experiment import Experiment
-from models import LeNet
+from networks.le_net import LeNet
 from input.data.mnist_data import MnistData
 import utils.constants as const
 

@@ -114,7 +114,7 @@ class Trainer(ABC):
             start_time = 0
             skip_count = 0
             print("Finished training of increment {}...".format(i))
-            writer.close_writer()
+            writer.close()
 
         self.__finish()
 

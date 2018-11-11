@@ -6,7 +6,7 @@ from abc import abstractmethod
 import tensorflow as tf
 
 from experiments.experiment import Experiment
-from models import CaffeNet
+from networks.caffe_net import CaffeNet
 from input.data.caltech_256_data import Caltech256Data
 import utils.constants as const
 
