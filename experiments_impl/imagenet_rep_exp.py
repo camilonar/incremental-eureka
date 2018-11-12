@@ -2,6 +2,7 @@
 Experiment for Tiny Imagenet dataset using the proposed representative-selection algorithm
 """
 from experiments.imagenet_exp import ImagenetExperiment
+from training.support.tester import Tester
 from training.trainer.rep_trainer import RepresentativesTrainer
 from training.config.general_config import GeneralConfig
 from training.config.increment_config import IncrementConfig
@@ -13,8 +14,10 @@ class ImagenetRepExperiment(ImagenetExperiment):
     """
 
     def _prepare_trainer(self):
-        self.trainer = RepresentativesTrainer(self.general_config, self.neural_net, self.data_input, self.input_tensor,
-                                              self.output_tensor, self.ckp_path)
+        tester = Tester(self.neural_net, self.data_input, self.input_tensor, self.output_tensor)
+        self.__trainer = RepresentativesTrainer(self.general_config, self.neural_net, self.data_input,
+                                                self.input_tensor, self.output_tensor,
+                                                tester=tester, checkpoint=self.ckp_path)
 
     def _prepare_config(self, str_optimizer: str, is_incremental: bool):
         self.__general_config = GeneralConfig(0.0001, self.summary_interval, self.ckp_interval,
@@ -31,3 +34,7 @@ class ImagenetRepExperiment(ImagenetExperiment):
     @property
     def general_config(self):
         return self.__general_config
+
+    @property
+    def trainer(self):
+        return self.__trainer

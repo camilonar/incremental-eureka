@@ -25,7 +25,7 @@ class Trainer(ABC):
     """
 
     def __init__(self, config: GeneralConfig, model: Network, pipeline: Data, tensor_x: tf.Tensor, tensor_y: tf.Tensor,
-                 checkpoint: str = None):
+                 tester: Tester = None, checkpoint: str = None):
         """
         It creates a Trainer object
         :param config: the configuration for the whole training
@@ -33,6 +33,8 @@ class Trainer(ABC):
         :param pipeline: the data pipeline for the training
         :param tensor_x: the tensor corresponding to the input of a training
         :param tensor_y: the tensor corresponding to the output of a trainings
+        :param tester: a Tester object that is going to perform tests using the metrics defined in it (e.g. measure
+        accuracy of the model). Set to None if you don't want to perform tests.
         :param checkpoint: the checkpoint path if it's required to start the training from a checkpoint. A data path
         with the following structure is expected: ./checkpoints/dataset_name/config_net_name/checkpoint_name.ckpt.
         If there is no checkpoint to be loaded then its value should be None. The default value is None.
@@ -47,7 +49,7 @@ class Trainer(ABC):
         self.checkpoint = checkpoint
 
         # Creation of tester and saver
-        self.tester = Tester(model, pipeline, tensor_x, tensor_y)
+        self.tester = tester
         self.saver = Saver()
 
         # Creation of additional attributes for training
@@ -82,7 +84,7 @@ class Trainer(ABC):
 
         # Prepares checkpoints and initializes variables
         self.saver.prepare()
-        self.tester.prepare(self.sess)
+        self.tester.prepare()
 
         self.sess.run(tf.local_variables_initializer())
         self.sess.run(tf.global_variables_initializer())
@@ -155,7 +157,7 @@ class Trainer(ABC):
                 curr_time = time.time() + trained_time  # If a checkpoint has been loaded, it should adapt the time
                 interval = curr_time - start_time
 
-                if i % config.summary_interval == 0 and not i == 0:
+                if self.tester and i % config.summary_interval == 0 and not i == 0:
                     print("Performing validation at iteration: {}. Loss is: {}. "
                           "Time is: {}".format(i, c, interval))
                     self.tester.perform_validation(self.sess, i, writer)
@@ -231,4 +233,3 @@ class Trainer(ABC):
         order) over the batch of data using sess as Session
         """
         raise NotImplementedError("The subclass hasn't implemented the _train_batch method")
-

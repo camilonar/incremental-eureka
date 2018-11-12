@@ -5,7 +5,7 @@ Features:
 2. Executes a test training a neural network over a dataset according to a flexible configuration
 """
 from abc import ABC, abstractmethod
-from errors import TestNotPreparedError
+from errors import ExperimentNotPreparedError
 
 import utils.dir_utils as dir
 import tensorflow as tf
@@ -40,7 +40,6 @@ class Experiment(ABC):
         self.ckp_interval = ckp_interval
         self.checkpoint_key = checkpoint_key
         self.ckp_path = None
-        self.trainer = None
 
     @abstractmethod
     def _prepare_data_pipeline(self):
@@ -124,17 +123,17 @@ class Experiment(ABC):
         self.ckp_path = self._prepare_checkpoint_if_required(self.checkpoint_key, str_trainer)
         self._prepare_trainer()
 
-    def execute_test(self):
+    def execute_experiment(self):
         """
-        Calls the trainer to perform the test with the given configuration. It should raise an exception if the _prepare
-        methods (or prepare_all) hasn't been executed before this method.
+        Calls the trainer to perform the experiment with the given configuration. It should raise an exception if the
+        _prepare methods (or prepare_all) hasn't been executed before this method.
         :return: None
-        :raises TestNotPreparedError: if the Experiment hasn't been prepared before the execution of this method
+        :raises ExperimentNotPreparedError: if the Experiment hasn't been prepared before the execution of this method
         """
-        self.__check_conditions_for_test()
+        self.__check_conditions_for_experiment()
         self.trainer.train()
 
-    def __check_conditions_for_test(self):
+    def __check_conditions_for_experiment(self):
         """
         Checks if the Experiment is ready to perform a test. The evaluated requirements are:
         -The data pipeline
@@ -143,7 +142,7 @@ class Experiment(ABC):
         -The training configuration
         -If a checkpoint has been required, then it must have been loaded
         :return: None
-        :raises TestNotPreparedError: if it is found that at least one of the prerequisites for the test hasn't been
+        :raises ExperimentNotPreparedError: if it is found that at least one of the prerequisites for the test hasn't been
         fulfilled
         """
         print("Checking conditions for test...")
@@ -160,8 +159,9 @@ class Experiment(ABC):
             message += '-Checkpoint required by user, but not loaded'
 
         if message:
-            raise TestNotPreparedError("There has been some problems when checking the requirements for the execution"
-                                       " of the test:\n {}".format(message))
+            raise ExperimentNotPreparedError(
+                "There has been some problems when checking the requirements for the execution"
+                " of the test:\n {}".format(message))
 
         print("The test has been properly prepared...")
 
@@ -198,6 +198,15 @@ class Experiment(ABC):
         """
         Getter for the GeneralTraining object
         :return: the GeneralTraining object of the Experiments
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def trainer(self):
+        """
+        Getter for the Trainer object
+        :return: the Trainer object of the Experiment
         """
         pass
 

@@ -97,8 +97,8 @@ def main():
     train_dirs, validation_dir = paths.get_paths_from_dataset(dataset, is_incremental, dataset_path)
     helper.print_config(dataset, optimizer, checkpoint_key, s_interval, ckp_interval, seed, is_incremental, train_dirs,
                         validation_dir, is_menu=False)
-    helper.perform_test(dataset, optimizer, checkpoint_key, s_interval, ckp_interval, seed, is_incremental,
-                        train_dirs, validation_dir)
+    helper.perform_experiment(dataset, optimizer, checkpoint_key, s_interval, ckp_interval, seed, is_incremental,
+                              train_dirs, validation_dir)
     return 0
 
 

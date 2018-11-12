@@ -13,9 +13,9 @@ class OptionNotSupportedError(Exception):
         super().__init__(message)
 
 
-class TestNotPreparedError(Exception):
+class ExperimentNotPreparedError(Exception):
     """
-    This error is raised when the a condition for a test is not met that is required isn't found
+    This error is raised when the a condition for an experiment is not met that is required isn't found
     """
 
     def __init__(self, message):

@@ -7,6 +7,7 @@ import numpy as np
 from input.data import Data
 from libs.caffe_tensorflow.network import Network
 from training.config.general_config import GeneralConfig
+from training.support.tester import Tester
 from training.trainer.trainer import Trainer
 
 
@@ -17,8 +18,8 @@ class RepresentativesTrainer(Trainer):
     """
 
     def __init__(self, config: GeneralConfig, model: Network, pipeline: Data, tensor_x: tf.Tensor, tensor_y: tf.Tensor,
-                 checkpoint: str = None):
-        super().__init__(config, model, pipeline, tensor_x, tensor_y, checkpoint)
+                 tester: Tester = None, checkpoint: str = None):
+        super().__init__(config, model, pipeline, tensor_x, tensor_y, tester=tester, checkpoint=checkpoint)
         self.representatives = tf.placeholder(tf.float32, tensor_x.get_shape())
         self.weights = tf.placeholder(tf.float32, [None])
 

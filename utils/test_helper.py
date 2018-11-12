@@ -1,5 +1,5 @@
 """
-Module with useful functions for performing a test
+Module with useful functions for performing an experiment
 """
 import utils.constants as const
 from experiments_impl.experiments import Experiments
@@ -22,7 +22,7 @@ def print_config(dataset: str, optimizer: str, checkpoint_key: str, s_interval: 
         :param is_menu: boolean value. If set to True the menu version is used (asks for extra input)
     """
     print("\n--------------------------------------------------------")
-    print("Starting test with the following configuration:\n")
+    print("Starting experiment with the following configuration:\n")
     print("-Dataset: {}".format(dataset))
     print("-Optimizer: {}".format(optimizer))
     print("-Checkpoint: {}".format(checkpoint_key))
@@ -35,13 +35,13 @@ def print_config(dataset: str, optimizer: str, checkpoint_key: str, s_interval: 
     print("--------------------------------------------------------\n")
 
     if is_menu:
-        input("To continue with the test press any key...")
+        input("To continue with the experiment press any key...")
 
 
-def perform_test(dataset: str, optimizer: str, checkpoint_key: str, s_interval: int, ckp_interval: int, seed: int,
-                 is_incremental: bool, train_dirs: [str], validation_dir: str):
+def perform_experiment(dataset: str, optimizer: str, checkpoint_key: str, s_interval: int, ckp_interval: int, seed: int,
+                       is_incremental: bool, train_dirs: [str], validation_dir: str):
     """
-    Prepares and performs the test according to the configuration given by the user
+    Prepares and performs the experiment according to the configuration given by the user
     :param dataset: a string representing the dataset that has been configured by the user
     :param optimizer: a string representing the optimizer that has been configured by the user
     :param checkpoint_key: a string representing a checkpoint. Must be None if no checkpoint has been configured
@@ -60,4 +60,4 @@ def perform_test(dataset: str, optimizer: str, checkpoint_key: str, s_interval: 
     tester = factory(train_dirs, validation_dir, s_interval, ckp_interval, checkpoint_key)
 
     tester.prepare_all(optimizer, is_incremental)
-    tester.execute_test()
+    tester.execute_experiment()

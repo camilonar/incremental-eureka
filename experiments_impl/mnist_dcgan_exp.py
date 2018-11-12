@@ -3,6 +3,7 @@ Experiment for MNIST dataset using the training algorithm that uses artificial s
 """
 from experiments.mnist_exp import MnistExperiment
 from training.config.dcgan_config import DCGANConfig
+from training.support.tester import Tester
 from training.trainer.dcgan_trainer import DCGANTrainer
 from training.config.increment_config import IncrementConfig
 
@@ -13,8 +14,9 @@ class MnistDCGANExperiment(MnistExperiment):
     """
 
     def _prepare_trainer(self):
-        self.trainer = DCGANTrainer(self.general_config, self.neural_net, self.data_input, self.input_tensor,
-                                    self.output_tensor, self.ckp_path)
+        tester = Tester(self.neural_net, self.data_input, self.input_tensor, self.output_tensor)
+        self.__trainer = DCGANTrainer(self.general_config, self.neural_net, self.data_input, self.input_tensor,
+                                      self.output_tensor, tester=tester, checkpoint=self.ckp_path)
 
     def _prepare_config(self, str_optimizer: str, is_incremental: bool):
         self.__general_config = DCGANConfig(0.0001, dcgan_lr=0.0002, beta1=0.5, input_height=32, input_width=32,
@@ -33,3 +35,7 @@ class MnistDCGANExperiment(MnistExperiment):
     @property
     def general_config(self):
         return self.__general_config
+
+    @property
+    def trainer(self):
+        return self.__trainer

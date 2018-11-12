@@ -2,6 +2,7 @@
 Experiment for Caltech-101 dataset using the training algorithm that uses artificial sampling with DCGAN
 """
 from experiments.caltech_exp import CaltechExperiment
+from training.support.tester import Tester
 from training.trainer.dcgan_trainer import DCGANTrainer
 from training.config.general_config import GeneralConfig
 from training.config.increment_config import IncrementConfig
@@ -13,8 +14,9 @@ class CaltechDCGANExperiment(CaltechExperiment):
     """
 
     def _prepare_trainer(self):
-        self.trainer = DCGANTrainer(self.general_config, self.neural_net, self.data_input, self.input_tensor,
-                                    self.output_tensor, self.ckp_path)
+        tester = Tester(self.neural_net, self.data_input, self.input_tensor, self.output_tensor)
+        self.__trainer = DCGANTrainer(self.general_config, self.neural_net, self.data_input, self.input_tensor,
+                                      self.output_tensor, tester=tester, checkpoint=self.ckp_path)
 
     def _prepare_config(self, str_optimizer: str, is_incremental: bool):
         self.__general_config = GeneralConfig(0.0001, self.summary_interval, self.ckp_interval,
@@ -31,3 +33,7 @@ class CaltechDCGANExperiment(CaltechExperiment):
     @property
     def general_config(self):
         return self.__general_config
+
+    @property
+    def trainer(self):
+        return self.__trainer

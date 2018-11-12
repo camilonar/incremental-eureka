@@ -47,21 +47,19 @@ class Tester(object):
         return tf.summary.FileWriter(os.path.join(summaries_path, "increment_{}".format(identifier)),
                                      tf.get_default_graph())
 
-    def prepare(self, sess):
+    def prepare(self):
         """
         It does the preparation for the training. This preparations include:
         -Creates operators needed for summaries for TensorBoard
-        :param sess: the current session
         :return: None
         """
+        # Creates variables for measuring the accuracy
         correct_prediction = tf.equal(tf.argmax(self.tensor_y, 1), tf.argmax(self.model.get_output(), 1))
         accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
         self.streaming_accuracy, self.streaming_accuracy_update = tf.metrics.mean(accuracy)
         self.streaming_accuracy_scalar = tf.summary.scalar('accuracy', self.streaming_accuracy)
 
         self.test_iterator, self.test_x, self.test_y = self.pipeline.build_test_data_tensor()
-
-        self._custom_prepare(sess)
 
     def perform_validation(self, sess, iteration: int, writer: tf.summary.FileWriter):
         """
@@ -88,13 +86,3 @@ class Tester(object):
 
         summary = sess.run(self.streaming_accuracy_scalar)
         writer.add_summary(summary, iteration)
-
-    def _custom_prepare(self, sess):
-        """
-        This is a hook method that may be used by concrete testers to define custom preparations for the testing, which
-        may include the definition of additional metrics given that only accuracy is supported in the base class. This
-        method isn't implemented by default
-        :param sess: the current session
-        :return: None
-        """
-        pass
