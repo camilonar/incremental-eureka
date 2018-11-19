@@ -75,7 +75,7 @@ class Data(ABC):
         """
         print("Changing dataset part to part {} in the Data object...".format(index))
         if not self.general_config.train_configurations[index] is self.curr_config:
-            self.data_reader.change_dataset_part(index)
+            self.data_reader.change_dataset_megabatch(index)
             self.curr_config = self.general_config.train_configurations[index]
             self.close()
         else:

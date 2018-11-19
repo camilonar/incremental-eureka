@@ -15,10 +15,10 @@ class Reader(ABC):
     This structure is based in the pipelines from:
         https://github.com/ischlag/tensorflow-input-pipelines"""
 
-    def __init__(self, tr_paths: List[str], test_path: str):
+    def __init__(self, train_paths: List[str], test_path: str):
         """
         Creates a Reader object and points the current training data path to the first one of the list provided
-        :param tr_paths: a list of paths, where each one corresponds with the location of one part of the dataset,
+        :param train_paths: a list of paths, where each one corresponds with the location of one part of the dataset,
         which means, that it has the location of each one of the mega-batches
         :param test_path: the path where the test/validation data is located
         :param extras: an array with extra paths that may be used by some concrete Readers
@@ -26,8 +26,8 @@ class Reader(ABC):
         This must be called by the constructors of the subclasses.
         """
         self.test_path = test_path
-        self.tr_paths = tr_paths
-        self.curr_path = self.tr_paths[0]
+        self.train_paths = train_paths
+        self.curr_path = self.train_paths[0]
 
     @abstractmethod
     def load_training_data(self):
@@ -51,7 +51,7 @@ class Reader(ABC):
         :return: None
         :raises Exception: if the data is not found
         """
-        aux_tr_paths = self.tr_paths
+        aux_tr_paths = self.train_paths
         # This is used for non-incremental trainings (multiple TFRecords or directories correspond to one training)
         if type(aux_tr_paths[0]) == list:
             aux_tr_paths = aux_tr_paths[0]
@@ -67,7 +67,7 @@ class Reader(ABC):
         else:
             raise Exception("Validation directory doesn't seem to exist.")
 
-    def change_dataset_part(self, index: int):
+    def change_dataset_megabatch(self, index: int):
         """
         It changes the target archive of directory from which the training data is being extracted. This ONLY applies
         to the training data and NOT to the test data.
@@ -75,7 +75,7 @@ class Reader(ABC):
         :return: None
         """
         print("Changing dataset part to part {} in the Reader object...".format(index))
-        self.curr_path = self.tr_paths[index]
+        self.curr_path = self.train_paths[index]
         self.reload_training_data()
 
     @abstractmethod

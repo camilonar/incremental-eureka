@@ -4,7 +4,7 @@ From https://github.com/ethereon/caffe-tensorflow/tree/master/kaffe/tensorflow
 """
 import numpy as np
 import tensorflow as tf
-from keras.applications import MobileNet, MobileNetV2, xception
+
 
 DEFAULT_PADDING = 'SAME'
 
@@ -264,11 +264,7 @@ class Network(object):
         keep = 1 - self.use_dropout + (self.use_dropout * keep_prob)
         return tf.nn.dropout(input, keep, name=name)
 
-    @layer
-    def mobile_net_base(self, input, name):
-        with tf.variable_scope(name) as scope:
-            model_base = MobileNetV2(weights='imagenet', include_top=False, input_tensor=input)
-        return model_base.output
+
 
     @layer
     def global_average_pooling(self, input, name, stride=1):

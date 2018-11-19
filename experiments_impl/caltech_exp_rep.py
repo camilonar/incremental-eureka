@@ -1,16 +1,16 @@
 """
-Experiment for MNIST dataset using the proposed representative-selection algorithm
+Experiment for Caltech-101 dataset using the proposed representative-selection algorithm
 """
-from experiments.mnist_exp import MnistExperiment
+from experiments.caltech_exp import CaltechExperiment
 from training.support.tester import Tester
 from training.trainer.rep_trainer import RepresentativesTrainer
 from training.config.general_config import GeneralConfig
 from training.config.increment_config import IncrementConfig
 
 
-class MnistRepExperiment(MnistExperiment):
+class CaltechExperimentRep(CaltechExperiment):
     """
-    Performs experiments over MNIST dataset using the proposed representative-selection algorithm
+    Performs experiments over Caltech-101 dataset using the proposed representative-selection algorithm
     """
 
     def _prepare_trainer(self):
@@ -25,10 +25,10 @@ class MnistRepExperiment(MnistExperiment):
         # Creates configuration for 5 mega-batches
         if is_incremental:
             for i in range(5):
-                train_conf = IncrementConfig(50, batch_size=128)
+                train_conf = IncrementConfig(1, batch_size=160)
                 self.general_config.add_train_conf(train_conf)
         else:
-            train_conf = IncrementConfig(50, batch_size=128)
+            train_conf = IncrementConfig(1, batch_size=160)
             self.general_config.add_train_conf(train_conf)
 
     @property

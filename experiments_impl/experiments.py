@@ -5,21 +5,24 @@ import dependency_injector.containers as containers
 import dependency_injector.providers as providers
 
 import utils.constants as const
-from experiments_impl.caltech_256_rms_exp import Caltech256RMSPropExperiment
-from experiments_impl.caltech_dcgan_exp import CaltechDCGANExperiment
-from experiments_impl.caltech_rep_exp import CaltechRepExperiment
-from experiments_impl.caltech_rms_exp import CaltechRMSPropExperiment
-from experiments_impl.cifar_dcgan_exp import CifarDCGANExperiment
-from experiments_impl.cifar_rep_exp import CifarRepExperiment
-from experiments_impl.cifar_rms_exp import CifarRMSPropExperiment
-from experiments_impl.cifar100_rms_exp import Cifar100RMSPropExperiment
-from experiments_impl.imagenet_dcgan_exp import ImagenetDCGANExperiment
-from experiments_impl.imagenet_rep_exp import ImagenetRepExperiment
-from experiments_impl.imagenet_rms_exp import ImagenetRMSPropExperiment
-from experiments_impl.mnist_dcgan_exp import MnistDCGANExperiment
-from experiments_impl.mnist_rep_exp import MnistRepExperiment
-from experiments_impl.mnist_rms_exp import MnistRMSPropExperiment
-from experiments_impl.fashion_mnist_rms_exp import FashionMnistRMSPropExperiment
+from experiments_impl.caltech_256_exp_rms import Caltech256ExperimentRMSProp
+from experiments_impl.caltech_exp_dcgan import CaltechExperimentDCGAN
+from experiments_impl.caltech_exp_rep import CaltechExperimentRep
+from experiments_impl.caltech_exp_rms import CaltechExperimentRMSProp
+from experiments_impl.cifar100_exp_rms import Cifar100ExperimentRMSProp
+
+from experiments_impl.cifar_exp_dcgan import CifarExperimentDCGAN
+from experiments_impl.cifar_exp_rep import CifarExperimentRep
+from experiments_impl.cifar_exp_rms import CifarExperimentRMSProp
+from experiments_impl.fashion_mnist_exp_rms import FashionMnistExperimentRMSProp
+
+from experiments_impl.imagenet__exp_dcgan import ImagenetExperimentDCGAN
+from experiments_impl.imagenet_exp_rep import ImagenetExperimentRep
+from experiments_impl.imagenet_exp_rms import ImagenetExperimentRMSProp
+
+from experiments_impl.mnist_exp_dcgan import MnistExperimentDCGAN
+from experiments_impl.mnist_exp_rep import MnistExperimentRep
+from experiments_impl.mnist_exp_rms import MnistExperimentRMSProp
 
 
 class Experiments(containers.DeclarativeContainer):
@@ -31,22 +34,22 @@ class Experiments(containers.DeclarativeContainer):
     -Tiny Imagenet
     """
     # TODO agregar los otros testers
-    testers = {const.TR_BASE: {const.DATA_CALTECH_101: providers.Factory(CaltechRMSPropExperiment),
-                               const.DATA_CIFAR_10: providers.Factory(CifarRMSPropExperiment),
-                               const.DATA_TINY_IMAGENET: providers.Factory(ImagenetRMSPropExperiment),
-                               const.DATA_MNIST: providers.Factory(MnistRMSPropExperiment),
-                               const.DATA_CALTECH_256: providers.Factory(Caltech256RMSPropExperiment),
-                               const.DATA_CIFAR_100: providers.Factory(Cifar100RMSPropExperiment),
-                               const.DATA_FASHION_MNIST: providers.Factory(FashionMnistRMSPropExperiment)
+    testers = {const.TR_BASE: {const.DATA_CALTECH_101: providers.Factory(CaltechExperimentRMSProp),
+                               const.DATA_CIFAR_10: providers.Factory(CifarExperimentRMSProp),
+                               const.DATA_TINY_IMAGENET: providers.Factory(ImagenetExperimentRMSProp),
+                               const.DATA_MNIST: providers.Factory(MnistExperimentRMSProp),
+                               const.DATA_CALTECH_256: providers.Factory(Caltech256ExperimentRMSProp),
+                               const.DATA_CIFAR_100: providers.Factory(Cifar100ExperimentRMSProp),
+                               const.DATA_FASHION_MNIST: providers.Factory(FashionMnistExperimentRMSProp)
                                },
-               const.TR_DCGAN: {const.DATA_CALTECH_101: providers.Factory(CaltechDCGANExperiment),
-                                const.DATA_CIFAR_10: providers.Factory(CifarDCGANExperiment),
-                                const.DATA_TINY_IMAGENET: providers.Factory(ImagenetDCGANExperiment),
-                                const.DATA_MNIST: providers.Factory(MnistDCGANExperiment)},
-               const.TR_REP: {const.DATA_CALTECH_101: providers.Factory(CaltechRepExperiment),
-                              const.DATA_CIFAR_10: providers.Factory(CifarRepExperiment),
-                              const.DATA_TINY_IMAGENET: providers.Factory(ImagenetRepExperiment),
-                              const.DATA_MNIST: providers.Factory(MnistRepExperiment)}
+               const.TR_DCGAN: {const.DATA_CALTECH_101: providers.Factory(CaltechExperimentDCGAN),
+                                const.DATA_CIFAR_10: providers.Factory(CifarExperimentDCGAN),
+                                const.DATA_TINY_IMAGENET: providers.Factory(ImagenetExperimentDCGAN),
+                                const.DATA_MNIST: providers.Factory(MnistExperimentDCGAN)},
+               const.TR_REP: {const.DATA_CALTECH_101: providers.Factory(CaltechExperimentRep),
+                              const.DATA_CIFAR_10: providers.Factory(CifarExperimentRep),
+                              const.DATA_TINY_IMAGENET: providers.Factory(ImagenetExperimentRep),
+                              const.DATA_MNIST: providers.Factory(MnistExperimentRep)}
                }
 
     @classmethod

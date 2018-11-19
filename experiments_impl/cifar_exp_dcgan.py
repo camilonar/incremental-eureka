@@ -1,16 +1,16 @@
 """
-Experiment for Caltech-101 dataset using the training algorithm that uses artificial sampling with DCGAN
+Experiment for Cifar-10 dataset using the training algorithm that uses artificial sampling with DCGAN
 """
-from experiments.caltech_exp import CaltechExperiment
+from experiments.cifar_exp import CifarExperiment
 from training.support.tester import Tester
 from training.trainer.dcgan_trainer import DCGANTrainer
 from training.config.general_config import GeneralConfig
 from training.config.increment_config import IncrementConfig
 
 
-class CaltechDCGANExperiment(CaltechExperiment):
+class CifarExperimentDCGAN(CifarExperiment):
     """
-    Performs experiments over Caltech-101 dataset using the training algorithm that uses artificial sampling with DCGAN
+    Performs experiments over Cifar-10 dataset using the training algorithm that uses artificial sampling with DCGAN
     """
 
     def _prepare_trainer(self):
@@ -24,10 +24,10 @@ class CaltechDCGANExperiment(CaltechExperiment):
         # Creates configuration for 5 mega-batches
         if is_incremental:
             for i in range(5):
-                train_conf = IncrementConfig(1, batch_size=160)
+                train_conf = IncrementConfig(300, batch_size=64)
                 self.general_config.add_train_conf(train_conf)
         else:
-            train_conf = IncrementConfig(1, batch_size=160)
+            train_conf = IncrementConfig(300, batch_size=64)
             self.general_config.add_train_conf(train_conf)
 
     @property

@@ -8,7 +8,7 @@ from training.trainer.dcgan_trainer import DCGANTrainer
 from training.config.increment_config import IncrementConfig
 
 
-class MnistDCGANExperiment(MnistExperiment):
+class MnistExperimentDCGAN(MnistExperiment):
     """
     Performs experiments over MNIST dataset using the training algorithm that uses artificial sampling with DCGAN
     """

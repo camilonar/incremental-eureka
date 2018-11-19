@@ -44,7 +44,7 @@ def __get_mnist_paths(is_incremental: bool, base_folder: str = const.MNIST_PATH)
     name_tr = os.path.join(base_folder, base)
 
     if not is_incremental:
-        # tr_paths = [os.path.join(base_folder, base + "complete" + ext)]
+        # train_paths = [os.path.join(base_folder, base + "complete" + ext)]
         tr_paths = [name_tr+"complete"+ext]
     else:
         tr_paths = [name_tr + "{}".format(x) + ext for x in range(1, 6)]

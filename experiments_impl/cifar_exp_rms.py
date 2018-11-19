@@ -8,7 +8,7 @@ from training.config.general_config import GeneralConfig
 from training.config.increment_config import IncrementConfig
 
 
-class CifarRMSPropExperiment(CifarExperiment):
+class CifarExperimentRMSProp(CifarExperiment):
     """
     Performs experiments over Cifar-10 dataset using RMSProp
     """
