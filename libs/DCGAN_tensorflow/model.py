@@ -144,7 +144,7 @@ class DCGAN(object):
         self.g_optim = tf.train.AdamOptimizer(learning_rate, beta1=beta1) \
             .minimize(self.g_loss, var_list=self.g_vars)
 
-    def train(self, batch_size, model_name, batch_images, batch_labels, increment, iteration):
+    def train(self, batch_size, batch_images, batch_labels, increment, iteration):
 
         sample_inputs = batch_images[0:self.sample_num]
         sample_labels = batch_labels[0:self.sample_num]
@@ -164,7 +164,7 @@ class DCGAN(object):
         batch_z = np.random.uniform(-1, 1, [batch_size, self.z_dim]) \
             .astype(np.float32)
 
-        if model_name == const.DATA_MNIST:
+        if self.dataset_name == const.DATA_MNIST:
             # Update D network
             _, summary_str = self.sess.run([self.d_optim, self.d_sum],
                                            feed_dict={
@@ -225,7 +225,7 @@ class DCGAN(object):
                  time.time() - start_time, errD_fake + errD_real, errG))
 
         if np.mod(iteration, 100) == 1:
-            if model_name == const.DATA_MNIST:
+            if self.dataset_name == const.DATA_MNIST:
                 samples, d_loss, g_loss = self.sess.run(
                     [self.sampler, self.d_loss, self.g_loss],
                     feed_dict={
@@ -429,3 +429,8 @@ class DCGAN(object):
         else:
             print(" [*] Failed to find a checkpoint")
             return False, 0
+
+    def get_samples(self, sess, n: int):
+        z_sample = np.random.uniform(-0.5, 0.5, size=(n, self.z_dim))
+        samples = sess.run(self.sampler, feed_dict={self.z: z_sample})
+        return samples

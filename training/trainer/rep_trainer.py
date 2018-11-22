@@ -61,7 +61,13 @@ class RepresentativesTrainer(Trainer):
         [n_representatives, x1, x2, ..., xn] where [x1...xn] is the shape of a single sample image. The labels
         array has shape [n_representatives, n_labels].
         """
-        # outputs = sess.run(model, feed_dict={self.tensor_x: image_batch, self.tensor_y: target_batch})
-        # dif = outputs[0][outputs.shape[1] - 1] - outputs[0][outputs.shape[1] - 2]
-        random = np.random.choice(image_batch.shape[0], 20, replace=False)
-        return image_batch[random, :], target_batch[random, :]
+        n = 10  # Number of representatives
+        outputs = sess.run(self.model.get_output(), feed_dict={tensor_x: image_batch, tensor_y: target_batch})
+
+        outputs = np.sort(outputs)  # Order outputs over the last axis
+        difs = [i[-1] - i[-2] for i in outputs]  # Best vs. Second Best
+        sort_indices = np.argsort(difs)  # Order indices (from lowest dif. to highest dif.)
+        image_batch = [image_batch[i] for i in sort_indices]  # The data is ordered according to the indices
+        target_batch = [target_batch[i] for i in sort_indices]  # The data labels are ordered according to the indices
+
+        return image_batch[:n], target_batch[:n]

@@ -31,8 +31,8 @@ class DCGANTrainer(Trainer):
                 output_height=config.output_height,
                 batch_size=config.train_configurations[0].batch_size,
                 sample_num=config.train_configurations[0].batch_size,
-                y_dim=10,
                 c_dim=config.c_dim,
+                y_dim=10,
                 z_dim=config.z_dim,
                 dataset_name=config.model_name,
                 checkpoint_dir="checkpoint")
@@ -60,6 +60,7 @@ class DCGANTrainer(Trainer):
 
         # TODO arreglar esto: no debería preguntarse de forma explícita
         if len(target_batch) == self.config.train_configurations[0].batch_size:
-            self.dcgan.train(self.config.train_configurations[0].batch_size, self.config.model_name,
+            self.dcgan.train(self.config.train_configurations[0].batch_size,
                              image_batch, target_batch, increment, iteration)
+            # samples = self.dcgan.get_samples(sess, self.config.train_configurations[0].batch_size)
         return 0, 0
