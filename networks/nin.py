@@ -10,6 +10,7 @@ class NiN(Network):
         the constructor of the object as 'data'.
         E.g.:
             net = NiN({'data': input_tensor})
+
         :return: None
         """
         (self.feed('data')

@@ -4,9 +4,12 @@ from libs.caffe_tensorflow.network import Network
 class FashionMnistNet(Network):
     def setup(self):
         """
+        Network to be used with Fashion MNIST dataset
 
         This code was taken and adapted from:
         https://medium.com/tensorflow/hello-deep-learning-fashion-mnist-with-keras-50fcff8cd74a
+
+        :return: None
         """
         (self.feed('data')
          .conv(2, 2, 64, 1, 1, padding='VALID', name='conv1')

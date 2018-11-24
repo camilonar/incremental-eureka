@@ -58,8 +58,8 @@ class RepresentativesTrainer(Trainer):
         :param tensor_x: the tensor corresponding to the input of a training
         :param tensor_y: the tensor corresponding to the output of a training
         :return: a tuple with 2 numpy.ndarray with the data and the labels. The data array has shape
-        [n_representatives, x1, x2, ..., xn] where [x1...xn] is the shape of a single sample image. The labels
-        array has shape [n_representatives, n_labels].
+            **[n_representatives, x1, x2, ..., xn]** where [x1...xn] is the shape of a single sample image. The labels
+            array has shape **[n_representatives, n_labels]**.
         """
         n = 10  # Number of representatives
         outputs = sess.run(self.model.get_output(), feed_dict={tensor_x: image_batch, tensor_y: target_batch})

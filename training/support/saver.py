@@ -24,6 +24,7 @@ class Saver(object):
         """
         Prepares all tensors and variables needed for proper checkpoint saving and loading. This method only prepares
         the variables used for the basic version of checkpoint loading
+
         :return: None
         """
         self.iteration_variable = tf.get_variable("iteration", shape=[1], initializer=tf.zeros_initializer)
@@ -45,14 +46,15 @@ class Saver(object):
         This method prepares the previously created neural network with the checkpoint data if a checkpoint is
         provided. It also loads any kind of additional Variable that is need for the training (like Data or Optimizer's
         variables).
+
         :param sess: current session
         :param ckp_path: the checkpoint path if it's required to start the training from a checkpoint. A data path with
-        the following structure is expected: ./checkpoints/dataset_name/config_name/checkpoint_name.ckpt.
-        If there is no checkpoint to be loaded then its value should be None.
-        :return:  if a checkpoint has been successfully loaded then this method returns a tuple containing 4 values:
-        the number of the current mega-batch (increment), iteration over the batch, iteration counting from the start
-        of the training, and the time that the network has already been trained (counting from the start of the
-        mega-batch) in that order. It returns a tuple of zeros if no checkpoint is loaded.
+            the following structure is expected: *./checkpoints/dataset_name/config_name/checkpoint_name.ckpt*.
+            If there is no checkpoint to be loaded then its value should be None.
+        :return: if a checkpoint has been successfully loaded then this method returns a tuple containing 4 values:
+            the number of the current mega-batch (increment), iteration over the batch, iteration counting from the
+            start of the training, and the time that the network has already been trained (counting from the start of
+            the mega-batch) in that order. It returns a tuple of zeros if no checkpoint is loaded.
         """
         if not ckp_path:
             print("No checkpoint has been loaded.")
@@ -71,14 +73,15 @@ class Saver(object):
                    *args, **kwargs):
         """
         Saves all the variables of the model
+
         :param sess: current session
         :param ckp_dir: the path to the directory where the checkpoints are going to be saved
         :param iteration: the current iteration number over the training data
         :param total_iteration: the current iteration number over the training data, counting from the start of the
-        training (that is, from the first batch of mega-batch 0)
+            training (that is, from the first batch of mega-batch 0)
         :param increment: the number of the mega-batch
         :param curr_time: the time that has passed since the beginning of the training of the current batch. This time
-        must be in seconds
+            must be in seconds
         """
         filename = "model-{}-{}.ckpt".format(increment, total_iteration)
         sess.run(self.mega_batch, feed_dict={self.aux_tensor: [increment]})
@@ -99,6 +102,7 @@ class Saver(object):
         information must be loaded from that source. If you need another kind of checkpoint management then you should
         override the _maybe_load_model and _save_model methods.
         This method isn't implemented by default
+
         :param sess: the current session
         :return: None
         """
@@ -113,6 +117,7 @@ class Saver(object):
         information must be loaded from that source. If you need another kind of checkpoint management then you should
         override the _maybe_load_model and _save_model methods.
         This method isn't implemented by default
+
         :param sess: the current session
         :return: None
         """
@@ -123,6 +128,7 @@ class Saver(object):
         This is a hook method that may be used by concrete savers to define custom preparations for the checkpoint
         loading and saving, which may include the definition of additional variables that need to be stored. This
         method isn't implemented by default
+
         :return: None
         """
         pass

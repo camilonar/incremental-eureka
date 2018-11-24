@@ -5,7 +5,7 @@ from experiments.cifar_exp import CifarExperiment
 from training.support.tester import Tester
 from training.trainer.dcgan_trainer import DCGANTrainer
 from training.config.general_config import GeneralConfig
-from training.config.increment_config import IncrementConfig
+from training.config.megabatch_config import MegabatchConfig
 
 
 class CifarExperimentDCGAN(CifarExperiment):
@@ -24,10 +24,10 @@ class CifarExperimentDCGAN(CifarExperiment):
         # Creates configuration for 5 mega-batches
         if is_incremental:
             for i in range(5):
-                train_conf = IncrementConfig(300, batch_size=64)
+                train_conf = MegabatchConfig(300, batch_size=64)
                 self.general_config.add_train_conf(train_conf)
         else:
-            train_conf = IncrementConfig(300, batch_size=64)
+            train_conf = MegabatchConfig(300, batch_size=64)
             self.general_config.add_train_conf(train_conf)
 
     @property

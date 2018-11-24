@@ -26,6 +26,7 @@ class Data(ABC):
         training as the configuration for the first mega-batch.
 
         This must be called by the constructors of the subclasses.
+
         :param general_config: the configuration for the whole training
         :param data_reader: the corresponding Reader of the data of the dataset
         :param image_height: the height at which the images are going to be rescaled
@@ -41,15 +42,16 @@ class Data(ABC):
     def build_train_data_tensor(self, shuffle=False, augmentation=False, skip_count=0):
         """
         Builds the training data tensor
+
         :param shuffle: specifies whether the data is going to be randomly shuffled or not
         :param augmentation: specifies if there is going to be performed a data augmentation process
         :param skip_count: number of elements to be skipped from the Dataset. If the dataset.batch is applied, then each
-        batch is treated as 1 element, so in that case, skip_count is the number of batches to be skipped from the
-        Dataset.
+            batch is treated as 1 element, so in that case, skip_count is the number of batches to be skipped from the
+            Dataset.
         :return: a tuple of an Iterator and two Tensors, where the first value is an Iterator for the
-         data, the second value is the tensor of training data and the third value is the tensor with the
-         corresponding labels of the data. NOTE: the Iterator must be initialized before the training and label data
-         tensors can be used to feed data into a model
+            data, the second value is the tensor of training data and the third value is the tensor with the
+            corresponding labels of the data. NOTE: the Iterator must be initialized before the training and label data
+            tensors can be used to feed data into a model
         """
         raise NotImplementedError("The subclass hasn't implemented the build_train_data_tensor method")
 
@@ -57,12 +59,13 @@ class Data(ABC):
     def build_test_data_tensor(self, shuffle=False, augmentation=False):
         """
         Builds the test data tensor
+
         :param shuffle: specifies whether the data is going to be randomly shuffled or not
         :param augmentation: specifies if there is going to be performed a data augmentation process
         :return:  a tuple of an Iterator and two Tensors, where the first value is an Iterator for the
-         data, the second value is the tensor of test data and the third value is the tensor with the corresponding
-         labels of the data. NOTE: the Iterator must be initialized before the testing and label data tensors can be
-         used to feed data into a model
+            data, the second value is the tensor of test data and the third value is the tensor with the corresponding
+            labels of the data. NOTE: the Iterator must be initialized before the testing and label data tensors can be
+            used to feed data into a model
         """
         raise NotImplementedError("The subclass hasn't implemented the build_test_data_tensor method")
 
@@ -70,6 +73,7 @@ class Data(ABC):
         """
         It changes the target archive of directory from which the training data is being extracted. This ONLY applies
         to the training data and NOT to the test data.
+
         :param index: the number of the mega-batch, starting from 0. I.e. for the first batch, this would be 0
         :return: None
         """
@@ -84,6 +88,7 @@ class Data(ABC):
     def __del__(self):
         """
         Destroys the object and closes the pipeline
+
         :return: None
         """
         self.close()
@@ -92,6 +97,7 @@ class Data(ABC):
     def close(self):
         """
         Closes the pipeline
+
         :return: None
         """
         raise NotImplementedError("The subclass hasn't implemented the close method")

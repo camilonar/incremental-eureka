@@ -3,6 +3,11 @@ from libs.caffe_tensorflow.network import Network
 
 class SimpleNet(Network):
     def setup(self):
+        """
+        Creates a SimpleNet
+
+        :return: None
+        """
         (self.feed('data')
          .conv(3, 3, 64, 1, 1, padding='VALID', name='conv1')
          .batch_normalization(name="bn1")

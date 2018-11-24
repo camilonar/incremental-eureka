@@ -10,7 +10,9 @@ import utils.test_helper as helper
 def create_parser():
     """
     Creates the argument Parser
-    :return: an ArgumentParser
+
+    :return: a parser properly configured
+    :rtype: ArgumentParser
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -72,6 +74,7 @@ def unpack_variables(dataset: str, optimizer: str, checkpoint_key: str, s_interv
                      is_incremental: bool, dataset_path: str):
     """
     Helper function that is used as a proxy for easily unpacking variables from the corresponding parser
+
     :param dataset: a string representing the dataset that has been configured by the user
     :param optimizer: a string representing the optimizer that has been configured by the user
     :param checkpoint_key: a string representing a checkpoint. Must be None if no checkpoint has been configured
@@ -88,8 +91,9 @@ def unpack_variables(dataset: str, optimizer: str, checkpoint_key: str, s_interv
 def main():
     """
         Executes the program
+
         :return: None
-        """
+    """
     parser = create_parser()
     args = parser.parse_args()
     dataset, optimizer, checkpoint_key, s_interval, ckp_interval, seed, is_incremental, dataset_path = unpack_variables(

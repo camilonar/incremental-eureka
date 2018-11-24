@@ -20,6 +20,7 @@ class DirectoryReader(Reader):
     def __init__(self, train_dirs: [str], validation_dir: str):
         """
         Creates a DirectoryReader object
+
         :param train_dirs: the paths to the training data
         :param validation_dir: the path to the testing data
         """
@@ -46,14 +47,15 @@ class DirectoryReader(Reader):
     @staticmethod
     def _find_image_files(path: str, categories: List[str]):
         """
-        Build a list of all images files and labels in the data set.
+        Builds a list of all images files and labels in the data set.
+
         :param path: directory where the images are located. It is expected that the dataset has a structure
-        path/class_name/*images. For example:
+            *path/class_name/*images*. For example:
                     101_ObjectCategories/train/accordion/*.jpg (non-incremental)
                     101_ObjectCategories/train/Increment0/accordion/*.jpg (incremental)
         :param categories: list of strings that contain the caltech dataset categories
-        :return: a tuple with two lists, the first one represents the paths of images data and the second one is a integer thats
-        represents the correct category of the image.
+        :return: a tuple with two lists, the first one represents the paths of images data and the second one is an
+            integer that represents the correct category of the image.
         """
         filenames = []
         labels = []

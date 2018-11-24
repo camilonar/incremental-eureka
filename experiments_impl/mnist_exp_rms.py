@@ -5,7 +5,7 @@ from experiments.mnist_exp import MnistExperiment
 from training.support.tester import Tester
 from training.trainer.rms_trainer import RMSPropTrainer
 from training.config.general_config import GeneralConfig
-from training.config.increment_config import IncrementConfig
+from training.config.megabatch_config import MegabatchConfig
 
 
 class MnistExperimentRMSProp(MnistExperiment):
@@ -25,11 +25,11 @@ class MnistExperimentRMSProp(MnistExperiment):
         if is_incremental:
 
             for i in range(5):
-                train_conf = IncrementConfig(50, batch_size=128)
+                train_conf = MegabatchConfig(50, batch_size=128)
                 self.general_config.add_train_conf(train_conf)
         else:
             self.__general_config.learn_rate = 0.001
-            train_conf = IncrementConfig(50, batch_size=128)
+            train_conf = MegabatchConfig(50, batch_size=128)
             self.general_config.add_train_conf(train_conf)
 
     @property

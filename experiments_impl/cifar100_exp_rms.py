@@ -5,7 +5,7 @@ from experiments.cifar100_exp import Cifar100Experiment
 from training.support.tester import Tester
 from training.trainer.rms_trainer import RMSPropTrainer
 from training.config.general_config import GeneralConfig
-from training.config.increment_config import IncrementConfig
+from training.config.megabatch_config import MegabatchConfig
 
 
 class Cifar100ExperimentRMSProp(Cifar100Experiment):
@@ -24,10 +24,10 @@ class Cifar100ExperimentRMSProp(Cifar100Experiment):
         # Creates configuration for 5 mega-batches
         if is_incremental:
             for i in range(5):
-                train_conf = IncrementConfig(100, batch_size=128)
+                train_conf = MegabatchConfig(100, batch_size=128)
                 self.general_config.add_train_conf(train_conf)
         else:
-            train_conf = IncrementConfig(100, batch_size=2)
+            train_conf = MegabatchConfig(100, batch_size=2)
             self.general_config.add_train_conf(train_conf)
 
     @property

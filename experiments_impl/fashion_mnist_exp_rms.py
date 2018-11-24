@@ -5,7 +5,7 @@ from experiments.fashion_mnist_exp import FashionMnistExperiment
 from training.support.tester import Tester
 from training.trainer.rms_trainer import RMSPropTrainer
 from training.config.general_config import GeneralConfig
-from training.config.increment_config import IncrementConfig
+from training.config.megabatch_config import MegabatchConfig
 
 
 class FashionMnistExperimentRMSProp(FashionMnistExperiment):
@@ -24,10 +24,10 @@ class FashionMnistExperimentRMSProp(FashionMnistExperiment):
         # Creates configuration for 5 mega-batches
         if is_incremental:
             for i in range(5):
-                train_conf = IncrementConfig(80, batch_size=250)
+                train_conf = MegabatchConfig(80, batch_size=250)
                 self.general_config.add_train_conf(train_conf)
         else:
-            train_conf = IncrementConfig(80, batch_size=250)
+            train_conf = MegabatchConfig(80, batch_size=250)
             self.general_config.add_train_conf(train_conf)
 
     @property

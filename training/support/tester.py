@@ -17,6 +17,7 @@ class Tester(object):
     def __init__(self, model: Network, pipeline: Data, tensor_x: tf.Tensor, tensor_y: tf.Tensor):
         """
         It creates a Tester object
+
         :param model: the neural net that is going to be trained
         :param pipeline: the data pipeline for the training
         :param tensor_x: the tensor corresponding to the input of a training
@@ -39,9 +40,10 @@ class Tester(object):
     def create_writer(summaries_path: str, identifier: int):
         """
         Creates a tf.summary.FileWriter, that saves results to summaries_path/increment_{id}
+
         :param summaries_path: the path of the directory where the results of the tests are going to be saved
         :param identifier: an ID for identifying the writer. This is used for the name of the file where the results are
-        going to be saved
+            going to be saved
         :return: a tf.summary.FileWriter object
         """
         return tf.summary.FileWriter(os.path.join(summaries_path, "increment_{}".format(identifier)),
@@ -51,6 +53,7 @@ class Tester(object):
         """
         It does the preparation for the training. This preparations include:
         -Creates operators needed for summaries for TensorBoard
+
         :return: None
         """
         # Creates variables for measuring the accuracy
@@ -66,6 +69,7 @@ class Tester(object):
         Performs validation over the test data and register the results in the form of summaries that can be interpreted
         by Tensorboard. The prepare method must have been called at least once before using this method, otherwise,
         an Exception may occur.
+
         :param sess: the current session
         :param iteration: the current iteration number over the training data
         :param writer: a FileWriter properly configured

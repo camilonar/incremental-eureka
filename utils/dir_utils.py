@@ -9,8 +9,10 @@ from training.config.general_config import GeneralConfig
 def get_unique_logdir():
     """
     Creates an unique logging directory based on current datetime (year, month, ..., seconds)
-    :return: a String with a directory name. The returned value DOES NOT have any OS specific separator, e.g.
-    it would return 'log_2018-10-04-49-24' and not 'log_2018-10-04-49-24/'
+
+    :return: a string with a directory name. The returned value **DOES NOT** have any OS specific separator, e.g.
+        it would return 'log_2018-10-04-49-24' and not 'log_2018-10-04-49-24/'
+    :rtype: str
     """
     timestamp = datetime.utcnow().strftime('%Y-%m-%d-%H-%M-%S')
     return 'log_{}'.format(timestamp)
@@ -19,6 +21,7 @@ def get_unique_logdir():
 def prepare_directories(config: GeneralConfig):
     """
     Creates and prepares the directories of checkpoints and summaries for TensorBoard
+
     :param config: the configuration that is going to be used in the whole training
     :return: a tuple containing a path for a checkpoint directory and a path for a summaries directory
     """
@@ -39,14 +42,15 @@ def prepare_directories(config: GeneralConfig):
 def create_full_checkpoint_path(model_name: str, config_name: str, inc_ckp_path: str, root='checkpoints', ext='.ckpt'):
     """
     Creates the full relative path to a checkpoint. It also checks if the path exists
+
     :param model_name: the name of the dataset corresponding to the checkpoint (e.g. Imagenet)
     :param config_name: the name of the Optimizer corresponding to the checkpoint (e.g. CEAL)
     :param inc_ckp_path: a string representing the mega-batch and iteration corresponding to the checkpoint. It is
-    expected to follow the format "[mega-batch]-[iteration]", e.g. "0-50".
+        expected to follow the format *"[mega-batch]-[iteration]"*, e.g. "0-50".
     :param root: the root directory where checkpoints are being stored
     :param ext: the extension of checkpoint files
     :return: a tuple containing the generated path (str) and a boolean that says whether or not the generated path is
-    a file that actually exists
+        a file that actually exists
     """
     filename = "model-" + inc_ckp_path + ext
     ckpt_path = os.path.join(root, model_name, config_name, filename)

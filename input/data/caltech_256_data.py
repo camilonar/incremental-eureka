@@ -25,7 +25,6 @@ class Caltech256Data(Data):
                  image_height=IMAGE_HEIGHT,
                  image_width=IMAGE_WIDTH):
 
-        """ Downloads the data if necessary. """
         print("Loading caltech data...")
         my_caltech = DirectoryReader(train_dirs, validation_dir)
         super().__init__(general_config, my_caltech, image_height, image_width)
@@ -50,10 +49,11 @@ class Caltech256Data(Data):
         def load_images(single_path, single_target):
             """
             Maps the paths and labels with the corresponding Tensors that are going to be used as Input for the training
+
             :param single_path: a path to an image of .jpeg type
             :param single_target: a number that corresponds with the label of the sample
             :return: a tuple with two tensors, the first one represents the image data and the second one represents
-            the label.
+                the label.
             """
             # one hot encode the target
             single_target = tf.cast(tf.subtract(single_target, tf.constant(1)), tf.int32)

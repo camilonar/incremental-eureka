@@ -12,6 +12,8 @@ class LeNet(Network):
 
         This code was taken and adapted from:
         https://github.com/sujaybabruwad/LeNet-in-Tensorflow
+
+        :return: None
         """
         (self.feed('data')
          .conv(5, 5, 6, 1, 1, padding='VALID', name='conv1')

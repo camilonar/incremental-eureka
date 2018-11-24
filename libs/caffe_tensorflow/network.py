@@ -279,6 +279,7 @@ class Network(object):
         This operation allows to load a network in case that transfer learning is used (i.e. loading the weights of a
         network previously trained in other dataset). If has_transfer_learning property is set to True then the model
         is model, otherwise no operation is performed.
+
         :param sess: the current Session
         :return: None
         """
@@ -289,8 +290,10 @@ class Network(object):
     def data_path(self):
         """
         Contains the path to the weights and biases of the network that is going to be loaded for transfer learning
+
         :return: a string with the path where the weights of the network are stored, if transfer learning is used. The
-        default implementation returns None.
+            default implementation returns None.
+        :rtype: str
         """
         return None
 
@@ -298,7 +301,9 @@ class Network(object):
     def trainable_layers(self):
         """
         Contains a list with the names of the layers that are going to be trained. This is useful for transfer learning
+
         :return: a list. The default implementation returns an empty list
+        :rtype: list
         """
         return []
 
@@ -306,8 +311,10 @@ class Network(object):
     def trainable_variables(self):
         """
         Contains the list of Trainable variables
+
         :return: the list of Trainable variables. Returns None if has_transfer_learning is set to False, and the list of
-         variables of the layers whose names are in trainable_layers if it's set to True
+            variables of the layers whose names are in trainable_layers if it's set to True
+        :rtype: list
         """
         if self.has_transfer_learning:
             var_list = []
@@ -321,7 +328,9 @@ class Network(object):
     def has_transfer_learning(self):
         """
         Indicates whether or not, transfer learning is going to be used with the model.
+
         :return: True if the model weights should be loaded from a network previously trained in another dataset. By
-        default it returns False.
+            default it returns False.
+        :rtype: bool
         """
         return False

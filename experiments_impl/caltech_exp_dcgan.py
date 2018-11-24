@@ -5,7 +5,7 @@ from experiments.caltech_exp import CaltechExperiment
 from training.support.tester import Tester
 from training.trainer.dcgan_trainer import DCGANTrainer
 from training.config.general_config import GeneralConfig
-from training.config.increment_config import IncrementConfig
+from training.config.megabatch_config import MegabatchConfig
 
 
 class CaltechExperimentDCGAN(CaltechExperiment):
@@ -24,10 +24,10 @@ class CaltechExperimentDCGAN(CaltechExperiment):
         # Creates configuration for 5 mega-batches
         if is_incremental:
             for i in range(5):
-                train_conf = IncrementConfig(1, batch_size=160)
+                train_conf = MegabatchConfig(1, batch_size=160)
                 self.general_config.add_train_conf(train_conf)
         else:
-            train_conf = IncrementConfig(1, batch_size=160)
+            train_conf = MegabatchConfig(1, batch_size=160)
             self.general_config.add_train_conf(train_conf)
 
     @property

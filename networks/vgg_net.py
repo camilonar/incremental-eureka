@@ -9,6 +9,7 @@ class VGGNet(Network):
          the constructor of the object as 'data'.
          E.g.:
             net = VGGNet({'data': input_tensor})
+
         :return: None
         """
         (self.feed('data')
@@ -45,6 +46,3 @@ class VGGNet(Network):
     @property
     def trainable_layers(self):
         return ["fc7", "fc8"]
-
-    def load(self, data_path, session, train_layers=None):
-        print("LOADD CORRECTO ")

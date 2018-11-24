@@ -28,10 +28,15 @@ from experiments_impl.mnist_exp_rms import MnistExperimentRMSProp
 class Experiments(containers.DeclarativeContainer):
     """
     IoC container for the basic experiments included in the framework, which corresponds to datasets:
-    -Caltech-101
-    -Cifar-10
-    -MNIST
-    -Tiny Imagenet
+
+        - Caltech-101
+        - CIFAR-10
+        - CIFAR-100
+        - MNIST
+        - Tiny Imagenet
+        - Caltech 256
+        - Fashion MNIST
+
     """
     # TODO agregar los otros testers
     testers = {const.TR_BASE: {const.DATA_CALTECH_101: providers.Factory(CaltechExperimentRMSProp),
@@ -56,8 +61,10 @@ class Experiments(containers.DeclarativeContainer):
     def get_experiment(cls, str_trainer: str, str_dataset: str):
         """
         Gets an Experiment object factory
+
         :param str_trainer: a string representing the trainer/optimizer
         :param str_dataset: a string representing the dataset
         :return: a Factory provider for the desired trainer and dataset
+        :rtype: Factory
         """
         return cls.testers[str_trainer][str_dataset]

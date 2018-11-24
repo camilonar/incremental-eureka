@@ -1,8 +1,9 @@
 """
 Module that helps with the execution of experiments.
 Features:
-1. Prepares the ambient for testing
-2. Executes a test training a neural network over a dataset according to a flexible configuration
+
+    1. Prepares the ambient for testing
+    2. Executes a test training a neural network over a dataset according to a flexible configuration
 """
 from abc import ABC, abstractmethod
 from errors import ExperimentNotPreparedError
@@ -22,15 +23,16 @@ class Experiment(ABC):
                  summary_interval=100, ckp_interval=200, checkpoint_key: str = None):
         """
         It creates an Experiment object
+
         :param train_dirs: array of strings corresponding to the paths of each one of the mega-batches for training
         :param validation_dir: a string corresponding to the path of the testing data
         :param summary_interval: the interval of iterations at which the summaries are going to be performed
         :param ckp_interval: the interval of iterations at which the evaluations and checkpoints are going to be
-        performed. Must be an integer multiple of summary_interval
+            performed. Must be an integer multiple of summary_interval
         :param checkpoint_key: a string containing the checkpoint's corresponding mega-batch and iteration if it's
-        required to start the training from a checkpoint. It is expected to follow the format
-        "[mega-batch]-[iteration]", e.g. "0-50".
-        If there is no checkpoint to be loaded then its value should be None. The default value is None.
+            required to start the training from a checkpoint. It is expected to follow the format
+            "*[mega-batch]-[iteration]*", e.g. "0-50".
+            If there is no checkpoint to be loaded then its value should be None. The default value is None.
 
         This must be called by the constructors of the subclasses.
         """
@@ -45,6 +47,7 @@ class Experiment(ABC):
     def _prepare_data_pipeline(self):
         """
         It prepares the data pipeline according to the configuration of each Experiment
+
         :return: None
         """
         raise NotImplementedError("The subclass hasn't implemented the _prepare_data_pipeline method")
@@ -53,8 +56,9 @@ class Experiment(ABC):
     def _prepare_neural_network(self):
         """
         It creates and stores the proper neural network according to the assigned dataset of the tester.
-        E.g. if the Experiment performs experiments over ImageNet then it should create a CaffeNet, but if the experiments are over
-        MNIST then it should create a LeNet.
+        E.g. if the Experiment performs experiments over ImageNet then it should create a CaffeNet, but if
+        the experiments are over MNIST then it should create a LeNet.
+
         :return: None
         """
         raise NotImplementedError("The subclass hasn't implemented the _prepare_neural_network method")
@@ -65,6 +69,7 @@ class Experiment(ABC):
         Prepares the trainer that is required by the User. All the other preparations (e.g. _prepare_config,
         _prepare_neural_network) must be completed before this method is used, otherwise, there may be unexpected
         behavior
+
         :return: None
         """
 
@@ -73,6 +78,7 @@ class Experiment(ABC):
         """
         This method creates and saves the proper Configuration for the training according to the pre-established
         conditions of each dataset
+
         :param str_optimizer: a string that represents the chosen Trainer.
         :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
         :return: None
@@ -83,13 +89,15 @@ class Experiment(ABC):
         """
         This method prepares the checkpoint path given an incomplete checkpoint path. It also checks if the created
         checkpoint path is a valid path.
+
         :param checkpoint_key: the checkpoint key if it's required to start the training from a checkpoint. It is
-         expected to follow the format "[increment]-[iteration]", e.g. "0-50".
-        If there is no checkpoint to be loaded then its value should be None.
+            expected to follow the format "[increment]-[iteration]", e.g. "0-50".
+            If there is no checkpoint to be loaded then its value should be None.
         :param str_optimizer: a string that represents the selected trainer/optimizer
         :return: if a checkpoint has been successfully loaded then this method returns a string representing the full
-        path to the checkpoint. If no checkpoint has been requested or if the generated path doesn't exists
-        then this method returns None
+            path to the checkpoint. If no checkpoint has been requested or if the generated path doesn't exists
+            then this method returns None
+        :rtype: str
         """
         if checkpoint_key:
             path, valid = dir.create_full_checkpoint_path(self.dataset_name, str_optimizer, checkpoint_key)
@@ -104,6 +112,7 @@ class Experiment(ABC):
         It prepares the Experiment object for the test, according to the various parameters given up to this point and
         also according to the corresponding dataset to which the concrete Experiment is associated.
         This method calls ALL the _prepare methods defined in the base class.
+
         :param str_trainer: a string that represents the chosen Trainer. Currently supported strings are:
             -OPT_BASE: for a simple RMSProp
             -OPT_DCGAN: for the Trainer that uses the algorithm presented in "Evolutive deep models for online learning
@@ -127,6 +136,7 @@ class Experiment(ABC):
         """
         Calls the trainer to perform the experiment with the given configuration. It should raise an exception if the
         _prepare methods (or prepare_all) hasn't been executed before this method.
+
         :return: None
         :raises ExperimentNotPreparedError: if the Experiment hasn't been prepared before the execution of this method
         """
@@ -141,9 +151,10 @@ class Experiment(ABC):
         -The Optimizer
         -The training configuration
         -If a checkpoint has been required, then it must have been loaded
+
         :return: None
-        :raises ExperimentNotPreparedError: if it is found that at least one of the prerequisites for the test hasn't been
-        fulfilled
+        :raises ExperimentNotPreparedError: if it is found that at least one of the prerequisites for the test hasn't
+            been fulfilled
         """
         print("Checking conditions for test...")
         message = ""
@@ -170,7 +181,9 @@ class Experiment(ABC):
     def dataset_name(self):
         """
         Getter for the name of the dataset associated with the Experiment
+
         :return: the name of the dataset of the Experiment
+        :rtype: str
         """
         pass
 
@@ -179,7 +192,9 @@ class Experiment(ABC):
     def data_input(self):
         """
         Getter for the Data pipeline object
+
         :return: the data pipeline object of the Experiment
+        :rtype: Data
         """
         pass
 
@@ -188,7 +203,9 @@ class Experiment(ABC):
     def neural_net(self):
         """
         Getter for the Neural network object
+
         :return: the Neural network object of the Experiment
+        :rtype: Network
         """
         pass
 
@@ -196,8 +213,10 @@ class Experiment(ABC):
     @abstractmethod
     def general_config(self):
         """
-        Getter for the GeneralTraining object
-        :return: the GeneralTraining object of the Experiments
+        Getter for the GeneralConfig object
+
+        :return: the GeneralConfig object of the Experiments
+        :rtype: GeneralConfig
         """
         pass
 
@@ -206,7 +225,9 @@ class Experiment(ABC):
     def trainer(self):
         """
         Getter for the Trainer object
+
         :return: the Trainer object of the Experiment
+        :rtype: Trainer
         """
         pass
 
@@ -215,9 +236,11 @@ class Experiment(ABC):
         """
         It tells whether or not a checkpoint for the training has been loaded, in case that a checkpoint has been
         required by the User
+
         :return: it should return True if the checkpoint has been properly loaded into the neural net or if no
-        checkpoint has been requested. It should return false if a checkpoint has been requested but hasn't been loaded
-        into the net
+            checkpoint has been requested. It should return false if a checkpoint has been requested but hasn't been
+            loaded into the net
+        :rtype: bool
         """
         if self.checkpoint_key is None:
             return True
@@ -228,7 +251,9 @@ class Experiment(ABC):
     def input_tensor(self):
         """
         Getter for the input tensor of the neural network used by the Experiment
+
         :return: a Tensor that was assigned as 'data' when the network was created
+        :rtype: tf.Tensor
         """
         pass
 
@@ -237,9 +262,11 @@ class Experiment(ABC):
     def output_tensor(self):
         """
         Getter for the output tensor of the training
+
         :return: the Tensor associated to the labels of supervised learning.
-        E.g. if the tensor is used for calculating the mse, as follows, then 'data_y' should be the returned Tensor
-        of this function:
-            mse = tf.reduce_mean(tf.square(data_y - neural_net.get_output()))
+            E.g. if the tensor is used for calculating the mse, as follows, then 'data_y' should be the returned Tensor
+            of this function:
+                `mse = tf.reduce_mean(tf.square(data_y - neural_net.get_output()))`
+        :rtype: tf.Tensor
         """
         pass

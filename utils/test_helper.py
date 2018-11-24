@@ -9,12 +9,13 @@ def print_config(dataset: str, optimizer: str, checkpoint_key: str, s_interval: 
                  is_incremental: bool, train_dirs: [str], validation_dir: str, is_menu: bool = True):
     """
         Prints the configuration selected by the user
+
         :param dataset: a string representing the dataset that has been configured by the user
         :param optimizer: a string representing the optimizer that has been configured by the user
         :param checkpoint_key: a string representing a checkpoint. Must be None if no checkpoint has been configured
         :param s_interval: the summary interval that has been configured by the user
-        :param ckp_interval: the checkpoint interval that has been configured by the user
-        if the dataset doesn't have any dataset-specific path.
+        :param ckp_interval: the checkpoint interval that has been configured by the user if the dataset doesn't have
+            any dataset-specific path.
         :param seed: the seed for random numbers
         :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
         :param train_dirs: array of strings corresponding to the paths of each one of the mega-batches for training
@@ -42,6 +43,7 @@ def perform_experiment(dataset: str, optimizer: str, checkpoint_key: str, s_inte
                        is_incremental: bool, train_dirs: [str], validation_dir: str):
     """
     Prepares and performs the experiment according to the configuration given by the user
+
     :param dataset: a string representing the dataset that has been configured by the user
     :param optimizer: a string representing the optimizer that has been configured by the user
     :param checkpoint_key: a string representing a checkpoint. Must be None if no checkpoint has been configured
@@ -51,8 +53,6 @@ def perform_experiment(dataset: str, optimizer: str, checkpoint_key: str, s_inte
     :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
     :param train_dirs: array of strings corresponding to the paths of each one of the mega-batches for training
     :param validation_dir: a string corresponding to the path of the testing data
-    :param extras: an array of strings corresponding to paths specific for each dataset. It should be an empty array
-    if the dataset doesn't have any dataset-specific path.
     :return: None
     """
     const.SEED = seed

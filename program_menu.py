@@ -10,6 +10,7 @@ import utils.test_helper as helper
 def print_menu():
     """
     Prints the menu for the configuration of a Test
+
     :return: a str, corresponding to the response of the user
     """
     print()
@@ -30,17 +31,19 @@ def print_menu():
 def ask_for_configuration():
     """
     Asks the user for the following configurations for a test:
-    -Dataset
-    -Optimizer (between the supported types)
-    -Load of a checkpoint (Optional)
-    -Learning Rate (Optional)
-    -Summary Interval (Optional)
-    -Checkpoint Interval (Optional)
-    -Seed for random numbers (Optional)
+
+        - Dataset
+        - Optimizer (between the supported types)
+        - Load of a checkpoint (Optional)
+        - Learning Rate (Optional)
+        - Summary Interval (Optional)
+        - Checkpoint Interval (Optional)
+        - Seed for random numbers (Optional)
+
     :return: a tuple containing 3 strings, 2 ints and a float: name of the dataset (str), name of the optimizer (str),
-    representation of a checkpoint (str), summary interval (int), checkpoint interval (int) and seed (float)
-    in that order. The representation of a checkpoint will be returned as None if the user doesn't configure it.
-    An example of a return value is: ('MNIST', 'TR_BASE', None, 100, 300, 12345).
+        representation of a checkpoint (str), summary interval (int), checkpoint interval (int) and seed (float)
+        in that order. The representation of a checkpoint will be returned as None if the user doesn't configure it.
+        An example of a return value is: ('MNIST', 'TR_BASE', None, 100, 300, 12345).
     """
 
     # Creation of variables
@@ -79,9 +82,11 @@ def ask_for_configuration():
 def configure_dataset_and_neural_net(curr_dataset: str):
     """
         Configures the optimizer appropriately
+
         :param curr_dataset: the current dataset that has been configured by the user
         :return: a str representing the new dataset if the user has changed it to a valid value, otherwise, the current
-        dataset will be returned
+            dataset will be returned
+        :rtype: str
         """
     print()
     print("----------------------------Configure the Dataset----------------------------")
@@ -124,9 +129,11 @@ def configure_dataset_and_neural_net(curr_dataset: str):
 def configure_optimizer(curr_optimizer: str):
     """
     Configures the optimizer appropriately
+
     :param curr_optimizer: the current optimizer that has been configured by the user
     :return: a str representing the new optimizer if the user has changed it to a valid value, otherwise, the current
-    optimizer will be returned
+        optimizer will be returned
+    :rtype: str
     """
     print()
     print("----------------------------Configure the Optimizer----------------------------")
@@ -159,14 +166,16 @@ def configure_optimizer(curr_optimizer: str):
 def configure_checkpoint(curr_ckp: str):
     """
     Configures a representation of a checkpoint based in the corresponding increment (mega-batch) and iteration given
-    by the user. Notice that this function DOES NOT check if the given checkpoint is valid. Also, the full checkpoint
-    path must be created at a later moment, since that path is heavily dependent of other parameters like Dataset and
-    Optimizer that may change during configuration time.
+    by the user. Notice that this function **DOES NOT** check if the given checkpoint is valid. Also, the full
+    checkpoint path must be created at a later moment, since that path is heavily dependent of other parameters like
+    Dataset and Optimizer that may change during configuration time.
+
     :param curr_ckp: a string representing the increment and iteration of a checkpoint. It must be in the form:
-    "[increment]-[iteration]", e.g. "1-20"
+        *"[increment]-[iteration]"*, e.g. "1-20"
     :return: a string representing the new checkpoint if the user has changed it, otherwise, the current checkpoint will
-     be returned. A value of None will be returned if there was a checkpoint already configured and the user decided to
-     not load a checkpoint anymore.
+        be returned. A value of None will be returned if there was a checkpoint already configured and the user decided
+        to not load a checkpoint anymore.
+    :rtype: str
     """
     print()
     print("----------------------------Configure the Checkpoint----------------------------")
@@ -201,7 +210,9 @@ def configure_checkpoint(curr_ckp: str):
 def get_checkpoint():
     """
     Ask the user for the values of increment and iteration for the checkpoint
-    :return: a string representing the increment and iteration, with the format "[increment]-[iteration]", e.g. "0-50"
+
+    :return: a string representing the increment and iteration, with the format *"[increment]-[iteration]"*, e.g. "0-50"
+    :rtype: str
     """
     print()
     while True:
@@ -222,8 +233,10 @@ def get_checkpoint():
 def reset_checkpoint(curr_ckp: str):
     """
     Resets the checkpoint
+
     :param curr_ckp: a string representing the increment and iteration of a checkpoint.
     :return: None if the checkpoint is reset, otherwise, the current checkpoint will be returned
+    :rtype: str
     """
     print()
 
@@ -245,10 +258,11 @@ def reset_checkpoint(curr_ckp: str):
 def configure_intervals(curr_s_interval: int, curr_ckp_interval: int):
     """
     Configures the summary interval and checkpoint interval
+
     :param curr_s_interval: the current summary interval that has been configured by the user
     :param curr_ckp_interval: the current checkpoint interval that has been configured by the user
     :return: a tuple with 2 integers: the new summary interval and the new checkpoint interval if the user has changed
-    them to a valid value, otherwise, the current summary and checkpoint intervals will be returned
+        them to a valid value, otherwise, the current summary and checkpoint intervals will be returned
     """
     print()
     print("----------------------------Configure the Intervals----------------------------")
@@ -281,8 +295,10 @@ def get_checkpoint_multiplier():
     """
     Ask the user for the multiplier for the checkpoint interval, since this interval must be a multiple of the summary
     interval
+
     :return: an int greater than 0 that corresponds to the multiplier selected by the User, or -1 if the User cancels
-    the operation
+        the operation
+    :rtype: int
     """
     print("\nPress [X] if you want to cancel the operation")
     print("\n The checkpoint interval is a multiplier of the summary interval. For example, if you set a multiplier \n"
@@ -304,9 +320,11 @@ def get_checkpoint_multiplier():
 def configure_seed(curr_seed: int):
     """
     Asks the user for the seed for random number generators
+
     :param curr_seed: the current value of the seed
-    :return: a float correspondig to the new seed if the user has changed it to a valid value, otherwise, the current
-    seed will be returned
+    :return: an int corresponding to the new seed if the user has changed it to a valid value, otherwise, the current
+        seed will be returned
+    :rtype: int
     """
     print()
     print("----------------------------Configure the Seed----------------------------")
@@ -327,6 +345,7 @@ def configure_seed(curr_seed: int):
 def main():
     """
     Executes the program
+
     :return: None
     """
     is_incremental = const.IS_INCREMENTAL

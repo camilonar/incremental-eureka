@@ -14,6 +14,7 @@ class DCGANConfig(GeneralConfig):
                  summary_interval=100, check_interval=200, config_name='default', model_name='dataset_default'):
         """
         Creates a DCGANConfig object
+
         :param learning_rate: the learning rate to be used in the training
         :param dcgan_lr: the learning rate for Adam, which is used to train the DCGAN networks
         :param beta1: the beta value for Adam, which is used to train the DCGAN networks
@@ -25,7 +26,7 @@ class DCGANConfig(GeneralConfig):
         :param z_dim: Dimension of dim for Z.
         :param summary_interval: the interval of iterations at which the summaries are going to be performed
         :param check_interval: the interval of iterations at which the evaluations and checkpoints are going to be
-        performed. Must be an integer multiple of summary_interval
+            performed. Must be an integer multiple of summary_interval
         :param config_name: a descriptive name for the training configuration
         :param model_name: a descriptive name for the model
         """
