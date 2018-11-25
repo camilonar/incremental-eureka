@@ -63,7 +63,7 @@ SEED = 12345
 """
 Default value for the seed for random values
 """
-IS_INCREMENTAL = False
+IS_INCREMENTAL = True
 """
 It tells whether or not incremental learning is being used (useful for some Experiments)
 """
