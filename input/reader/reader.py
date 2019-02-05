@@ -80,7 +80,7 @@ class Reader(ABC):
         :param index: the number of the mega-batch, starting from 0. I.e. for the first batch, this would be 0
         :return: None
         """
-        print("Changing dataset part to part {} in the Reader object...".format(index))
+        print("Changing dataset megabatch to megabatch {} in the Reader object...".format(index))
         self.curr_path = self.train_paths[index]
         self.reload_training_data()
 

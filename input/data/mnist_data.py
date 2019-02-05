@@ -12,18 +12,13 @@ class MnistData(Data):
     """
     Data pipeline for MNIST dataset
     """
-    NUMBER_OF_CLASSES = 10
-    IMAGE_HEIGHT = 28
-    IMAGE_WIDTH = 28
-    IMAGE_WIDTH_RESIZE = 32
-    IMAGE_HEIGHT_RESIZE = 32
 
     def __init__(self, general_config,
                  train_dirs: [str],
                  validation_dir: str,
                  batch_queue_capacity=1000,
-                 image_height=IMAGE_HEIGHT_RESIZE,
-                 image_width=IMAGE_WIDTH_RESIZE):
+                 image_height=32,
+                 image_width=32):
         print("Loading mnist data...")
         my_mnist = TFRecordsReader(train_dirs, validation_dir)
         super().__init__(general_config, my_mnist, image_height, image_width)
@@ -43,6 +38,9 @@ class MnistData(Data):
         """
          Creates the input pipeline and performs some preprocessing.
         """
+        number_of_classes = 10
+        image_height = 28
+        image_width = 28
 
         def parser(serialized_example):
             """
@@ -64,11 +62,11 @@ class MnistData(Data):
                 })
 
             image = tf.decode_raw(features['image_raw'], tf.float32)
-            image.set_shape((self.IMAGE_WIDTH * self.IMAGE_HEIGHT))
+            image.set_shape((image_width * image_height))
             # Reshape from [depth * height * width] to [depth, height, width].
 
             image = tf.cast(
-                tf.transpose(tf.reshape(image, [1, self.IMAGE_HEIGHT, self.IMAGE_WIDTH]), [1, 2, 0]),
+                tf.transpose(tf.reshape(image, [1, image_height, image_width]), [1, 2, 0]),
                 tf.float32)
 
             image = tf.image.resize_images(image, [self.image_width, self.image_height])
@@ -78,7 +76,7 @@ class MnistData(Data):
                                                  saturate=True)
 
             label = tf.cast(features['label'], tf.int32)
-            label = tf.one_hot(label, depth=self.NUMBER_OF_CLASSES)
+            label = tf.one_hot(label, depth=number_of_classes)
 
             return image, label
 
@@ -95,6 +93,7 @@ class MnistData(Data):
             dataset = dataset.repeat(self.curr_config.epochs)
 
         dataset.skip(skip_count)
+        
         iterator = dataset.make_initializable_iterator()
         images_batch, target_batch = iterator.get_next()
         return iterator, images_batch, target_batch

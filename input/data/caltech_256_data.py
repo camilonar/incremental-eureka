@@ -13,17 +13,13 @@ class Caltech256Data(Data):
     """
     Data pipeline for Caltech-256 dataset
     """
-    NUMBER_OF_CLASSES = 256
-    IMAGE_HEIGHT = 224
-    IMAGE_WIDTH = 224
-    NUM_OF_CHANNELS = 3
 
     def __init__(self, general_config,
                  train_dirs: [str],
                  validation_dir: [str],
                  batch_queue_capacity=1000,
-                 image_height=IMAGE_HEIGHT,
-                 image_width=IMAGE_WIDTH):
+                 image_height=224,
+                 image_width=224):
 
         print("Loading caltech data...")
         my_caltech = DirectoryReader(train_dirs, validation_dir)
@@ -45,6 +41,8 @@ class Caltech256Data(Data):
         Creates the input pipeline and performs some preprocessing.
         The full dataset needs to fit into memory for this version.
         """
+        number_of_classes = 256
+        num_of_channels = 3
 
         def load_images(single_path, single_target):
             """
@@ -57,11 +55,11 @@ class Caltech256Data(Data):
             """
             # one hot encode the target
             single_target = tf.cast(tf.subtract(single_target, tf.constant(1)), tf.int32)
-            single_target = tf.one_hot(single_target, depth=self.NUMBER_OF_CLASSES)
+            single_target = tf.one_hot(single_target, depth=number_of_classes)
 
             # load the jpg image according to path
             file_content = tf.read_file(single_path)
-            single_image = tf.image.decode_jpeg(file_content, channels=self.NUM_OF_CHANNELS)
+            single_image = tf.image.decode_jpeg(file_content, channels=num_of_channels)
 
             # convert to [0, 1]
             single_image = tf.image.convert_image_dtype(single_image,
@@ -74,7 +72,7 @@ class Caltech256Data(Data):
             if augmentation:
                 single_image = tf.image.resize_image_with_crop_or_pad(single_image, self.image_height + 4,
                                                                       self.image_width + 4)
-                single_image = tf.random_crop(single_image, [self.image_height, self.image_width, self.NUM_OF_CHANNELS])
+                single_image = tf.random_crop(single_image, [self.image_height, self.image_width, num_of_channels])
                 single_image = tf.image.random_flip_left_right(single_image)
 
                 single_image = tf.image.per_image_standardization(single_image)
@@ -95,7 +93,7 @@ class Caltech256Data(Data):
         if not testing:
             dataset = dataset.repeat(self.curr_config.epochs)
 
-        # dataset.skip(skip_count)
+        dataset.skip(skip_count)
 
         iterator = dataset.make_initializable_iterator()
         images_batch, target_batch = iterator.get_next()

@@ -12,18 +12,13 @@ class CifarData(Data):
     """
     Data pipeline for Cifar-10
     """
-    NUMBER_OF_CLASSES = 10
-    IMAGE_HEIGHT = 32
-    IMAGE_WIDTH = 32
-    IMAGE_WIDTH_RESIZE = 32
-    IMAGE_HEIGHT_RESIZE = 32
 
     def __init__(self, general_config,
                  train_dirs: [str],
                  validation_dir: str,
                  batch_queue_capacity=1000,
-                 image_height=IMAGE_HEIGHT_RESIZE,
-                 image_width=IMAGE_WIDTH_RESIZE):
+                 image_height=32,
+                 image_width=32):
         print("Loading Cifar-10 data...")
         my_cifar = TFRecordsReader(train_dirs, validation_dir)
         super().__init__(general_config, my_cifar, image_height, image_width)
@@ -42,8 +37,11 @@ class CifarData(Data):
     def __build_generic_data_tensor(self, filename, shuffle, augmentations, testing, skip_count=0):
         """
         Creates the input pipeline and performs some preprocessing.
-
         """
+        number_of_classes = 10
+        image_height = 32
+        image_width = 32
+
         def parser(serialized_example):
             """
             Parses a single tf.Example into image and label tensors.
@@ -61,11 +59,11 @@ class CifarData(Data):
                 })
 
             image = tf.decode_raw(features['image'], tf.uint8)
-            image.set_shape([3 * self.IMAGE_HEIGHT * self.IMAGE_WIDTH])
+            image.set_shape([3 * image_height * image_width])
 
             # Reshape from [depth * height * width] to [depth, height, width].
             image = tf.cast(
-                tf.transpose(tf.reshape(image, [3, self.IMAGE_HEIGHT, self.IMAGE_WIDTH]), [1, 2, 0]),
+                tf.transpose(tf.reshape(image, [3, image_height, image_width]), [1, 2, 0]),
                 tf.float32)
 
             image = tf.image.convert_image_dtype(image,
@@ -73,7 +71,7 @@ class CifarData(Data):
                                                  saturate=True) * (1 / 255.0)
             # Data Augmentation
             if augmentations:
-                distorted_image = tf.random_crop(image, [self.IMAGE_HEIGHT, self.IMAGE_WIDTH, 3])
+                distorted_image = tf.random_crop(image, [image_height, image_width, 3])
                 # Randomly flip the image horizontally.
                 distorted_image = tf.image.random_flip_left_right(distorted_image)
                 # Because these operations are not commutative, consider randomizing
@@ -88,12 +86,12 @@ class CifarData(Data):
                 image = tf.image.per_image_standardization(distorted_image)
 
                 # Set the shapes of tensors.
-                image.set_shape([self.IMAGE_HEIGHT, self.IMAGE_WIDTH, 3])
+                image.set_shape([image_height, image_width, 3])
 
             image = tf.image.resize_images(image, [self.image_width, self.image_height])
 
             label = tf.cast(features['label'], tf.int32)
-            label = tf.one_hot(label, depth=self.NUMBER_OF_CLASSES)
+            label = tf.one_hot(label, depth=number_of_classes)
 
             return image, label
 

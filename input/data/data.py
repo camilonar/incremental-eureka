@@ -77,13 +77,13 @@ class Data(ABC):
         :param index: the number of the mega-batch, starting from 0. I.e. for the first batch, this would be 0
         :return: None
         """
-        print("Changing dataset part to part {} in the Data object...".format(index))
+        print("Changing dataset megabatch to megabatch {} in the Data object...".format(index))
         if not self.general_config.train_configurations[index] is self.curr_config:
             self.data_reader.change_dataset_megabatch(index)
             self.curr_config = self.general_config.train_configurations[index]
             self.close()
         else:
-            print("The dataset part hasn't been changed because the requested part is the current part")
+            print("The dataset megabatch hasn't been changed because the requested megabatch is the current megabatch")
 
     def __del__(self):
         """

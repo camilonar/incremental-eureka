@@ -2,23 +2,14 @@
 This module has a facade for a network.
 From https://github.com/ethereon/caffe-tensorflow/tree/master/kaffe/tensorflow
 """
+from abc import ABC
+
 import numpy as np
 import tensorflow as tf
-
 
 DEFAULT_PADDING = 'SAME'
 
 
-def include_original(dec):
-    def meta_decorator(f):
-        decorated = dec(f)
-        decorated._original = f
-        return decorated
-
-    return meta_decorator
-
-
-@include_original
 def layer(op):
     '''Decorator for composable network layers.'''
 
@@ -44,7 +35,7 @@ def layer(op):
     return layer_decorated
 
 
-class Network(object):
+class Network(ABC):
 
     def __init__(self, inputs, trainable=True):
         # The input nodes for this network
@@ -263,8 +254,6 @@ class Network(object):
     def dropout(self, input, keep_prob, name):
         keep = 1 - self.use_dropout + (self.use_dropout * keep_prob)
         return tf.nn.dropout(input, keep, name=name)
-
-
 
     @layer
     def global_average_pooling(self, input, name, stride=1):

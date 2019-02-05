@@ -12,6 +12,7 @@ class CifarExperimentRep(CifarExperiment):
     """
     Performs experiments over Cifar-10 dataset using the proposed representative-selection algorithm
     """
+    g = None
 
     def _prepare_trainer(self):
         tester = Tester(self.neural_net, self.data_input, self.input_tensor, self.output_tensor)
@@ -25,10 +26,10 @@ class CifarExperimentRep(CifarExperiment):
         # Creates configuration for 5 mega-batches
         if is_incremental:
             for i in range(5):
-                train_conf = MegabatchConfig(300, batch_size=128)
+                train_conf = MegabatchConfig(50, batch_size=128)
                 self.general_config.add_train_conf(train_conf)
         else:
-            train_conf = MegabatchConfig(300, batch_size=128)
+            train_conf = MegabatchConfig(50, batch_size=128)
             self.general_config.add_train_conf(train_conf)
 
     @property

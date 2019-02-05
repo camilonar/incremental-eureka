@@ -159,7 +159,7 @@ class Trainer(ABC):
                 image_batch, target_batch = self.sess.run([data_x, data_y])
 
                 _, c = self._train_batch(self.sess, image_batch, target_batch, self.tensor_x, self.tensor_y,
-                                         self.train_step, self.loss, increment, iteration, total_iteration)
+                                         self.train_step, self.loss, increment, iteration, i)
                 curr_time = time.time() + trained_time  # If a checkpoint has been loaded, it should adapt the time
                 interval = curr_time - start_time
 
