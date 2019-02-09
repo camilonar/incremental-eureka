@@ -1,7 +1,7 @@
 """
 Experiment for Caltech-101 dataset using base RMSProp
 """
-from experiments.caltech_256_exp import Caltech256Experiment
+from experiments.caltech256.caltech_256_exp import Caltech256Experiment
 from training.support.tester import Tester
 from training.trainer.rms_trainer import RMSPropTrainer
 from training.config.general_config import GeneralConfig

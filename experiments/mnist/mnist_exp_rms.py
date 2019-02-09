@@ -1,7 +1,7 @@
 """
 Experiment for MNIST dataset using base RMSProp
 """
-from experiments.mnist_exp import MnistExperiment
+from experiments.mnist.mnist_exp import MnistExperiment
 from training.support.tester import Tester
 from training.trainer.rms_trainer import RMSPropTrainer
 from training.config.general_config import GeneralConfig

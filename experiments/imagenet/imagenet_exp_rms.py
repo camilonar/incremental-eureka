@@ -1,24 +1,24 @@
 """
-Experiment for Tiny Imagenet dataset using the training algorithm that uses artificial sampling with DCGAN
+Experiment for Tiny Imagenet dataset using base RMSProp
 """
-from experiments.imagenet_exp import ImagenetExperiment
+from experiments.imagenet.imagenet_exp import ImagenetExperiment
 from training.support.tester import Tester
-from training.trainer.dcgan_trainer import DCGANTrainer
+from training.trainer.rms_trainer import RMSPropTrainer
 from training.config.general_config import GeneralConfig
 from training.config.megabatch_config import MegabatchConfig
 
 
-class ImagenetExperimentDCGAN(ImagenetExperiment):
+class ImagenetExperimentRMSProp(ImagenetExperiment):
     """
-    Performs experiments over Tiny Imagenet dataset using the training algorithm that uses artificial sampling with DCGAN
+    Performs experiments over Tiny Imagenet dataset using RMSProp
     """
     general_config = None
     trainer = None
 
     def _prepare_trainer(self):
         tester = Tester(self.neural_net, self.data_input, self.input_tensor, self.output_tensor)
-        self.trainer = DCGANTrainer(self.general_config, self.neural_net, self.data_input, self.input_tensor,
-                                    self.output_tensor, tester=tester, checkpoint=self.ckp_path)
+        self.trainer = RMSPropTrainer(self.general_config, self.neural_net, self.data_input,
+                                      self.input_tensor, self.output_tensor, tester=tester, checkpoint=self.ckp_path)
 
     def _prepare_config(self, str_optimizer: str, is_incremental: bool):
         self.general_config = GeneralConfig(0.0001, self.summary_interval, self.ckp_interval,

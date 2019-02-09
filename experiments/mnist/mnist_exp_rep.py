@@ -1,16 +1,16 @@
 """
-Experiment for Tiny Imagenet dataset using the proposed representative-selection algorithm
+Experiment for MNIST dataset using the proposed representative-selection algorithm
 """
-from experiments.imagenet_exp import ImagenetExperiment
+from experiments.mnist.mnist_exp import MnistExperiment
 from training.support.tester import Tester
 from training.trainer.rep_trainer import RepresentativesTrainer
 from training.config.general_config import GeneralConfig
 from training.config.megabatch_config import MegabatchConfig
 
 
-class ImagenetExperimentRep(ImagenetExperiment):
+class MnistExperimentRep(MnistExperiment):
     """
-    Performs experiments over Tiny Imagenet dataset using the proposed representative-selection algorithm
+    Performs experiments over MNIST dataset using the proposed representative-selection algorithm
     """
     general_config = None
     trainer = None
@@ -27,8 +27,8 @@ class ImagenetExperimentRep(ImagenetExperiment):
         # Creates configuration for 5 mega-batches
         if is_incremental:
             for i in range(5):
-                train_conf = MegabatchConfig(100, batch_size=100)
+                train_conf = MegabatchConfig(50, batch_size=128)
                 self.general_config.add_train_conf(train_conf)
         else:
-            train_conf = MegabatchConfig(100, batch_size=100)
+            train_conf = MegabatchConfig(50, batch_size=128)
             self.general_config.add_train_conf(train_conf)

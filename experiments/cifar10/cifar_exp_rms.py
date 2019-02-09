@@ -1,24 +1,22 @@
 """
-Experiment for Cifar-10 dataset using the proposed representative-selection algorithm
+Experiment for Cifar-10 dataset using base RMSProp
 """
-from experiments.cifar_exp import CifarExperiment
+from experiments.cifar10.cifar_exp import CifarExperiment
 from training.support.tester import Tester
-from training.trainer.rep_trainer import RepresentativesTrainer
+from training.trainer.rms_trainer import RMSPropTrainer
 from training.config.general_config import GeneralConfig
 from training.config.megabatch_config import MegabatchConfig
 
 
-class CifarExperimentRep(CifarExperiment):
+class CifarExperimentRMSProp(CifarExperiment):
     """
-    Performs experiments over Cifar-10 dataset using the proposed representative-selection algorithm
+    Performs experiments over Cifar-10 dataset using RMSProp
     """
-    g = None
 
     def _prepare_trainer(self):
         tester = Tester(self.neural_net, self.data_input, self.input_tensor, self.output_tensor)
-        self.__trainer = RepresentativesTrainer(self.general_config, self.neural_net, self.data_input,
-                                                self.input_tensor, self.output_tensor,
-                                                tester=tester, checkpoint=self.ckp_path)
+        self.__trainer = RMSPropTrainer(self.general_config, self.neural_net, self.data_input,
+                                        self.input_tensor, self.output_tensor, tester=tester, checkpoint=self.ckp_path)
 
     def _prepare_config(self, str_optimizer: str, is_incremental: bool):
         self.__general_config = GeneralConfig(0.0001, self.summary_interval, self.ckp_interval,

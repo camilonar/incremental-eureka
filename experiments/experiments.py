@@ -5,24 +5,24 @@ import dependency_injector.containers as containers
 import dependency_injector.providers as providers
 
 import utils.constants as const
-from experiments_impl.caltech_256_exp_rms import Caltech256ExperimentRMSProp
-from experiments_impl.caltech_exp_dcgan import CaltechExperimentDCGAN
-from experiments_impl.caltech_exp_rep import CaltechExperimentRep
-from experiments_impl.caltech_exp_rms import CaltechExperimentRMSProp
-from experiments_impl.cifar100_exp_rms import Cifar100ExperimentRMSProp
+from experiments.caltech256.caltech_256_exp_rms import Caltech256ExperimentRMSProp
+from experiments.caltech101.caltech_exp_dcgan import CaltechExperimentDCGAN
+from experiments.caltech101.caltech_exp_rep import CaltechExperimentRep
+from experiments.caltech101.caltech_exp_rms import CaltechExperimentRMSProp
+from experiments.cifar100.cifar100_exp_rms import Cifar100ExperimentRMSProp
 
-from experiments_impl.cifar_exp_dcgan import CifarExperimentDCGAN
-from experiments_impl.cifar_exp_rep import CifarExperimentRep
-from experiments_impl.cifar_exp_rms import CifarExperimentRMSProp
-from experiments_impl.fashion_mnist_exp_rms import FashionMnistExperimentRMSProp
+from experiments.cifar10.cifar_exp_dcgan import CifarExperimentDCGAN
+from experiments.cifar10.cifar_exp_rep import CifarExperimentRep
+from experiments.cifar10.cifar_exp_rms import CifarExperimentRMSProp
+from experiments.fashion_mnist.fashion_mnist_exp_rms import FashionMnistExperimentRMSProp
 
-from experiments_impl.imagenet__exp_dcgan import ImagenetExperimentDCGAN
-from experiments_impl.imagenet_exp_rep import ImagenetExperimentRep
-from experiments_impl.imagenet_exp_rms import ImagenetExperimentRMSProp
+from experiments.imagenet.imagenet__exp_dcgan import ImagenetExperimentDCGAN
+from experiments.imagenet.imagenet_exp_rep import ImagenetExperimentRep
+from experiments.imagenet.imagenet_exp_rms import ImagenetExperimentRMSProp
 
-from experiments_impl.mnist_exp_dcgan import MnistExperimentDCGAN
-from experiments_impl.mnist_exp_rep import MnistExperimentRep
-from experiments_impl.mnist_exp_rms import MnistExperimentRMSProp
+from experiments.mnist.mnist_exp_dcgan import MnistExperimentDCGAN
+from experiments.mnist.mnist_exp_rep import MnistExperimentRep
+from experiments.mnist.mnist_exp_rms import MnistExperimentRMSProp
 
 
 class Experiments(containers.DeclarativeContainer):

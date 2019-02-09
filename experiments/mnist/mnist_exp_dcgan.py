@@ -1,7 +1,7 @@
 """
 Experiment for MNIST dataset using the training algorithm that uses artificial sampling with DCGAN
 """
-from experiments.mnist_exp import MnistExperiment
+from experiments.mnist.mnist_exp import MnistExperiment
 from training.config.dcgan_config import DCGANConfig
 from training.support.tester import Tester
 from training.trainer.dcgan_trainer import DCGANTrainer

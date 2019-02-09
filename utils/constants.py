@@ -1,7 +1,6 @@
 """
 This module has constants used across the program
 """
-import os
 
 # -------------Names for the different datasets------------
 
@@ -66,36 +65,4 @@ Default value for the seed for random values
 IS_INCREMENTAL = True
 """
 It tells whether or not incremental learning is being used (useful for some Experiments)
-"""
-
-# -------------Default locations for datasets------------
-
-__DATASET_PATH = os.path.join("..", "datasets")
-MNIST_PATH = os.path.join(__DATASET_PATH, "MNIST")
-"""
-Default path for the directory where MNIST is stored
-"""
-FASHION_MNIST_PATH = os.path.join(__DATASET_PATH, "FASHION-MNIST")
-"""
-Default path for the directory where Fashion MNIST is stored
-"""
-CIFAR_10_PATH = os.path.join(__DATASET_PATH, "cifar10")
-"""
-Default path for the directory where CIFAR-10 is stored
-"""
-CIFAR_100_PATH = os.path.join(__DATASET_PATH, "cifar-100")
-"""
-Default path for the directory where CIFAR-100 is stored
-"""
-CALTECH_101_PATH = os.path.join(__DATASET_PATH, "101_ObjectCategories")
-"""
-Default path for the directory where Caltech 101 is stored
-"""
-TINY_IMAGENET_PATH = os.path.join(__DATASET_PATH, "tiny-imagenet-200")
-"""
-Default path for the directory where Tiny Imagenet is stored
-"""
-CALTECH_256_PATH = os.path.join(__DATASET_PATH, "256_ObjectCategories")
-"""
-Default path for the directory where Caltech 256 is stored
 """

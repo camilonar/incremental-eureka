@@ -2,7 +2,7 @@
 Module with useful functions for performing an experiment
 """
 import utils.constants as const
-from experiments_impl.experiments import Experiments
+from experiments.experiments import Experiments
 
 
 def print_config(dataset: str, optimizer: str, checkpoint_key: str, s_interval: int, ckp_interval: int, seed: int,
@@ -50,7 +50,7 @@ def perform_experiment(dataset: str, optimizer: str, checkpoint_key: str, s_inte
     :param s_interval: the summary interval that has been configured by the user
     :param ckp_interval: the checkpoint interval that has been configured by the user
     :param seed: the seed for random numbers
-    :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
+    :param is_incremental: True to indicate that the training is going to contain multiple mega-batches and
     :param train_dirs: array of strings corresponding to the paths of each one of the mega-batches for training
     :param validation_dir: a string corresponding to the path of the testing data
     :return: None

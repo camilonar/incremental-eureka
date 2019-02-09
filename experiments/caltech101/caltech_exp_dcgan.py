@@ -1,25 +1,24 @@
 """
-Experiment for Caltech-101 dataset using the proposed representative-selection algorithm
+Experiment for Caltech-101 dataset using the training algorithm that uses artificial sampling with DCGAN
 """
-from experiments.caltech_exp import CaltechExperiment
+from experiments.caltech101.caltech_exp import CaltechExperiment
 from training.support.tester import Tester
-from training.trainer.rep_trainer import RepresentativesTrainer
+from training.trainer.dcgan_trainer import DCGANTrainer
 from training.config.general_config import GeneralConfig
 from training.config.megabatch_config import MegabatchConfig
 
 
-class CaltechExperimentRep(CaltechExperiment):
+class CaltechExperimentDCGAN(CaltechExperiment):
     """
-    Performs experiments over Caltech-101 dataset using the proposed representative-selection algorithm
+    Performs experiments over Caltech-101 dataset using the training algorithm that uses artificial sampling with DCGAN
     """
     general_config = None
     trainer = None
 
     def _prepare_trainer(self):
         tester = Tester(self.neural_net, self.data_input, self.input_tensor, self.output_tensor)
-        self.trainer = RepresentativesTrainer(self.general_config, self.neural_net, self.data_input,
-                                              self.input_tensor, self.output_tensor,
-                                              tester=tester, checkpoint=self.ckp_path)
+        self.trainer = DCGANTrainer(self.general_config, self.neural_net, self.data_input, self.input_tensor,
+                                    self.output_tensor, tester=tester, checkpoint=self.ckp_path)
 
     def _prepare_config(self, str_optimizer: str, is_incremental: bool):
         self.general_config = GeneralConfig(0.0001, self.summary_interval, self.ckp_interval,
