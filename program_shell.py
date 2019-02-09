@@ -5,6 +5,7 @@ import argparse
 import utils.constants as const
 import utils.default_paths as paths
 import utils.test_helper as helper
+from utils.train_modes import TrainMode
 
 
 def create_parser():
@@ -57,7 +58,7 @@ def create_parser():
         '-i',
         '--is_incremental',
         action="store_true",
-        default=const.IS_INCREMENTAL,
+        default=const.TRAIN_MODE,
         help='(Optional) Must be set for incremental training.')
     parser.add_argument(
         '-dp',
@@ -71,7 +72,7 @@ def create_parser():
 
 
 def unpack_variables(dataset: str, optimizer: str, checkpoint_key: str, s_interval: int, ckp_interval: int, seed: int,
-                     is_incremental: bool, dataset_path: str):
+                     train_mode: TrainMode, dataset_path: str):
     """
     Helper function that is used as a proxy for easily unpacking variables from the corresponding parser
 
@@ -81,11 +82,11 @@ def unpack_variables(dataset: str, optimizer: str, checkpoint_key: str, s_interv
     :param s_interval: the summary interval that has been configured by the user
     :param ckp_interval: the checkpoint interval that has been configured by the user
     :param seed: the seed for random numbers
-    :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
+    :param train_mode: Indicates the training mode that is going to be used
     :param dataset_path: the path to the root of the dataset
     :return: the values of the unpacked arguments in the same order
     """
-    return dataset, optimizer, checkpoint_key, s_interval, ckp_interval, seed, is_incremental, dataset_path
+    return dataset, optimizer, checkpoint_key, s_interval, ckp_interval, seed, train_mode, dataset_path
 
 
 def main():
@@ -96,12 +97,12 @@ def main():
     """
     parser = create_parser()
     args = parser.parse_args()
-    dataset, optimizer, checkpoint_key, s_interval, ckp_interval, seed, is_incremental, dataset_path = unpack_variables(
+    dataset, optimizer, checkpoint_key, s_interval, ckp_interval, seed, train_mode, dataset_path = unpack_variables(
         **vars(args))
-    train_dirs, validation_dir = paths.get_paths_from_dataset(dataset, is_incremental, dataset_path)
-    helper.print_config(dataset, optimizer, checkpoint_key, s_interval, ckp_interval, seed, is_incremental, train_dirs,
+    train_dirs, validation_dir = paths.get_paths_from_dataset(dataset, dataset_path)
+    helper.print_config(dataset, optimizer, checkpoint_key, s_interval, ckp_interval, seed, train_mode, train_dirs,
                         validation_dir, is_menu=False)
-    helper.perform_experiment(dataset, optimizer, checkpoint_key, s_interval, ckp_interval, seed, is_incremental,
+    helper.perform_experiment(dataset, optimizer, checkpoint_key, s_interval, ckp_interval, seed, train_mode,
                               train_dirs, validation_dir)
     return 0
 

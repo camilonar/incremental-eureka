@@ -58,7 +58,7 @@ class ImagenetData(Data):
                  image_height=256,
                  image_width=256):
         print("Loading imagenet data")
-        my_imagenet = DirectoryReader(train_dirs, validation_dir)
+        my_imagenet = DirectoryReader(train_dirs, validation_dir, general_config.train_mode)
         super().__init__(general_config, my_imagenet, image_height, image_width)
         self.batch_queue_capacity = batch_queue_capacity + 3 * self.curr_config.batch_size
         self.data_reader.check_if_data_exists()

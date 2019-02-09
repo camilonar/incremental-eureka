@@ -12,6 +12,7 @@ import utils.dir_utils as dir
 import tensorflow as tf
 import numpy as np
 import utils.constants as const
+from utils.train_modes import TrainMode
 
 
 class Experiment(ABC):
@@ -74,13 +75,13 @@ class Experiment(ABC):
         """
 
     @abstractmethod
-    def _prepare_config(self, str_optimizer: str, is_incremental: bool):
+    def _prepare_config(self, str_optimizer: str, train_mode: TrainMode):
         """
         This method creates and saves the proper Configuration for the training according to the pre-established
         conditions of each dataset
 
         :param str_optimizer: a string that represents the chosen Trainer.
-        :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
+        :param train_mode: Indicates the training mode that is going to be used
         :return: None
         """
         raise NotImplementedError("The subclass hasn't implemented the _prepare_config method")
@@ -107,7 +108,7 @@ class Experiment(ABC):
         print("No checkpoint has been loaded...")
         return None
 
-    def prepare_all(self, str_trainer: str, is_incremental: bool):
+    def prepare_all(self, str_trainer: str, train_mode: TrainMode):
         """
         It prepares the Experiment object for the test, according to the various parameters given up to this point and
         also according to the corresponding dataset to which the concrete Experiment is associated.
@@ -118,15 +119,15 @@ class Experiment(ABC):
             -OPT_DCGAN: for the Trainer that uses the algorithm presented in "Evolutive deep models for online learning
                     on data streams with no storage"
                     See: http://ceur-ws.org/Vol-1958/IOTSTREAMING2.pdf
-            -OPT_REPRESENTATIVES: for the proposed approach of this work, i.e. an incremental algorithm that uses RMSProp
+            -OPT_REPRESENTATIVES: for the proposed method of this work, i.e. an incremental algorithm that uses RMSProp
                     and select samples based in clustering
-        :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
+        :param train_mode: Indicates the training mode that is going to be used
         :return: None
         """
         tf.reset_default_graph()
         tf.set_random_seed(const.SEED)
         np.random.seed(const.SEED)
-        self._prepare_config(str_trainer, is_incremental)
+        self._prepare_config(str_trainer, train_mode)
         self._prepare_data_pipeline()
         self._prepare_neural_network()
         self.ckp_path = self._prepare_checkpoint_if_required(self.checkpoint_key, str_trainer)

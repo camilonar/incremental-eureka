@@ -3,6 +3,7 @@ This module has constants used across the program
 """
 
 # -------------Names for the different datasets------------
+from utils.train_modes import TrainMode
 
 DATA_MNIST = "MNIST"
 """
@@ -62,7 +63,7 @@ SEED = 12345
 """
 Default value for the seed for random values
 """
-IS_INCREMENTAL = True
+TRAIN_MODE = TrainMode.INCREMENTAL
 """
-It tells whether or not incremental learning is being used (useful for some Experiments)
+It specifies the default Training Mode
 """

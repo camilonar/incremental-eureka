@@ -348,12 +348,12 @@ def main():
 
     :return: None
     """
-    is_incremental = const.IS_INCREMENTAL
+    train_mode = const.TRAIN_MODE
     dataset, optimizer, checkpoint, s_interval, ckp_interval, seed = ask_for_configuration()
-    train_dirs, validation_dir = paths.get_paths_from_dataset(dataset, is_incremental)
-    helper.print_config(dataset, optimizer, checkpoint, s_interval, ckp_interval, seed, is_incremental,
+    train_dirs, validation_dir = paths.get_paths_from_dataset(dataset)
+    helper.print_config(dataset, optimizer, checkpoint, s_interval, ckp_interval, seed, train_mode,
                         train_dirs, validation_dir)
-    helper.perform_experiment(dataset, optimizer, checkpoint, s_interval, ckp_interval, seed, is_incremental,
+    helper.perform_experiment(dataset, optimizer, checkpoint, s_interval, ckp_interval, seed, train_mode,
                               train_dirs, validation_dir)
     return 0
 

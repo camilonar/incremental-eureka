@@ -19,7 +19,7 @@ class Cifar100Data(Data):
                  image_height=224,
                  image_width=224):
         print("Loading Cifar-100 data...")
-        my_cifar = TFRecordsReader(train_dirs, validation_dir)
+        my_cifar = TFRecordsReader(train_dirs, validation_dir, general_config.train_mode)
         super().__init__(general_config, my_cifar, image_height, image_width)
         self.data_reader.check_if_data_exists()
         self.batch_queue_capacity = batch_queue_capacity

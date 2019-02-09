@@ -6,8 +6,10 @@ import random
 import os
 from typing import List
 
+from errors import OptionNotSupportedError
 from input.reader import Reader
 from utils import constants as const
+from utils.train_modes import TrainMode
 
 valid_ext = [".jpg", ".gif", ".png", ".jpeg"]
 
@@ -17,14 +19,8 @@ class DirectoryReader(Reader):
     Reader for datasets stored in directories
     """
 
-    def __init__(self, train_dirs: [str], validation_dir: str):
-        """
-        Creates a DirectoryReader object
-
-        :param train_dirs: the paths to the training data
-        :param validation_dir: the path to the testing data
-        """
-        super().__init__(train_dirs, validation_dir)
+    def __init__(self, train_dirs: [str], validation_dir: str, train_mode: TrainMode):
+        super().__init__(train_dirs, validation_dir, train_mode)
         self.categories = sorted(os.listdir(self.curr_path))
         self.val_filenames, self.val_labels = self._find_image_files(validation_dir, self.categories)
         self.train_filenames, self.train_labels = self._find_image_files(self.curr_path, self.categories)
@@ -39,7 +35,15 @@ class DirectoryReader(Reader):
         return self.val_filenames, self.val_labels
 
     def reload_training_data(self):
-        self.train_filenames, self.train_labels = self._find_image_files(self.curr_path, self.categories)
+        tr_filenames, tr_labels = self._find_image_files(self.curr_path, self.categories)
+        if self.train_mode == TrainMode.INCREMENTAL:
+            self.train_filenames, self.train_labels = tr_filenames, tr_labels
+        elif self.train_mode == TrainMode.ACUMULATIVE:
+            self.train_filenames.extend(tr_filenames)
+            self.train_labels.extend(tr_labels)
+        else:
+            raise OptionNotSupportedError("The requested Reader class: {} doesn't support the requested training"
+                                          " mode: {}".format(self.__class__, self.train_mode))
 
     ###############################################################################
     # TensorFlow Inception function (ported to python3)

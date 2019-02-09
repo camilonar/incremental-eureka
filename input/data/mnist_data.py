@@ -20,7 +20,7 @@ class MnistData(Data):
                  image_height=32,
                  image_width=32):
         print("Loading mnist data...")
-        my_mnist = TFRecordsReader(train_dirs, validation_dir)
+        my_mnist = TFRecordsReader(train_dirs, validation_dir, general_config.train_mode)
         super().__init__(general_config, my_mnist, image_height, image_width)
         self.batch_queue_capacity = batch_queue_capacity
         self.data_reader.check_if_data_exists()
@@ -81,7 +81,7 @@ class MnistData(Data):
             return image, label
 
         # Creates the dataset
-        dataset = tf.data.TFRecordDataset(filename)
+        dataset = tf.data.TFRecordDataset(filename, num_parallel_reads=len(self.general_config.train_configurations))
         dataset = dataset.map(parser, num_parallel_calls=self.batch_queue_capacity)
 
         if shuffle:

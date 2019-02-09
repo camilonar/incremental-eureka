@@ -23,7 +23,7 @@ class CaltechData(Data):
 
         """ Downloads the data if necessary. """
         print("Loading Caltech data...")
-        my_caltech = DirectoryReader(train_dirs, validation_dir)
+        my_caltech = DirectoryReader(train_dirs, validation_dir, general_config.train_mode)
         super().__init__(general_config, my_caltech, image_height, image_width)
         self.batch_queue_capacity = batch_queue_capacity + 3 * self.curr_config.batch_size
         self.data_reader.check_if_data_exists()

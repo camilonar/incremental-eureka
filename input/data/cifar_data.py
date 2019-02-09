@@ -20,7 +20,7 @@ class CifarData(Data):
                  image_height=32,
                  image_width=32):
         print("Loading Cifar-10 data...")
-        my_cifar = TFRecordsReader(train_dirs, validation_dir)
+        my_cifar = TFRecordsReader(train_dirs, validation_dir, general_config.train_mode)
         super().__init__(general_config, my_cifar, image_height, image_width)
         self.data_reader.check_if_data_exists()
         self.batch_queue_capacity = batch_queue_capacity
@@ -96,7 +96,7 @@ class CifarData(Data):
             return image, label
 
         # Creates the dataset
-        dataset = tf.data.TFRecordDataset(filename)
+        dataset = tf.data.TFRecordDataset(filename, num_parallel_reads=len(self.general_config.train_configurations))
         dataset = dataset.map(parser, num_parallel_calls=self.batch_queue_capacity)
 
         if shuffle:

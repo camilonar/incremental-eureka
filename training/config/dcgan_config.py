@@ -2,6 +2,7 @@
 Configuration for the training algorithm that uses artificial sampling with DCGAN
 """
 from training.config.general_config import GeneralConfig
+from utils.train_modes import TrainMode
 
 
 class DCGANConfig(GeneralConfig):
@@ -9,12 +10,14 @@ class DCGANConfig(GeneralConfig):
     Training configuration for the training algorithm that uses artificial sampling with DCGAN
     """
 
-    def __init__(self, learning_rate: float, dcgan_lr: float, beta1: float, input_height: float, input_width: float,
+    def __init__(self, train_mode: TrainMode, learning_rate: float, dcgan_lr: float, beta1: float, input_height: float,
+                 input_width: float,
                  output_height: float, output_width: float, c_dim: int, z_dim: int,
                  summary_interval=100, check_interval=200, config_name='default', model_name='dataset_default'):
         """
         Creates a DCGANConfig object
 
+        :param train_mode: Indicates the training mode that is going to be used
         :param learning_rate: the learning rate to be used in the training
         :param dcgan_lr: the learning rate for Adam, which is used to train the DCGAN networks
         :param beta1: the beta value for Adam, which is used to train the DCGAN networks
@@ -30,7 +33,7 @@ class DCGANConfig(GeneralConfig):
         :param config_name: a descriptive name for the training configuration
         :param model_name: a descriptive name for the model
         """
-        super().__init__(learning_rate, summary_interval, check_interval, config_name, model_name)
+        super().__init__(train_mode, learning_rate, summary_interval, check_interval, config_name, model_name)
         self.dcgan_lr = dcgan_lr
         self.beta1 = beta1
         self.input_height = input_height

@@ -8,6 +8,8 @@ from abc import ABC, abstractmethod
 from typing import List
 import os
 
+from utils.train_modes import TrainMode
+
 
 class Reader(ABC):
     """
@@ -17,18 +19,20 @@ class Reader(ABC):
         https://github.com/ischlag/tensorflow-input-pipelines
     """
 
-    def __init__(self, train_paths: List[str], test_path: str):
+    def __init__(self, train_paths: List[str], test_path: str, train_mode: TrainMode):
         """
         Creates a Reader object and points the current training data path to the first one of the list provided
 
         :param train_paths: a list of paths, where each one corresponds with the location of one part of the dataset,
             which means, that it has the location of each one of the mega-batches
         :param test_path: the path where the test/validation data is located
+        :param train_mode: Indicates the training mode that is going to be used
 
         This must be called by the constructors of the subclasses.
         """
         self.test_path = test_path
         self.train_paths = train_paths
+        self.train_mode = train_mode
         self.curr_path = self.train_paths[0]
 
     @abstractmethod

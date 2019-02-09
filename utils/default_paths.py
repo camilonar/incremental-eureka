@@ -46,6 +46,7 @@ CALTECH_256_PATH = os.path.join(__DATASET_PATH, "256_ObjectCategories")
 Default path for the directory where Caltech 256 is stored
 """
 
+
 # TODO revisar todos los paths para asegurar que funcione adecuadamente
 def get_alexnet_weights_path():
     """
@@ -67,11 +68,10 @@ def get_vgg16_weights_path():
     return "../transfer_learning/vgg16_weights.npz"
 
 
-def __get_mnist_paths(is_incremental: bool, base_folder: str = MNIST_PATH):
+def __get_mnist_paths(base_folder: str = MNIST_PATH):
     """
     It gives the default paths to the training and testing data of MNIST
 
-    :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
     :param base_folder: the directory where the datasets are being stored. E.g. if a dataset is stored in
         ../datasets/MNIST, then base_folder should be "../datasets/MNIST"
     :return: a tuple, where the first value is an array of strings corresponding to the paths of each one of the
@@ -81,20 +81,16 @@ def __get_mnist_paths(is_incremental: bool, base_folder: str = MNIST_PATH):
     ext = ".tfrecords"
     name_tr = os.path.join(base_folder, base)
 
-    if not is_incremental:
-        tr_paths = [name_tr+"complete"+ext]
-    else:
-        tr_paths = [name_tr + "{}".format(x) + ext for x in range(1, 6)]
+    tr_paths = [name_tr + "{}".format(x) + ext for x in range(1, 6)]
 
     test_path = os.path.join(base_folder, "validation" + ext)
     return tr_paths, test_path
 
 
-def __get_fashion_mnist_paths(is_incremental: bool, base_folder: str = FASHION_MNIST_PATH):
+def __get_fashion_mnist_paths(base_folder: str = FASHION_MNIST_PATH):
     """
     It gives the default paths to the training and testing data of FASHION MNIST
 
-    :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
     :param base_folder: the directory where the datasets are being stored. E.g. if a dataset is stored in
         ../datasets/FASHION-MNIST, then base_folder should be "../datasets/FASHION-MNIST"
     :return: a tuple, where the first value is an array of strings corresponding to the paths of each one of the
@@ -105,18 +101,14 @@ def __get_fashion_mnist_paths(is_incremental: bool, base_folder: str = FASHION_M
     name_tr = os.path.join(base_folder, base)
     tr_paths = [name_tr + "{}".format(x) + ext for x in range(1, 6)]
 
-    if not is_incremental:
-        tr_paths = [tr_paths]
-
     test_path = os.path.join(base_folder, "test" + ext)
     return tr_paths, test_path
 
 
-def __get_cifar_paths(is_incremental: bool, base_folder: str = CIFAR_10_PATH):
+def __get_cifar_paths(base_folder: str = CIFAR_10_PATH):
     """
     It gives the default paths to the training and testing data of CIFAR-10
 
-    :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
     :param base_folder: the directory where the datasets are being stored. E.g. if a dataset is stored in
         ../datasets/cifar10, then base_folder should be "../datasets/cifar10"
     :return: a tuple, where the first value is an array of strings corresponding to the paths of each one of the
@@ -126,19 +118,14 @@ def __get_cifar_paths(is_incremental: bool, base_folder: str = CIFAR_10_PATH):
     ext = ".tfrecords"
     tr_paths = [base + "{}".format(x) + ext for x in range(1, 6)]
 
-    if not is_incremental:
-        tr_paths = [tr_paths]
-
     test_path = os.path.join(base_folder, "test_batch" + ext)
     return tr_paths, test_path
 
 
-# TODO versiones incrementales y no incrementales
-def __get_cifar100_paths(is_incremental: bool, base_folder: str = CIFAR_100_PATH):
+def __get_cifar100_paths(base_folder: str = CIFAR_100_PATH):
     """
     It gives the default paths to the training and testing data of CIFAR-100
 
-    :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
     :param base_folder: the directory where the datasets are being stored. E.g. if a dataset is stored in
         ../datasets/cifar-100, then base_folder should be "../datasets/cifar-100"
     :return: a tuple, where the first value is an array of strings corresponding to the paths of each one of the
@@ -148,66 +135,53 @@ def __get_cifar100_paths(is_incremental: bool, base_folder: str = CIFAR_100_PATH
     ext = ".tfrecords"
     tr_paths = [base + ext]
 
-    if not is_incremental:
-        tr_paths = [tr_paths]
-
     test_path = os.path.join(base_folder, "test" + ext)
     return tr_paths, test_path
 
 
-def __get_caltech_paths(is_incremental: bool, base_folder: str = CALTECH_101_PATH):
+def __get_caltech_paths(base_folder: str = CALTECH_101_PATH):
     """
     It gives the default paths to the training and testing data of CALTECH-101
 
-    :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
     :param base_folder: the directory where the datasets are being stored. E.g. if a dataset is stored in
         ../datasets/101_ObjectCategories, then base_folder should be "../datasets/101_ObjectCategories"
     :return: a tuple, where the first value is an array of strings corresponding to the paths of each one of the
         mega-batches for training, and the second value is a string corresponding to the path of the testing data
     """
     base = os.path.join(base_folder, "train")
-    if is_incremental:
-        paths = [os.path.join(base, "Lote{}".format(x)) for x in range(0, 5)]
-    else:
-        paths = [base]
+    paths = [os.path.join(base, "Lote{}".format(x)) for x in range(0, 5)]
+
     validation_dir = os.path.join(base_folder, "test")
     return paths, validation_dir
 
 
-def __get_caltech_256_paths(is_incremental: bool, base_folder: str = CALTECH_256_PATH):
+def __get_caltech_256_paths(base_folder: str = CALTECH_256_PATH):
     """
     It gives the default paths to the training and testing data of CALTECH-256
 
-    :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
     :param base_folder: the directory where the datasets are being stored. E.g. if a dataset is stored in
         ../datasets/256_ObjectCategories, then base_folder should be "../datasets/256_ObjectCategories"
     :return: a tuple, where the first value is an array of strings corresponding to the paths of each one of the
         mega-batches for training, and the second value is a string corresponding to the path of the testing data
     """
     base = os.path.join(base_folder, "train")
-    if is_incremental:
-        paths = [os.path.join(base, "Lote{}".format(x)) for x in range(0, 5)]
-    else:
-        paths = [base]
+    paths = [os.path.join(base, "Lote{}".format(x)) for x in range(0, 5)]
+
     validation_dir = os.path.join(base_folder, "test")
     return paths, validation_dir
 
 
-def __get_tiny_imagenet_paths(is_incremental: bool, base_folder: str = TINY_IMAGENET_PATH):
+def __get_tiny_imagenet_paths(base_folder: str = TINY_IMAGENET_PATH):
     """
     It gives the default paths to the training and testing data of TINY IMAGENET
 
-    :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
     :param base_folder: the directory where the datasets are being stored. E.g. if a dataset is stored in
         ../datasets/tiny-imagenet-200, then base_folder should be "../datasets/tiny-imagenet-200"
     :return: a tuple, where the first value is an array of strings corresponding to the paths of each one of the
         mega-batches for training, and the second value is a string corresponding to the path of the testing data
     """
     base = os.path.join(base_folder, "train_split")
-    if is_incremental:
-        train_dirs = [os.path.join(base, "Lote{}".format(x)) for x in range(0, 5)]
-    else:
-        train_dirs = [base]
+    train_dirs = [os.path.join(base, "Lote{}".format(x)) for x in range(0, 5)]
 
     validation_dir = os.path.join(base_folder, "val")
 
@@ -219,12 +193,11 @@ def __get_not_supported_dataset(*args):
                                   "program.")
 
 
-def get_paths_from_dataset(dataset: str, is_incremental: bool, base_folder: str = None):
+def get_paths_from_dataset(dataset: str, base_folder: str = None):
     """
     It gives the default paths to the training and testing data of the supported dataset
 
     :param dataset: a string representing the dataset
-    :param is_incremental: True to indicate that the training is gonna contain multiple mega-batches
     :param base_folder: the base directory where the dataset is located. If it's not provided, then the default values
         for each dataset will be used
     :return: a tuple, where the first value is an array of strings corresponding to the paths of each one of the
@@ -243,6 +216,6 @@ def get_paths_from_dataset(dataset: str, is_incremental: bool, base_folder: str 
                const.DATA_FASHION_MNIST: __get_fashion_mnist_paths
                }
     if base_folder:
-        return options.get(dataset, __get_not_supported_dataset)(is_incremental, base_folder)
+        return options.get(dataset, __get_not_supported_dataset)(base_folder)
     else:
-        return options.get(dataset, __get_not_supported_dataset)(is_incremental)
+        return options.get(dataset, __get_not_supported_dataset)()
