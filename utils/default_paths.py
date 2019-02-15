@@ -17,15 +17,15 @@ from errors import OptionNotSupportedError
 # -------------Default locations for datasets------------
 
 __DATASET_PATH = os.path.join("..", "datasets")
-MNIST_PATH = os.path.join(__DATASET_PATH, "MNIST")
+MNIST_PATH = os.path.join(__DATASET_PATH, "MNIST_UNBALANCED")
 """
 Default path for the directory where MNIST is stored
 """
-FASHION_MNIST_PATH = os.path.join(__DATASET_PATH, "FASHION-MNIST")
+FASHION_MNIST_PATH = os.path.join(__DATASET_PATH, "FASHION-MNIST_UNBALANCED")
 """
 Default path for the directory where Fashion MNIST is stored
 """
-CIFAR_10_PATH = os.path.join(__DATASET_PATH, "cifar10")
+CIFAR_10_PATH = os.path.join(__DATASET_PATH, "CIFAR10_UNBALANCED")
 """
 Default path for the directory where CIFAR-10 is stored
 """

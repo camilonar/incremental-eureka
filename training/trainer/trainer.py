@@ -10,6 +10,7 @@ from abc import ABC, abstractmethod
 
 import tensorflow as tf
 from tensorflow.python.framework.errors_impl import OutOfRangeError
+import numpy as np
 
 from input.data import Data
 from libs.caffe_tensorflow.network import Network
@@ -58,6 +59,9 @@ class Trainer(ABC):
         self.ckp_dir, self.summaries_dir = None, None
         self.loss, self.train_step = None, None
 
+        # Creation of the mask for incremental learning
+        self.mask_tensor, self.mask_value = None, None
+
     def __prepare(self):
         """
         It does the preparation for the training. This preparations include:
@@ -82,6 +86,7 @@ class Trainer(ABC):
         self.sess = tf.InteractiveSession()
 
         # Creates loss function and optimizer
+        self.mask_value, self.mask_tensor = self._create_mask(self.model.get_output())
         self.loss = self._create_loss(self.tensor_y, self.model.get_output())
         self.train_step = self._create_optimizer(self.config, self.loss, self.model.trainable_variables)
 
@@ -157,15 +162,17 @@ class Trainer(ABC):
         while True:
             try:
                 image_batch, target_batch = self.sess.run([data_x, data_y])
+                self._update_mask(self.mask_value, target_batch)
 
-                _, c = self._train_batch(self.sess, image_batch, target_batch, self.tensor_x, self.tensor_y,
-                                         self.train_step, self.loss, increment, iteration, i)
+                _, loss = self._train_batch(self.sess, image_batch, target_batch, self.tensor_x, self.tensor_y,
+                                            self.train_step, self.loss, increment, iteration, i)
                 curr_time = time.time() + trained_time  # If a checkpoint has been loaded, it should adapt the time
                 interval = curr_time - start_time
+                self.tester.save_loss(self.sess, loss, i, writer)
 
                 if self.tester and i % config.summary_interval == 0 and not i == 0:
                     print("Performing validation at iteration: {}. Loss is: {}. "
-                          "Time is: {}".format(i, c, interval))
+                          "Time is: {}".format(i, loss, interval))
                     self.tester.perform_validation(self.sess, i, writer)
                 if i % config.check_interval == 0:
                     self.saver.save_model(self.sess, self.ckp_dir, iteration, i, increment, interval)
@@ -190,6 +197,35 @@ class Trainer(ABC):
         """
         print("Finishing training...")
         self.pipeline.close()
+
+    @staticmethod
+    def _create_mask(net_output: tf.Tensor):
+        """
+        Creates a mask for the model with length equal to the number of outputs in net_output. The purpouse of
+        this mask is to be used in a training for turning on and off certain outputs of the net.
+
+        :param net_output: a tensor corresponding to the last layer of a neural network
+        :return: a tuple: an array of zeroes with shape [n_outputs], where n_outputs is the number of outputs in
+        net_output, and a tf.placeholder with the same shape as the mask
+        """
+        mask = [0 for _ in range(net_output.shape[1])]
+        placeholder = tf.placeholder(tf.float32, shape=[net_output.shape[1]])
+        return mask, placeholder
+
+    @staticmethod
+    def _update_mask(mask, target_batch):
+        """
+        Updates the current mask for the model output
+
+        :param mask: the current value of the mask used for the model output
+        :param target_batch: the batch of data corresponding to the output, as obtained from the data pipeline
+        :return: None
+        """
+        if np.count_nonzero(mask) < len(mask):
+            count = np.count_nonzero(target_batch, axis=0)
+            for i, c in enumerate(count):
+                if c > 0:
+                    mask[i] = 1
 
     @abstractmethod
     def _create_loss(self, tensor_y: tf.Tensor, net_output: tf.Tensor):

@@ -1,13 +1,12 @@
 """
 Module for performing experiments over MNIST
 """
-from abc import abstractmethod, ABC
+from abc import ABC
 
 import tensorflow as tf
 
 from experiments.experiment import Experiment
 from networks.fashion_mnist_net import FashionMnistNet
-from networks.le_net import LeNet
 from input.data.fashion_mnist_data import   FashionMnistData
 import utils.constants as const
 
@@ -28,4 +27,4 @@ class FashionMnistExperiment(Experiment, ABC):
     def _prepare_neural_network(self):
         self.input_tensor = tf.placeholder(tf.float32, [None, 28, 28, 1])
         self.output_tensor = tf.placeholder(tf.float32, [None, 10])
-        self.neural_net = LeNet({'data': self.input_tensor})
+        self.neural_net = FashionMnistNet({'data': self.input_tensor})
