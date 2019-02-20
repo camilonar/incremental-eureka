@@ -14,6 +14,7 @@ from experiments.cifar100.cifar100_exp_rms import Cifar100ExperimentRMSProp
 from experiments.cifar10.cifar_exp_dcgan import CifarExperimentDCGAN
 from experiments.cifar10.cifar_exp_rep import CifarExperimentRep
 from experiments.cifar10.cifar_exp_rms import CifarExperimentRMSProp
+from experiments.fashion_mnist.fashion_mnist_exp_rep import FashionMnistExperimentRep
 from experiments.fashion_mnist.fashion_mnist_exp_rms import FashionMnistExperimentRMSProp
 
 from experiments.imagenet.imagenet__exp_dcgan import ImagenetExperimentDCGAN
@@ -54,7 +55,8 @@ class Experiments(containers.DeclarativeContainer):
                const.TR_REP: {const.DATA_CALTECH_101: providers.Factory(CaltechExperimentRep),
                               const.DATA_CIFAR_10: providers.Factory(CifarExperimentRep),
                               const.DATA_TINY_IMAGENET: providers.Factory(ImagenetExperimentRep),
-                              const.DATA_MNIST: providers.Factory(MnistExperimentRep)}
+                              const.DATA_MNIST: providers.Factory(MnistExperimentRep),
+                              const.DATA_FASHION_MNIST: providers.Factory(FashionMnistExperimentRep)}
                }
 
     @classmethod

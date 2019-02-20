@@ -1,7 +1,7 @@
 """
 Module for performing experiments over CIFAR-10
 """
-from abc import abstractmethod, ABC
+from abc import ABC
 
 import tensorflow as tf
 
