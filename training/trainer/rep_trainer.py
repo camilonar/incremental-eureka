@@ -24,9 +24,12 @@ class RepresentativesTrainer(Trainer):
         self.representatives = [[] for _ in range(model.get_output().shape[1])]
         self.weights = tf.placeholder(tf.float32, [None])
 
+        self.buffered_reps = []
+
         self.presel = 10  # Number of preselected samples
-        self.n = 10  # Number of representatives that are passed in each batch
+        self.rep_per_batch = 10  # Number of representatives that are passed in each batch
         self.r = 20  # Maximum number of representatives per class
+        self.buffer = 1  # Number of buffer iterations. Interval at which the representatives will be updated
 
     def _create_loss(self, tensor_y: tf.Tensor, net_output: tf.Tensor):
         return tf.losses.softmax_cross_entropy(tensor_y, net_output, weights=self.weights)
@@ -37,85 +40,94 @@ class RepresentativesTrainer(Trainer):
     def _train_batch(self, sess, image_batch, target_batch, tensor_x: tf.Tensor, tensor_y: tf.Tensor,
                      train_step: tf.Operation, loss: tf.Tensor, increment: int, iteration: int, total_it: int):
         # Gets the representatives
-        rep_values, rep_labels = self.__get_representatives(sess, image_batch, target_batch,
-                                                            tensor_x, tensor_y, total_it)
+        rep_values, rep_labels = self.__get_representatives()
 
         # Gets the respective weights
         weights_values = np.full((len(image_batch)), 1.0)
-        rep_weights = np.full((len(rep_values)), 3.0)
-        weights_values = np.concatenate((weights_values, rep_weights))
 
-        # Concatenates the training samples with the representatives
-        image_batch = np.concatenate((image_batch, rep_values))
-        target_batch = np.concatenate((target_batch, rep_labels))
+        if len(rep_values) > 0:
+            rep_weights = np.full((len(rep_values)), 3.0)
+            weights_values = np.concatenate((weights_values, rep_weights))
+            # Concatenates the training samples with the representatives
+            image_batch = np.concatenate((image_batch, rep_values))
+            target_batch = np.concatenate((target_batch, rep_labels))
+
         # Executes the update of the net
-        return self.sess.run([self.train_step, self.loss],
-                             feed_dict={self.tensor_x: image_batch, self.tensor_y: target_batch,
-                                        self.weights: weights_values})
+        ts, loss, outputs = self.sess.run([self.train_step, self.loss, self.model.get_output()],
+                                          feed_dict={self.tensor_x: image_batch, self.tensor_y: target_batch,
+                                                     self.weights: weights_values})
 
-    def __get_representatives(self, sess, image_batch, target_batch, tensor_x: tf.Tensor, tensor_y: tf.Tensor,
-                              total_it: int):
+        # Modifies the list of representatives
+        self.__buffer_samples(image_batch, target_batch, outputs, total_it)
+        if total_it % self.buffer == 0:
+            self.__modify_representatives(self.buffered_reps)
+            self.__clear_buffer()
+        return ts, loss
+
+    def __get_representatives(self):
         """
         Selects or retrieves the representatives from the data
 
-        :param sess: the current session
-        :param image_batch: he batch of data corresponding to the input, as obtained from the data pipeline
-        :param target_batch: the batch of data corresponding to the output, as obtained from the data pipeline
-        :param tensor_x: the tensor corresponding to the input of a training
-        :param tensor_y: the tensor corresponding to the output of a training
-        :param total_it: the current iteration counting from the start of training
         :return: a tuple with 2 numpy.ndarray with the data and the labels. The data array has shape
             **[n_representatives, x1, x2, ..., xn]** where [x1...xn] is the shape of a single sample image. The labels
             array has shape **[n_representatives, n_labels]**.
+            The method returns a tuple of empty arrays **[]** if the number of representatives is less than the minimum
+            number of representatives per batch (rep_per_batch)
         """
-        outputs = sess.run(self.model.get_output(), feed_dict={tensor_x: image_batch})
+        repr_list = np.concatenate(self.representatives)
+        if repr_list.size >= self.rep_per_batch:
+            samples = np.random.choice(repr_list, size=self.rep_per_batch, replace=False)
+            return [i.value for i in samples], [i.output for i in samples]
+        else:
+            return [], []
 
+    def __buffer_samples(self, image_batch, target_batch, outputs, iteration):
+        """
+        Adds samples to the buffer. This version buffers all the original images from a batch
+        :param image_batch: the list of images of a batch
+        :param target_batch: the list of one hot labels of a batch
+        :param outputs: output probabilities of the neural network
+        :param iteration: current iteration of training
+        :return: None
+        """
         scores_ranking = np.argsort(outputs)  # Allows knowing the ranking of each class probability
         outputs = np.sort(outputs)  # Order outputs over the last axis
-        difs = [i[-1] - i[-2] for i in outputs]  # Best vs. Second Best
+        difs = np.array([i[-1] - i[-2] for i in outputs])  # Best vs. Second Best
         sort_indices = np.argsort(difs)  # Order indices (from lowest dif. to highest dif.)
-        difs = [difs[i] for i in sort_indices]
-        image_batch = [image_batch[i] for i in sort_indices]  # The data is ordered according to the indices
-        target_batch = [target_batch[i] for i in sort_indices]  # The data labels are ordered according to the indices
-        scores_ranking = [scores_ranking[i] for i in sort_indices]
-        outputs = [outputs[i] for i in sort_indices]
+        difs = difs[sort_indices]
+        image_batch = np.asarray(image_batch)[sort_indices]  # The data is ordered according to the indices
+        target_batch = np.asarray(target_batch)[sort_indices]  # The data labels are ordered according to the indices
+        scores_ranking = scores_ranking[sort_indices]
+        outputs = outputs[sort_indices]
 
-        self.__modify_representatives(image_batch[:self.presel], target_batch[:self.presel], difs[:self.presel],
-                                      outputs, scores_ranking, total_it)
-        samples = np.random.choice(np.concatenate(self.representatives), size=self.n, replace=False)
-        return [i.value for i in samples], [i.output for i in samples]
+        for i in range(self.presel):
+            self.buffered_reps.append(Representative(image_batch[i], target_batch[i], difs[i], iteration,
+                                                     self.__extract_best_second_best(outputs[i], scores_ranking[i])))
 
-    def __modify_representatives(self, preselected_images, preselected_targets, metric_values, sorted_scores,
-                                 scores_ranking, total_it: int):
+    def __clear_buffer(self):
+        """
+        Clears the buffer
+        :return: None
+        """
+        self.buffered_reps = []
+
+    def __modify_representatives(self, candidate_representatives):
         """
         Modifies the representatives list according to the new data
         
-        :param preselected_images: the preselected representatives from the current batch
-        :param preselected_targets: the preselected representatives' labels
-        :param metric_values: the metric values of each one of the preselected representatives
-        :param sorted_scores: the sorted output of the network for preselected samples. Must have shape
-                [n_samples, n_outputs]. The scores must be sorted by axis=-1
-        :param scores_ranking: the position of each class probability of each one of the preselected representatives.
-                I.e. an array of shape [n_samples, n_outputs], where n_outputs has the values as:
-                [last_class_index,..., second_class_index, first_class_index]
-                E.g. if we have two samples where the outputs for the network are [0.3, 0.2, 0.5] and [0.7, 0.5, 0.6],
-                then output_ranking should be: [[1, 0, 2], [1, 2, 0]]
-        :param total_it: the current iteration counting from the start of training
-        :return:
+        :param candidate_representatives: the preselected representatives from the buffer
+        :return: None
         """
-        for i, _ in enumerate(preselected_images):
-            nclass = int(np.argmax(preselected_targets[i]))
-            self.representatives[nclass].append(Representative(preselected_images[i], preselected_targets[i],
-                                                               metric_values[i], total_it,
-                                                               self.__extract_best_second_best(sorted_scores[i],
-                                                                                               scores_ranking[i])))
+        for i, _ in enumerate(candidate_representatives):
+            nclass = int(np.argmax(candidate_representatives[i].output))
+            self.representatives[nclass].append(candidate_representatives[i])
 
         # Sorts representatives of each list, corresponding to each class
         self._calculate_crowd_distance(self.representatives)
         for i in range(len(self.representatives)):
-            # self.representatives[i].sort(key=lambda x: x.crowd_distance)
-            self.representatives[i].sort(key=lambda x: x.metric * (1 + min(1, (total_it - x.iteration) / 10000)),
-                                         reverse=True)
+            self.representatives[i].sort(key=lambda x: x.crowd_distance)
+            # self.representatives[i].sort(key=lambda x: x.metric * (1 + min(1, (total_it - x.iteration) / 10000)),
+            #                             reverse=True)
             self.representatives[i] = self.representatives[i][-min(self.r, len(self.representatives[i])):]
 
     @staticmethod
