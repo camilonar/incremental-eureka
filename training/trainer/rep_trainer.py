@@ -29,11 +29,12 @@ class RepresentativesTrainer(Trainer):
 
         self.presel = 18  # Number of preselected samples
         self.rep_per_batch = 18  # Number of representatives that are passed in each batch
-        self.rep_per_class = 25  # Maximum number of representatives per class
+        self.rep_per_class = 15  # Maximum number of representatives per class
         self.buffer = 1  # Number of buffer iterations. Interval at which the representatives will be updated
 
     def _create_loss(self, tensor_y: tf.Tensor, net_output: tf.Tensor):
-        return tf.losses.softmax_cross_entropy(tensor_y, net_output, weights=self.weights)
+        return tf.losses.softmax_cross_entropy(tf.multiply(tensor_y, self.mask_tensor),
+                                               tf.multiply(net_output, self.mask_tensor), weights=self.weights)
 
     def _create_optimizer(self, config: GeneralConfig, loss: tf.Tensor, var_list=None):
         return tf.train.RMSPropOptimizer(config.learn_rate).minimize(loss, var_list=var_list)
@@ -42,11 +43,12 @@ class RepresentativesTrainer(Trainer):
                      train_step: tf.Operation, loss: tf.Tensor, increment: int, iteration: int, total_it: int):
         # Gets the representatives
         reps = self.__get_representatives()
+        n_reps = len(reps)
 
         # Gets the respective weights
         weights_values = np.full((len(image_batch)), 1.0)
 
-        if len(reps) > 0:
+        if n_reps > 0:
             rep_weights = [rep.weight for rep in reps]
             rep_values = [rep.value for rep in reps]
             rep_labels = [rep.output for rep in reps]
@@ -58,10 +60,14 @@ class RepresentativesTrainer(Trainer):
         # Executes the update of the net
         ts, loss, outputs = self.sess.run([self.train_step, self.loss, self.model.get_output()],
                                           feed_dict={self.tensor_x: image_batch, self.tensor_y: target_batch,
-                                                     self.weights: weights_values})
+                                                     self.weights: weights_values,
+                                                     self.mask_tensor: self.mask_value})
 
         # Modifies the list of representatives
-        self.__buffer_samples(image_batch, target_batch, outputs, total_it)
+        if n_reps == 0:
+            self.__buffer_samples(image_batch, target_batch, outputs, total_it)
+        else:
+            self.__buffer_samples(image_batch[:-n_reps], target_batch[:-n_reps], outputs[:-n_reps], total_it)
         if total_it % self.buffer == 0:
             self.__modify_representatives(self.buffered_reps)
             self.__clear_buffer()
@@ -94,8 +100,7 @@ class RepresentativesTrainer(Trainer):
             self.representatives[nclass].append(candidate_representatives[i])
             self.class_count[nclass] += 1
 
-        # Recalculates the metrics (i.e. outputs and difs) of the representatives
-        self.__recalculate_metrics(self.representatives)
+        # self.__recalculate_metrics(self.representatives)
         # Sorts representatives of each list, corresponding to each class
         self.__calculate_crowd_distance(self.representatives)
         for i in range(len(self.representatives)):
@@ -104,7 +109,7 @@ class RepresentativesTrainer(Trainer):
             #                             reverse=True)
             self.representatives[i] = self.representatives[i][-min(self.rep_per_class, len(self.representatives[i])):]
 
-        self.__recalculate_weights(self.representatives)
+        # self.__recalculate_weights(self.representatives)
 
     def __buffer_samples(self, image_batch, target_batch, outputs, iteration):
         """
@@ -116,8 +121,8 @@ class RepresentativesTrainer(Trainer):
         :return: None
         """
         scores_ranking = np.argsort(outputs)  # Allows knowing the ranking of each class probability
-        outputs = np.sort(outputs)  # Order outputs over the last axis
-        difs = np.array([i[-1] - i[-2] for i in outputs])  # Best vs. Second Best
+        sorted_outputs = np.sort(outputs)  # Aux. for outputs sorted by probability
+        difs = np.array([i[-1] - i[-2] for i in sorted_outputs])  # Best vs. Second Best
         sort_indices = np.argsort(difs)  # Order indices (from lowest dif. to highest dif.)
         difs = difs[sort_indices]
         image_batch = np.asarray(image_batch)[sort_indices]  # The data is ordered according to the indices
@@ -125,10 +130,10 @@ class RepresentativesTrainer(Trainer):
         scores_ranking = scores_ranking[sort_indices]
         outputs = outputs[sort_indices]
 
-        for i in range(self.presel):
+        for i in range(min(self.presel, len(image_batch))):
             self.buffered_reps.append(
                 Representative(image_batch[i].copy(), target_batch[i].copy(), difs[i].copy(), iteration,
-                               self.__extract_best_second_best(outputs[i].copy(), scores_ranking[i].copy())))
+                               outputs[i].copy()))
 
     def __clear_buffer(self):
         """
@@ -136,24 +141,6 @@ class RepresentativesTrainer(Trainer):
         :return: None
         """
         self.buffered_reps = []
-
-    @staticmethod
-    def __extract_best_second_best(scores, scores_ranking):
-        """
-        Extracts the best and second best
-
-        :param scores: the sorted output of the network for a sample. Must have shape [n_outputs].
-                The scores must be sorted by axis=-1
-        :param scores_ranking: the position of each class probability of each one of the preselected representatives.
-                I.e. an array of shape [n_outputs], with the following structure:
-                [last_class_index,..., second_class_index, first_class_index]
-                E.g. if we have a samples where the outputs for the network are [0.3, 0.2, 0.5], then output_ranking
-                should be: [1, 0, 2]
-        :return: a tuple of tuples, with the structure:
-                ((first_class_index, first_class_score), (second_class_index, second_class_score))
-        """
-        bvsb = ((scores_ranking[-1], scores[-1]), (scores_ranking[-2], scores[-2]))
-        return bvsb
 
     # TODO hacer más eficiente
     @staticmethod
@@ -179,14 +166,14 @@ class RepresentativesTrainer(Trainer):
             for i in range(len(cls[0].reduced_rep)):
 
                 def sort(x):
-                    return x.reduced_rep[i][1]
+                    return x.reduced_rep[i]
 
                 cls.sort(key=sort)
                 # Calculates crowd distance for the i-th objective.
-                cls[0].crowd_distance, cls[-1].crowd_distance = math.inf, math.inf
+                # cls[0].crowd_distance, cls[-1].crowd_distance = math.inf, math.inf
                 for j in range(1, len(cls) - 1):
-                    cls[j].crowd_distance += cls[j].reduced_rep[i][1] - cls[j - 1].reduced_rep[i][1]
-                    cls[j].crowd_distance += cls[j + 1].reduced_rep[i][1] - cls[j].reduced_rep[i][1]
+                    cls[j].crowd_distance += cls[j].reduced_rep[i] - cls[j - 1].reduced_rep[i]
+                    cls[j].crowd_distance += cls[j + 1].reduced_rep[i] - cls[j].reduced_rep[i]
 
     def __recalculate_weights(self, representatives):
         """
@@ -216,11 +203,11 @@ class RepresentativesTrainer(Trainer):
         image_batch = np.array([rep.value for rep in aux_rep])
         outputs = self.sess.run(self.model.get_output(), feed_dict={self.tensor_x: image_batch})
         scores_ranking = np.argsort(outputs)  # Allows knowing the ranking of each class probability
-        outputs = np.sort(outputs)  # Order outputs over the last axis
-        difs = np.array([i[-1] - i[-2] for i in outputs])  # Best vs. Second Best
+        aux_outputs = np.sort(outputs)  # Order outputs over the last axis
+        difs = np.array([i[-1] - i[-2] for i in aux_outputs])  # Best vs. Second Best
         for i in range(len(aux_rep)):
             aux_rep[i].metric = difs[i]
-            aux_rep[i].reduced_rep = self.__extract_best_second_best(outputs[i], scores_ranking[i])
+            aux_rep[i].reduced_rep = outputs[i]
 
 
 class Representative(object):
@@ -245,3 +232,8 @@ class Representative(object):
         self.reduced_rep = reduced_rep
         self.crowd_distance = crowd_distance
         self.weight = 3.0
+
+    def __eq__(self, other):
+        if isinstance(other, Representative.__class__):
+            return self.value.__eq__(other.value)
+        return False

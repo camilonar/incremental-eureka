@@ -122,8 +122,7 @@ class Trainer(ABC):
                                              self.config, writer, data_x, data_y)
             self._post_process_increment()
             # Reestablishes time and skip_count to zero after the first mega-batch (useful when a checkpoint is loaded)
-            start_time = 0
-            skip_count = 0
+            start_time, skip_count = 0, 0
             print("Finished training of increment {}...".format(i))
             writer.close()
 

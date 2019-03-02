@@ -55,7 +55,7 @@ class CaltechData(Data):
                 the label.
             """
             # one hot encode the target
-            single_target = tf.cast(tf.subtract(single_target, tf.constant(1)), tf.int32)
+            single_target = tf.cast(single_target, tf.int32)
             single_target = tf.one_hot(single_target, depth=number_of_classes)
 
             # load the jpg image according to path
