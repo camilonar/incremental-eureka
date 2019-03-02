@@ -100,7 +100,7 @@ class Cifar100Data(Data):
         dataset = dataset.map(parser, num_parallel_calls=self.batch_queue_capacity)
 
         if shuffle:
-            dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=12345)
+            dataset = dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=12345)
 
         dataset = dataset.batch(self.curr_config.batch_size)
         # Only does multiple epochs if the dataset is going to be used for training

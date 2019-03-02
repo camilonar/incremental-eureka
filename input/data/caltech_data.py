@@ -28,7 +28,7 @@ class CaltechData(Data):
         self.batch_queue_capacity = batch_queue_capacity + 3 * self.curr_config.batch_size
         self.data_reader.check_if_data_exists()
 
-    def build_train_data_tensor(self, shuffle=True, augmentation=False, skip_count=0):
+    def build_train_data_tensor(self, shuffle=False, augmentation=False, skip_count=0):
         img_path, cls = self.data_reader.load_training_data()
         return self.__build_generic_data_tensor(img_path, cls, shuffle, augmentation, testing=False,
                                                 skip_count=skip_count)
@@ -88,7 +88,7 @@ class CaltechData(Data):
         dataset = dataset.map(load_images)
 
         if shuffle:
-            dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=const.SEED)
+            dataset = dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=const.SEED)
         dataset = dataset.batch(self.curr_config.batch_size)
 
         # Only does multiple epochs if the dataset is going to be used for training

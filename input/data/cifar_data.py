@@ -16,7 +16,7 @@ class CifarData(Data):
     def __init__(self, general_config,
                  train_dirs: [str],
                  validation_dir: str,
-                 batch_queue_capacity=1000,
+                 batch_queue_capacity=10000,
                  image_height=32,
                  image_width=32):
         print("Loading Cifar-10 data...")
@@ -100,7 +100,7 @@ class CifarData(Data):
         dataset = dataset.map(parser, num_parallel_calls=self.batch_queue_capacity)
 
         if shuffle:
-            dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=const.SEED)
+            dataset = dataset.shuffle(buffer_size=self.batch_queue_capacity)
 
         dataset = dataset.batch(self.curr_config.batch_size)
         # Only does multiple epochs if the dataset is going to be used for training

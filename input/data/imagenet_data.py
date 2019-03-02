@@ -133,7 +133,7 @@ class ImagenetData(Data):
         dataset = dataset.map(load_images)
 
         if shuffle:
-            dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=const.SEED)
+            dataset = dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=const.SEED)
         dataset = dataset.batch(self.curr_config.batch_size)
 
         if not testing:
