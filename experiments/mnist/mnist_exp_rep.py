@@ -3,7 +3,7 @@ Experiment for MNIST dataset using the proposed representative-selection algorit
 """
 from errors import OptionNotSupportedError
 from experiments.mnist.mnist_exp import MnistExperiment
-from training.support.tester import Tester
+from experiments.tester import Tester
 from training.trainer.rep_trainer import RepresentativesTrainer
 from training.config.general_config import GeneralConfig
 from training.config.megabatch_config import MegabatchConfig

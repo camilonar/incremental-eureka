@@ -4,8 +4,8 @@ Module for the data pipeline of Caltech-256 dataset
 
 import tensorflow as tf
 
-from input.reader.directory_reader import DirectoryReader
-from input.data import Data
+from etl.reader.directory_reader import DirectoryReader
+from etl.data import Data
 import utils.constants as const
 
 

@@ -7,7 +7,7 @@ training
 3. The pipeline retrieves tensors that can be feed to the training module as needed
 """
 from abc import abstractmethod, ABC
-from input.reader import Reader
+from etl.reader import Reader
 from training.config.general_config import GeneralConfig
 
 

@@ -3,7 +3,7 @@ Experiment for Cifar-10 dataset using base RMSProp
 """
 from errors import OptionNotSupportedError
 from experiments.cifar100.cifar100_exp import Cifar100Experiment
-from training.support.tester import Tester
+from experiments.tester import Tester
 from training.trainer.rms_trainer import RMSPropTrainer
 from training.config.general_config import GeneralConfig
 from training.config.megabatch_config import MegabatchConfig

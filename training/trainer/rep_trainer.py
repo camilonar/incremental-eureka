@@ -5,10 +5,10 @@ import math
 import tensorflow as tf
 import numpy as np
 
-from input.data import Data
+from etl.data import Data
 from libs.caffe_tensorflow.network import Network
 from training.config.general_config import GeneralConfig
-from training.support.tester import Tester
+from experiments.tester import Tester
 from training.trainer.trainer import Trainer
 
 
@@ -27,10 +27,10 @@ class RepresentativesTrainer(Trainer):
 
         self.buffered_reps = []
 
-        self.presel = 18  # Number of preselected samples
-        self.rep_per_batch = 18  # Number of representatives that are passed in each batch
-        self.rep_per_class = 15  # Maximum number of representatives per class
-        self.buffer = 1  # Number of buffer iterations. Interval at which the representatives will be updated
+        self.presel = 20  # Number of preselected samples
+        self.rep_per_batch = 20  # Number of representatives that are passed in each batch
+        self.rep_per_class = 60  # Maximum number of representatives per class
+        self.buffer = 10  # Number of buffer iterations. Interval at which the representatives will be updated
 
     def _create_loss(self, tensor_y: tf.Tensor, net_output: tf.Tensor):
         return tf.losses.softmax_cross_entropy(tf.multiply(tensor_y, self.mask_tensor),
@@ -51,7 +51,7 @@ class RepresentativesTrainer(Trainer):
         if n_reps > 0:
             rep_weights = [rep.weight for rep in reps]
             rep_values = [rep.value for rep in reps]
-            rep_labels = [rep.output for rep in reps]
+            rep_labels = [rep.label for rep in reps]
             # Concatenates the training samples with the representatives
             weights_values = np.concatenate((weights_values, rep_weights))
             image_batch = np.concatenate((image_batch, rep_values))
@@ -82,8 +82,8 @@ class RepresentativesTrainer(Trainer):
             number of representatives per batch (rep_per_batch)
         """
         repr_list = np.concatenate(self.representatives)
-        if repr_list.size >= self.rep_per_batch:
-            samples = np.random.choice(repr_list, size=self.rep_per_batch, replace=False)
+        if repr_list.size > 0:
+            samples = np.random.choice(repr_list, size=min(self.rep_per_batch, repr_list.size), replace=False)
             return samples
         else:
             return []
@@ -96,7 +96,7 @@ class RepresentativesTrainer(Trainer):
         :return: None
         """
         for i, _ in enumerate(candidate_representatives):
-            nclass = int(np.argmax(candidate_representatives[i].output))
+            nclass = int(np.argmax(candidate_representatives[i].label))
             self.representatives[nclass].append(candidate_representatives[i])
             self.class_count[nclass] += 1
 
@@ -186,12 +186,12 @@ class RepresentativesTrainer(Trainer):
         # representatives respect to the batch. E.g. a batch of 100 images and 10 are preselected, total_weight = 10
         total_weight = (self.config.train_configurations[0].batch_size * 1.0) / self.presel
         # The total_weight is adjusted to the proportion between candidate representatives and actual representatives
-        total_weight *= (total_count / (len(representatives) * self.rep_per_class))
+        total_weight *= (total_count / np.sum([len(cls) for cls in representatives]))
         probs = [count / total_count for count in self.class_count]
         for i in range(len(representatives)):
             for rep in representatives[i]:
                 # This version uses log as an stabilizer
-                rep.weight = math.log(probs[i] * total_weight)
+                rep.weight = max(math.log(probs[i] * total_weight), 1.0)
 
     def __recalculate_metrics(self, representatives):
         """
@@ -215,18 +215,18 @@ class Representative(object):
     Representative sample of the algorithm
     """
 
-    def __init__(self, value, output, metric, iteration, reduced_rep=None, crowd_distance=None):
+    def __init__(self, value, label, metric, iteration, reduced_rep=None, crowd_distance=None):
         """
         Creates a Representative object
         :param value: the value of the representative (i.e. the image)
-        :param output: the expected ground truth label (in one-hot format)
+        :param label: the expected ground truth label (in one-hot format)
         :param metric: the value of the metric
         :param iteration: the iteration at which the sample was selected as representative
         :param reduced_rep: some kind of reduced representation of the representative (e.g. Best and Second Best class)
         :param crowd_distance: a measure of distance to the other representatives of the same cluster (e.g. same class)
         """
         self.value = value
-        self.output = output
+        self.label = label
         self.metric = metric
         self.iteration = iteration
         self.reduced_rep = reduced_rep

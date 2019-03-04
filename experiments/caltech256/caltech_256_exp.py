@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from experiments.experiment import Experiment
 from networks.caffe_net import CaffeNet
-from input.data.caltech_256_data import Caltech256Data
+from etl.data.caltech_256_data import Caltech256Data
 import utils.constants as const
 
 

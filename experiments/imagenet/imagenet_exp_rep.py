@@ -3,7 +3,7 @@ Experiment for Tiny Imagenet dataset using the proposed representative-selection
 """
 from errors import OptionNotSupportedError
 from experiments.imagenet.imagenet_exp import ImagenetExperiment
-from training.support.tester import Tester
+from experiments.tester import Tester
 from training.trainer.rep_trainer import RepresentativesTrainer
 from training.config.general_config import GeneralConfig
 from training.config.megabatch_config import MegabatchConfig

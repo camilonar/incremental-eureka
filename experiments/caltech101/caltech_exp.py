@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from experiments.experiment import Experiment
 from networks.alex_net import AlexNet
-from input.data.caltech_data import CaltechData
+from etl.data.caltech_data import CaltechData
 import utils.constants as const
 
 

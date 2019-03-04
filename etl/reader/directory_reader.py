@@ -7,7 +7,7 @@ import os
 from typing import List
 
 from errors import OptionNotSupportedError
-from input.reader import Reader
+from etl.reader import Reader
 from utils import constants as const
 from utils.train_modes import TrainMode
 

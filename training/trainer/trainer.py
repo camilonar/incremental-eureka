@@ -12,12 +12,12 @@ import tensorflow as tf
 from tensorflow.python.framework.errors_impl import OutOfRangeError
 import numpy as np
 
-from input.data import Data
+from etl.data import Data
 from libs.caffe_tensorflow.network import Network
 from training.config.general_config import GeneralConfig
 import utils.dir_utils as utils
 from training.support.saver import Saver
-from training.support.tester import Tester
+from experiments.tester import Tester
 
 
 class Trainer(ABC):

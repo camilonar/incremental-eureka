@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from experiments.experiment import Experiment
 from networks.le_net import LeNet
-from input.data.mnist_data import MnistData
+from etl.data.mnist_data import MnistData
 import utils.constants as const
 
 

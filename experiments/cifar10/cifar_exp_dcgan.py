@@ -3,7 +3,7 @@ Experiment for Cifar-10 dataset using the training algorithm that uses artificia
 """
 from errors import OptionNotSupportedError
 from experiments.cifar10.cifar_exp import CifarExperiment
-from training.support.tester import Tester
+from experiments.tester import Tester
 from training.trainer.dcgan_trainer import DCGANTrainer
 from training.config.general_config import GeneralConfig
 from training.config.megabatch_config import MegabatchConfig

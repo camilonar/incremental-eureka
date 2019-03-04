@@ -5,7 +5,7 @@ import os
 import tensorflow as tf
 from tensorflow.python.framework.errors_impl import OutOfRangeError
 
-from input.data import Data
+from etl.data import Data
 from libs.caffe_tensorflow.network import Network
 
 

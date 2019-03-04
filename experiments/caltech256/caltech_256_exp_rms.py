@@ -3,7 +3,7 @@ Experiment for Caltech-101 dataset using base RMSProp
 """
 from errors import OptionNotSupportedError
 from experiments.caltech256.caltech_256_exp import Caltech256Experiment
-from training.support.tester import Tester
+from experiments.tester import Tester
 from training.trainer.rms_trainer import RMSPropTrainer
 from training.config.general_config import GeneralConfig
 from training.config.megabatch_config import MegabatchConfig

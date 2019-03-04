@@ -3,7 +3,7 @@ Experiment for Cifar-10 dataset using the proposed representative-selection algo
 """
 from errors import OptionNotSupportedError
 from experiments.cifar10.cifar_exp import CifarExperiment
-from training.support.tester import Tester
+from experiments.tester import Tester
 from training.trainer.rep_trainer import RepresentativesTrainer
 from training.config.general_config import GeneralConfig
 from training.config.megabatch_config import MegabatchConfig
@@ -29,7 +29,7 @@ class CifarExperimentRep(CifarExperiment):
         # Creates configuration for 5 mega-batches
         if train_mode == TrainMode.INCREMENTAL or train_mode == TrainMode.ACUMULATIVE:
             for i in range(5):
-                train_conf = MegabatchConfig(300, batch_size=128)
+                train_conf = MegabatchConfig(100, batch_size=128)
                 self.general_config.add_train_conf(train_conf)
         else:
             raise OptionNotSupportedError("The requested Experiment class: {} doesn't support the requested training"

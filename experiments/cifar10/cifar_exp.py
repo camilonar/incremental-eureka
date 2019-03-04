@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from experiments.experiment import Experiment
 from networks.cifar_tfnet import CifarTFNet
-from input.data.cifar_data import CifarData
+from etl.data.cifar_data import CifarData
 import utils.constants as const
 
 

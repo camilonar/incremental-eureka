@@ -4,7 +4,7 @@ Experiment for MNIST dataset using the training algorithm that uses artificial s
 from errors import OptionNotSupportedError
 from experiments.mnist.mnist_exp import MnistExperiment
 from training.config.dcgan_config import DCGANConfig
-from training.support.tester import Tester
+from experiments.tester import Tester
 from training.trainer.dcgan_trainer import DCGANTrainer
 from training.config.megabatch_config import MegabatchConfig
 from utils.train_modes import TrainMode

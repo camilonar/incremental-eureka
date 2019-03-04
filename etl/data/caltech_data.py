@@ -4,9 +4,9 @@ Module for the data pipeline of Caltech-101 dataset
 
 import tensorflow as tf
 
-from input.data import Data
+from etl.data import Data
 import utils.constants as const
-from input.reader.directory_reader import DirectoryReader
+from etl.reader.directory_reader import DirectoryReader
 
 
 class CaltechData(Data):

@@ -2,7 +2,7 @@
 Module for reading a dataset stored in TFRecords
 """
 from errors import OptionNotSupportedError
-from input.reader import Reader
+from etl.reader import Reader
 from utils.train_modes import TrainMode
 
 

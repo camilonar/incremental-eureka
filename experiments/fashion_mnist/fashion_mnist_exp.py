@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from experiments.experiment import Experiment
 from networks.fashion_mnist_net import FashionMnistNet
-from input.data.fashion_mnist_data import   FashionMnistData
+from etl.data.fashion_mnist_data import   FashionMnistData
 import utils.constants as const
 
 

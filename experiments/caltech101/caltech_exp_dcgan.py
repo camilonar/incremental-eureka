@@ -3,7 +3,7 @@ Experiment for Caltech-101 dataset using the training algorithm that uses artifi
 """
 from errors import OptionNotSupportedError
 from experiments.caltech101.caltech_exp import CaltechExperiment
-from training.support.tester import Tester
+from experiments.tester import Tester
 from training.trainer.dcgan_trainer import DCGANTrainer
 from training.config.general_config import GeneralConfig
 from training.config.megabatch_config import MegabatchConfig

@@ -3,7 +3,7 @@ Experiment for MNIST dataset using base RMSProp
 """
 from errors import OptionNotSupportedError
 from experiments.fashion_mnist.fashion_mnist_exp import FashionMnistExperiment
-from training.support.tester import Tester
+from experiments.tester import Tester
 from training.trainer.rms_trainer import RMSPropTrainer
 from training.config.general_config import GeneralConfig
 from training.config.megabatch_config import MegabatchConfig

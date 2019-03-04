@@ -3,7 +3,7 @@ Experiment for Tiny Imagenet dataset using the training algorithm that uses arti
 """
 from errors import OptionNotSupportedError
 from experiments.imagenet.imagenet_exp import ImagenetExperiment
-from training.support.tester import Tester
+from experiments.tester import Tester
 from training.trainer.dcgan_trainer import DCGANTrainer
 from training.config.general_config import GeneralConfig
 from training.config.megabatch_config import MegabatchConfig
