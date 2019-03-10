@@ -26,10 +26,15 @@ class FashionMnistExperimentRMSProp(FashionMnistExperiment):
         self.general_config = GeneralConfig(train_mode, 0.0001, self.summary_interval, self.ckp_interval,
                                             config_name=str_optimizer, model_name=self.dataset_name)
         # Creates configuration for 5 mega-batches
-        if train_mode == TrainMode.INCREMENTAL or train_mode == TrainMode.ACUMULATIVE:
+        if train_mode == TrainMode.INCREMENTAL:
             for i in range(5):
                 train_conf = MegabatchConfig(100, batch_size=256)
                 self.general_config.add_train_conf(train_conf)
+        elif train_mode == TrainMode.ACUMULATIVE:
+            train_confs = [MegabatchConfig(100, batch_size=256), MegabatchConfig(75, batch_size=256),
+                           MegabatchConfig(50, batch_size=256), MegabatchConfig(50, batch_size=256),
+                           MegabatchConfig(25, batch_size=256)]
+            self.general_config.train_configurations = train_confs
         else:
             raise OptionNotSupportedError("The requested Experiment class: {} doesn't support the requested training"
                                           " mode: {}".format(self.__class__, train_mode))

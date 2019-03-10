@@ -82,11 +82,12 @@ class MnistData(Data):
 
         # Creates the dataset
         dataset = tf.data.TFRecordDataset(filename, num_parallel_reads=len(self.general_config.train_configurations))
-        dataset = dataset.map(parser, num_parallel_calls=self.batch_queue_capacity)
+        dataset = dataset.map(parser, num_parallel_calls=s8)
 
         if shuffle:
             dataset = dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=const.SEED)
         dataset = dataset.batch(self.curr_config.batch_size)
+        dataset = dataset.prefetch(self.batch_queue_capacity)
 
         # Only does multiple epochs if the dataset is going to be used for training
         if not testing:

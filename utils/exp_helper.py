@@ -40,13 +40,13 @@ def print_config(dataset: str, optimizer: str, checkpoint_key: str, s_interval: 
         input("To continue with the experiment press any key...")
 
 
-def perform_experiment(dataset: str, optimizer: str, checkpoint_key: str, s_interval: int, ckp_interval: int, seed: int,
-                       train_mode: TrainMode, train_dirs: [str], validation_dir: str):
+def perform_experiment(dataset_name: str, optimizer_name: str, checkpoint_key: str, s_interval: int, ckp_interval: int,
+                       seed: int, train_mode: TrainMode, train_dirs: [str], validation_dir: str):
     """
     Prepares and performs the experiment according to the configuration given by the user
 
-    :param dataset: a string representing the dataset that has been configured by the user
-    :param optimizer: a string representing the optimizer that has been configured by the user
+    :param dataset_name: a string representing the dataset that has been configured by the user
+    :param optimizer_name: a string representing the optimizer that has been configured by the user
     :param checkpoint_key: a string representing a checkpoint. Must be None if no checkpoint has been configured
     :param s_interval: the summary interval that has been configured by the user
     :param ckp_interval: the checkpoint interval that has been configured by the user
@@ -57,8 +57,8 @@ def perform_experiment(dataset: str, optimizer: str, checkpoint_key: str, s_inte
     :return: None
     """
     const.SEED = seed
-    factory = Experiments.get_experiment(optimizer, dataset)
-    tester = factory(train_dirs, validation_dir, s_interval, ckp_interval, checkpoint_key)
+    factory = Experiments.get_experiment(optimizer_name, dataset_name)
+    exp = factory(train_dirs, validation_dir, s_interval, ckp_interval, checkpoint_key)
 
-    tester.prepare_all(optimizer, train_mode)
-    tester.execute_experiment()
+    exp.prepare_all(optimizer_name, train_mode)
+    exp.execute_experiment()

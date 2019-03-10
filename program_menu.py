@@ -4,7 +4,7 @@ This module acts as a menu interface for performing the experiments
 
 import utils.constants as const
 import utils.default_paths as paths
-import utils.test_helper as helper
+import utils.exp_helper as helper
 
 
 def print_menu():

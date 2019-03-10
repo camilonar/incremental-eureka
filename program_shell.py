@@ -4,7 +4,7 @@ This module acts as a shell interface for performing the experiments
 import argparse
 import utils.constants as const
 import utils.default_paths as paths
-import utils.test_helper as helper
+import utils.exp_helper as helper
 from utils.train_modes import TrainMode
 
 
