@@ -60,5 +60,5 @@ def perform_experiment(dataset_name: str, optimizer_name: str, checkpoint_key: s
     factory = Experiments.get_experiment(optimizer_name, dataset_name)
     exp = factory(train_dirs, validation_dir, s_interval, ckp_interval, checkpoint_key)
 
-    exp.prepare_all(optimizer_name, train_mode)
+    exp.prepare_all(train_mode)
     exp.execute_experiment()

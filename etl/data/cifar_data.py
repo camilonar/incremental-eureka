@@ -98,6 +98,7 @@ class CifarData(Data):
         # Creates the dataset
         dataset = tf.data.TFRecordDataset(filename, num_parallel_reads=len(self.general_config.train_configurations))
         dataset = dataset.map(parser, num_parallel_calls=8)
+        dataset = dataset.cache()
 
         if shuffle:
             dataset = dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=const.SEED)

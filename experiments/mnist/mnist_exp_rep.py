@@ -8,12 +8,14 @@ from training.trainer.rep_trainer import RepresentativesTrainer
 from training.config.general_config import GeneralConfig
 from training.config.megabatch_config import MegabatchConfig
 from utils.train_modes import TrainMode
+from utils import constants as const
 
 
 class MnistExperimentRep(MnistExperiment):
     """
     Performs experiments over MNIST dataset using the proposed representative-selection algorithm
     """
+    optimizer_name = const.TR_REP
     general_config = None
     trainer = None
 

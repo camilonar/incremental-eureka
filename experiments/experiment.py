@@ -108,29 +108,22 @@ class Experiment(ABC):
         print("No checkpoint has been loaded...")
         return None
 
-    def prepare_all(self, str_trainer: str, train_mode: TrainMode):
+    def prepare_all(self, train_mode: TrainMode):
         """
         It prepares the Experiment object for the test, according to the various parameters given up to this point and
         also according to the corresponding dataset to which the concrete Experiment is associated.
         This method calls ALL the _prepare methods defined in the base class.
 
-        :param str_trainer: a string that represents the chosen Trainer. Currently supported strings are:
-            -OPT_BASE: for a simple RMSProp
-            -OPT_DCGAN: for the Trainer that uses the algorithm presented in "Evolutive deep models for online learning
-                    on data streams with no storage"
-                    See: http://ceur-ws.org/Vol-1958/IOTSTREAMING2.pdf
-            -OPT_REPRESENTATIVES: for the proposed method of this work, i.e. an incremental algorithm that uses RMSProp
-                    and select samples based in clustering
         :param train_mode: Indicates the training mode that is going to be used
         :return: None
         """
         tf.reset_default_graph()
         tf.set_random_seed(const.SEED)
         np.random.seed(const.SEED)
-        self._prepare_config(str_trainer, train_mode)
+        self._prepare_config(self.optimizer_name, train_mode)
         self._prepare_data_pipeline()
         self._prepare_neural_network()
-        self.ckp_path = self._prepare_checkpoint_if_required(self.checkpoint_key, str_trainer)
+        self.ckp_path = self._prepare_checkpoint_if_required(self.checkpoint_key, self.optimizer_name)
         self._prepare_trainer()
 
     def execute_experiment(self):
@@ -184,6 +177,17 @@ class Experiment(ABC):
         Getter for the name of the dataset associated with the Experiment
 
         :return: the name of the dataset of the Experiment
+        :rtype: str
+        """
+        pass
+
+    @property
+    @abstractmethod
+    def optimizer_name(self):
+        """
+        Getter for the name of the Optimizer associated with the Experiment
+
+        :return: the name of the optimizer of the Experiment
         :rtype: str
         """
         pass

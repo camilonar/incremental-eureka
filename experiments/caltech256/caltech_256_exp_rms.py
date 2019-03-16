@@ -8,12 +8,14 @@ from training.trainer.rms_trainer import RMSPropTrainer
 from training.config.general_config import GeneralConfig
 from training.config.megabatch_config import MegabatchConfig
 from utils.train_modes import TrainMode
+from utils import constants as const
 
 
 class Caltech256ExperimentRMSProp(Caltech256Experiment):
     """
     Performs experiments over Caltech-256 dataset using RMSProp
     """
+    optimizer_name = const.TR_BASE
     general_config = None
     trainer = None
 

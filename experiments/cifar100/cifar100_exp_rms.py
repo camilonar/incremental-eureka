@@ -8,6 +8,7 @@ from training.trainer.rms_trainer import RMSPropTrainer
 from training.config.general_config import GeneralConfig
 from training.config.megabatch_config import MegabatchConfig
 from utils.train_modes import TrainMode
+from utils import constants as const
 
 
 class Cifar100ExperimentRMSProp(Cifar100Experiment):
