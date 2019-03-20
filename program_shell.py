@@ -55,10 +55,10 @@ def create_parser():
         default=const.SEED,
         help='(Optional) The seed for random numbers. If not set then a default value is used instead.')
     parser.add_argument(
-        '-i',
-        '--is_incremental',
-        action="store_true",
-        default=const.TRAIN_MODE,
+        '-tm',
+        '--train_mode',
+        type=str,
+        default=const.TRAIN_MODE.__str__().split('.')[-1],
         help='(Optional) Must be set for incremental training.')
     parser.add_argument(
         '-dp',
@@ -72,7 +72,7 @@ def create_parser():
 
 
 def unpack_variables(dataset: str, optimizer: str, checkpoint_key: str, s_interval: int, ckp_interval: int, seed: int,
-                     train_mode: TrainMode, dataset_path: str):
+                     train_mode: str, dataset_path: str):
     """
     Helper function that is used as a proxy for easily unpacking variables from the corresponding parser
 
@@ -86,7 +86,8 @@ def unpack_variables(dataset: str, optimizer: str, checkpoint_key: str, s_interv
     :param dataset_path: the path to the root of the dataset
     :return: the values of the unpacked arguments in the same order
     """
-    return dataset, optimizer, checkpoint_key, s_interval, ckp_interval, seed, train_mode, dataset_path
+    return dataset, optimizer, checkpoint_key, s_interval, ckp_interval, seed, TrainMode.__members__.get(
+        train_mode), dataset_path
 
 
 def main():

@@ -69,7 +69,8 @@ class Tester(object):
         streaming_accuracy, streaming_accuracy_update = tf.metrics.mean(accuracy, name='accuracy_metric')
         tf.summary.scalar('accuracy', streaming_accuracy)
 
-    def _create_loss_metric(self):
+    @staticmethod
+    def _create_loss_metric():
         """
         Creates the loss metric and its auxiliary tensors
         :return: None
@@ -107,7 +108,8 @@ class Tester(object):
         summary = sess.run(streaming_accuracy_scalar)
         writer.add_summary(summary, iteration)
 
-    def save_loss(self, sess, loss, iteration: int, writer: tf.summary.FileWriter):
+    @staticmethod
+    def save_loss(sess, loss, iteration: int, writer: tf.summary.FileWriter):
         """
         Saves the loss value into the summary file for TensorBoard
 

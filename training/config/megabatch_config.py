@@ -9,7 +9,7 @@ class MegabatchConfig(object):
     Configuration for training based on a chunk of data. This is used for a specific increment of data
     """
 
-    def __init__(self, epochs: int, ttime: int = None, batch_size=100):
+    def __init__(self, epochs: int, ttime: int = None, batch_size=128):
         """
         Creates a MegabatchConfig object
 
