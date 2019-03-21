@@ -25,6 +25,4 @@ class Caltech256Experiment(Experiment):
         self.data_input = Caltech256Data(self.general_config, self.train_dirs, self.validation_dir)
 
     def _prepare_neural_network(self):
-        self.input_tensor = tf.placeholder(tf.float32, [None, 224, 224, 3])
-        self.output_tensor = tf.placeholder(tf.float32, [None, 256])
         self.neural_net = CaffeNet({'data': self.input_tensor})

@@ -26,6 +26,4 @@ class Cifar100Experiment(Experiment, ABC):
         self.data_input = Cifar100Data(self.general_config, self.train_dirs, self.validation_dir)
 
     def _prepare_neural_network(self):
-        self.input_tensor = tf.placeholder(tf.float32, [None, 224, 224, 3])
-        self.output_tensor = tf.placeholder(tf.float32, [None, 100])
         self.neural_net = SimpleNet({'data': self.input_tensor})

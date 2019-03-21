@@ -25,6 +25,4 @@ class ImagenetExperiment(Experiment, ABC):
         self.data_input = ImagenetData(self.general_config, self.train_dirs, self.validation_dir)
 
     def _prepare_neural_network(self):
-        self.input_tensor = tf.placeholder(tf.float32, [None, 256, 256, 3])
-        self.output_tensor = tf.placeholder(tf.float32, [None, 200])
         self.neural_net = CaffeNet({'data': self.input_tensor})

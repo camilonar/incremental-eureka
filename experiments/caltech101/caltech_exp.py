@@ -25,6 +25,4 @@ class CaltechExperiment(Experiment, ABC):
         self.data_input = CaltechData(self.general_config, self.train_dirs, self.validation_dir)
 
     def _prepare_neural_network(self):
-        self.input_tensor = tf.placeholder(tf.float32, [None, 227, 227, 3])
-        self.output_tensor = tf.placeholder(tf.float32, [None, 101])
         self.neural_net = AlexNet({'data': self.input_tensor})

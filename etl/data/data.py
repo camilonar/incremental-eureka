@@ -20,7 +20,7 @@ class Data(ABC):
     """
 
     def __init__(self, general_config: GeneralConfig, data_reader: Reader,
-                 image_height: int, image_width: int, buffer_size=128):
+                 image_shape: tuple, buffer_size=128):
         """
         Creates a Data pipeline object for a dataset composed of images. It also sets the current configuration for
         training as the configuration for the first mega-batch.
@@ -29,15 +29,14 @@ class Data(ABC):
 
         :param general_config: the configuration for the whole training
         :param data_reader: the corresponding Reader of the data of the dataset
-        :param image_height: the height at which the images are going to be rescaled
-        :param image_width: the width at which the images are going to be rescaled
+        :param image_shape: a tuple indicating which shape should the output image have in the format
+                (image_height, image_width, image_depth)
         :param buffer_size: the size of the buffer for various operations (such as shuffling)
         """
         self.general_config = general_config
         self.curr_config = self.general_config.train_configurations[0]
         self.data_reader = data_reader
-        self.image_height = image_height
-        self.image_width = image_width
+        self.image_shape = image_shape
         self.buffer_size = buffer_size
 
     def build_train_data_tensor(self, shuffle=True, augmentation=False, skip_count=0):

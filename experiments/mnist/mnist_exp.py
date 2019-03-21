@@ -18,13 +18,9 @@ class MnistExperiment(Experiment, ABC):
     dataset_name = const.DATA_MNIST
     data_input = None
     neural_net = None
-    input_tensor = None
-    output_tensor = None
 
     def _prepare_data_pipeline(self):
         self.data_input = MnistData(self.general_config, self.train_dirs, self.validation_dir)
 
     def _prepare_neural_network(self):
-        self.input_tensor = tf.placeholder(tf.float32, [None, 32, 32, 1])
-        self.output_tensor = tf.placeholder(tf.float32, [None, 10])
         self.neural_net = LeNet({'data': self.input_tensor})

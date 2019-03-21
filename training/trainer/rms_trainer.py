@@ -13,7 +13,7 @@ class RMSPropTrainer(Trainer):
     """
 
     def _train_batch(self, sess, image_batch, target_batch, tensor_x: tf.Tensor, tensor_y: tf.Tensor,
-                     train_step: tf.Operation, loss: tf.Tensor, increment: int, iteration: int, total_it: int):
+                     train_step: tf.Operation, loss: tf.Tensor, megabatch: int, iteration: int, total_it: int):
         return sess.run([train_step, loss],
                         feed_dict={tensor_x: image_batch, tensor_y: target_batch,
                                    self.mask_tensor: self.mask_value})

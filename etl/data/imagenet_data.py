@@ -58,7 +58,7 @@ class ImagenetData(Data):
                  image_width=256):
         print("Loading imagenet data")
         my_imagenet = DirectoryReader(train_dirs, validation_dir, general_config.train_mode)
-        super().__init__(general_config, my_imagenet, image_height, image_width, buffer_size=buffer_size)
+        super().__init__(general_config, my_imagenet, (image_height, image_width, 3), buffer_size=buffer_size)
         self.data_reader.check_if_data_exists()
 
     def _build_generic_data_tensor(self, reader_data, shuffle, augmentation, testing, skip_count=0):
@@ -91,11 +91,11 @@ class ImagenetData(Data):
                                                  dtype=tf.float32,
                                                  saturate=True)
 
-            image = tf.image.resize_images(image, [self.image_height, self.image_width])
+            image = tf.image.resize_images(image, [self.image_shape[0], self.image_shape[1]])
 
             # Data Augmentation
             if augmentation:
-                distorted_image = tf.random_crop(image, [self.image_height, self.image_width, 3])
+                distorted_image = tf.random_crop(image, [self.image_shape[0], self.image_shape[1], 3])
                 # Randomly flip the image horizontally.
                 distorted_image = tf.image.random_flip_left_right(distorted_image)
                 # Because these operations are not commutative, consider randomizing
@@ -110,7 +110,7 @@ class ImagenetData(Data):
                 image = tf.image.per_image_standardization(distorted_image)
 
                 # Set the shapes of tensors.
-                image.set_shape([self.image_height, self.image_width, 3])
+                image.set_shape([self.image_shape[0], self.image_shape[1], 3])
 
             return image, single_target
 

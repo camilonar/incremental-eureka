@@ -21,7 +21,7 @@ class MnistData(Data):
                  image_width=32):
         print("Loading MNIST data...")
         my_mnist = TFRecordsReader(train_dirs, validation_dir, general_config.train_mode)
-        super().__init__(general_config, my_mnist, image_height, image_width, buffer_size=buffer_size)
+        super().__init__(general_config, my_mnist, (image_height, image_width, 1), buffer_size=buffer_size)
         self.data_reader.check_if_data_exists()
 
     def _build_generic_data_tensor(self, reader_data, shuffle, augmentation, testing, skip_count=0):
@@ -59,7 +59,7 @@ class MnistData(Data):
                 tf.transpose(tf.reshape(image, [1, image_height, image_width]), [1, 2, 0]),
                 tf.float32)
 
-            image = tf.image.resize_images(image, [self.image_width, self.image_height])
+            image = tf.image.resize_images(image, [self.image_shape[0], self.image_shape[1]])
 
             image = tf.image.convert_image_dtype(image,
                                                  dtype=tf.float32,

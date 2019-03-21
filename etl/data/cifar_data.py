@@ -21,7 +21,7 @@ class CifarData(Data):
                  image_width=32):
         print("Loading CIFAR-10 data...")
         my_cifar = TFRecordsReader(train_dirs, validation_dir, general_config.train_mode)
-        super().__init__(general_config, my_cifar, image_height, image_width, buffer_size=buffer_size)
+        super().__init__(general_config, my_cifar, (image_height, image_width, 3), buffer_size=buffer_size)
         self.data_reader.check_if_data_exists()
 
     def _build_generic_data_tensor(self, reader_data, shuffle, augmentation, testing, skip_count=0):
@@ -78,7 +78,7 @@ class CifarData(Data):
                 # Set the shapes of tensors.
                 image.set_shape([image_height, image_width, 3])
 
-            image = tf.image.resize_images(image, [self.image_width, self.image_height])
+            image = tf.image.resize_images(image, [self.image_shape[0], self.image_shape[1]])
 
             label = tf.cast(features['label'], tf.int32)
             label = tf.one_hot(label, depth=number_of_classes)

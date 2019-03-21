@@ -116,19 +116,20 @@ class Trainer(ABC):
             self.pipeline.change_dataset_part(i)
             writer = self.tester.create_writer(self.summaries_dir, i)
             training_iterator, data_x, data_y = self.pipeline.build_train_data_tensor(skip_count=skip_count)
+            self.tensor_y.set_shape(data_y.get_shape())
             self.sess.run(training_iterator.initializer)
-            iteration = self.train_increment(i, skip_count, iteration, start_time,
+            iteration = self.train_megabatch(i, skip_count, iteration, start_time,
                                              self.config.train_configurations[i].ttime,
                                              self.config, writer, data_x, data_y)
-            self._post_process_increment()
+            self._post_process_megabatch()
             # Reestablishes time and skip_count to zero after the first mega-batch (useful when a checkpoint is loaded)
             start_time, skip_count = 0, 0
-            print("Finished training of increment {}...".format(i))
+            print("Finished training of megabatch {}...".format(i))
             writer.close()
 
         self.__finish()
 
-    def train_increment(self, increment: int, iteration: int, total_iteration: int, trained_time: float, ttime: float,
+    def train_megabatch(self, megabatch: int, iteration: int, total_iteration: int, trained_time: float, ttime: float,
                         config: GeneralConfig, writer: tf.summary.FileWriter,
                         data_x: tf.Tensor, data_y: tf.Tensor):
         """
@@ -137,7 +138,7 @@ class Trainer(ABC):
         Note: if both maximum number of epochs and maximum time are set, then the training finishes when any of the
         stop criteria is met
 
-        :param increment: the number of the mega-batch
+        :param megabatch: the number of the mega-batch
         :param iteration: the current iteration number over the training data. It should be zero if no checkpoint has
             been loaded or if the mega-batch at which the restored checkpoint is differs from the current mega-batch
         :param total_iteration: the current iteration number over the training data, counting from the start of the
@@ -153,7 +154,7 @@ class Trainer(ABC):
         :return: the current iteration
         :rtype: int
         """
-        print("Starting training of increment {}...".format(increment))
+        print("Starting training of megabatch {}...".format(megabatch))
         start_time = time.time()
         i = total_iteration  # Iteration counting from the start of the training
         self.tester.perform_validation(self.sess, i, writer)  # Performs validation at the beginning
@@ -164,7 +165,7 @@ class Trainer(ABC):
                 self._update_mask(self.mask_value, target_batch)
 
                 _, loss = self._train_batch(self.sess, image_batch, target_batch, self.tensor_x, self.tensor_y,
-                                            self.train_step, self.loss, increment, iteration, i)
+                                            self.train_step, self.loss, megabatch, iteration, i)
                 curr_time = time.time() + trained_time  # If a checkpoint has been loaded, it should adapt the time
                 interval = curr_time - start_time
                 self.tester.save_loss(self.sess, loss, i, writer)
@@ -174,10 +175,10 @@ class Trainer(ABC):
                           "Time is: {}".format(i, loss, interval))
                     self.tester.perform_validation(self.sess, i, writer)
                 if i % config.check_interval == 0:
-                    self.saver.save_model(self.sess, self.ckp_dir, iteration, i, increment, interval)
+                    self.saver.save_model(self.sess, self.ckp_dir, iteration, i, megabatch, interval)
                 if ttime and interval > ttime:
-                    print("Finished increment {} in {} seconds. You can see the results of the training using "
-                          "Tensorboard".format(increment, interval))
+                    print("Finished megabatch {} in {} seconds. You can see the results of the training using "
+                          "Tensorboard".format(megabatch, interval))
                     break
 
             except OutOfRangeError:
@@ -249,11 +250,11 @@ class Trainer(ABC):
         """
         raise NotImplementedError("The subclass hasn't implemented the _create_optimizer method")
 
-    def _post_process_increment(self):
+    def _post_process_megabatch(self):
         """
-        Does some post processing after the training of a batch is completed. It isn't implemented in the base version,
-        but may be overridden by a subclass that needs to perform changes to a variable or any kind of process after
-        the training.
+        Does some post processing after the training of a megabatch is completed. It isn't implemented in the base
+        version, but may be overridden by a subclass that needs to perform changes to a variable or any kind of process
+        after the training.
 
         :return: None
         """
@@ -261,7 +262,7 @@ class Trainer(ABC):
 
     @abstractmethod
     def _train_batch(self, sess, image_batch, target_batch, tensor_x: tf.Tensor, tensor_y: tf.Tensor,
-                     train_step: tf.Operation, loss: tf.Tensor, increment: int, iteration: int, total_it: int):
+                     train_step: tf.Operation, loss: tf.Tensor, megabatch: int, iteration: int, total_it: int):
         """
         Trains the current model over a batch of data
 
@@ -272,7 +273,7 @@ class Trainer(ABC):
         :param tensor_y: the tensor corresponding to the output of a training
         :param train_step: the current tf.Optimizer
         :param loss: a tensor representing the loss function
-        :param increment: the number of the mega-batch
+        :param megabatch: the number of the mega-batch
         :param iteration: the current iteration counting from the start of the mega-batch
         _param total_it: the current iteration counting from the start of the whole training
         :return: a tuple containing the result of the training, i.e. the result of running train_step and loss (in that

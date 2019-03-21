@@ -23,7 +23,7 @@ class CaltechData(Data):
         """ Downloads the data if necessary. """
         print("Loading Caltech data...")
         my_caltech = DirectoryReader(train_dirs, validation_dir, general_config.train_mode)
-        super().__init__(general_config, my_caltech, image_height, image_width, buffer_size=buffer_size)
+        super().__init__(general_config, my_caltech, (image_height, image_width, 3), buffer_size=buffer_size)
         self.data_reader.check_if_data_exists()
 
     def _build_generic_data_tensor(self, reader_data, shuffle, augmentation, testing, skip_count=0):
@@ -56,13 +56,13 @@ class CaltechData(Data):
                                                         dtype=tf.float32,
                                                         saturate=True)
 
-            single_image = tf.image.resize_images(single_image, [self.image_height, self.image_width])
+            single_image = tf.image.resize_images(single_image, [self.image_shape[0], self.image_shape[1]])
 
             # Data Augmentation
             if augmentation:
-                single_image = tf.image.resize_image_with_crop_or_pad(single_image, self.image_height + 4,
-                                                                      self.image_width + 4)
-                single_image = tf.random_crop(single_image, [self.image_height, self.image_width, num_of_channels])
+                single_image = tf.image.resize_image_with_crop_or_pad(single_image, self.image_shape[0] + 4,
+                                                                      self.image_shape[1] + 4)
+                single_image = tf.random_crop(single_image, [self.image_shape[0], self.image_shape[1], num_of_channels])
                 single_image = tf.image.random_flip_left_right(single_image)
 
             single_image = tf.image.per_image_standardization(single_image)

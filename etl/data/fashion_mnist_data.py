@@ -21,7 +21,7 @@ class FashionMnistData(Data):
                  image_width=28):
         print("Loading fashion mnist data...")
         my_f_mnist = TFRecordsReader(train_dirs, validation_dir, general_config.train_mode)
-        super().__init__(general_config, my_f_mnist, image_height, image_width, buffer_size=buffer_size)
+        super().__init__(general_config, my_f_mnist, (image_height, image_width, 1), buffer_size=buffer_size)
         self.data_reader.check_if_data_exists()
 
     def _build_generic_data_tensor(self, reader_data, shuffle, augmentation, testing, skip_count=0):
@@ -62,7 +62,7 @@ class FashionMnistData(Data):
                                                  dtype=tf.float32,
                                                  saturate=True) * (1 / 255.0)
 
-            image = tf.image.resize_images(image, [self.image_width, self.image_height])
+            image = tf.image.resize_images(image, [self.image_shape[0], self.image_shape[1]])
 
             label = tf.cast(features['label'], tf.int32)
             label = tf.one_hot(label, depth=number_of_classes)

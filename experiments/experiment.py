@@ -43,6 +43,7 @@ class Experiment(ABC):
         self.ckp_interval = ckp_interval
         self.checkpoint_key = checkpoint_key
         self.ckp_path = None
+        self.output_tensor, self.input_tensor = None, None
 
     @abstractmethod
     def _prepare_data_pipeline(self):
@@ -59,6 +60,7 @@ class Experiment(ABC):
         It creates and stores the proper neural network according to the assigned dataset of the tester.
         E.g. if the Experiment performs experiments over ImageNet then it should create a CaffeNet, but if
         the experiments are over MNIST then it should create a LeNet.
+        This method is expected to be executed right after _prepare_placeholders
 
         :return: None
         """
@@ -108,6 +110,18 @@ class Experiment(ABC):
         print("No checkpoint has been loaded...")
         return None
 
+    def _prepare_placeholders(self):
+        """
+        Prepares the input and output placeholders. This method requires that the data pipeline has already been created
+        (i.e. the method _prepare_data_pipeline() has been executed)
+
+        :return: None
+        """
+        self.output_tensor = tf.placeholder(tf.float32, shape=[None, None])
+        image_shape = list(self.data_input.image_shape)
+        image_shape.insert(0, None)
+        self.input_tensor = tf.placeholder(tf.float32, shape=image_shape)
+
     def prepare_all(self, train_mode: TrainMode):
         """
         It prepares the Experiment object for the test, according to the various parameters given up to this point and
@@ -122,6 +136,7 @@ class Experiment(ABC):
         np.random.seed(const.SEED)
         self._prepare_config(self.optimizer_name, train_mode)
         self._prepare_data_pipeline()
+        self._prepare_placeholders()
         self._prepare_neural_network()
         self.ckp_path = self._prepare_checkpoint_if_required(self.checkpoint_key, self.optimizer_name)
         self._prepare_trainer()
@@ -250,28 +265,3 @@ class Experiment(ABC):
         if self.checkpoint_key is None:
             return True
         return self.ckp_path
-
-    @property
-    @abstractmethod
-    def input_tensor(self):
-        """
-        Getter for the input tensor of the neural network used by the Experiment
-
-        :return: a Tensor that was assigned as 'data' when the network was created
-        :rtype: tf.Tensor
-        """
-        pass
-
-    @property
-    @abstractmethod
-    def output_tensor(self):
-        """
-        Getter for the output tensor of the training
-
-        :return: the Tensor associated to the labels of supervised learning.
-            E.g. if the tensor is used for calculating the mse, as follows, then 'data_y' should be the returned Tensor
-            of this function:
-                `mse = tf.reduce_mean(tf.square(data_y - neural_net.get_output()))`
-        :rtype: tf.Tensor
-        """
-        pass
