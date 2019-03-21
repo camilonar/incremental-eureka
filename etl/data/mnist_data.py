@@ -21,7 +21,7 @@ class MnistData(Data):
                  image_width=32):
         print("Loading MNIST data...")
         my_mnist = TFRecordsReader(train_dirs, validation_dir, general_config.train_mode)
-        super().__init__(general_config, my_mnist, image_height, image_width)
+        super().__init__(general_config, my_mnist, image_height, image_width, buffer_size=buffer_size)
         self.data_reader.check_if_data_exists()
 
     def _build_generic_data_tensor(self, reader_data, shuffle, augmentation, testing, skip_count=0):

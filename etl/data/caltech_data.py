@@ -5,7 +5,6 @@ Module for the data pipeline of Caltech-101 dataset
 import tensorflow as tf
 
 from etl.data import Data
-import utils.constants as const
 from etl.reader.directory_reader import DirectoryReader
 
 
@@ -17,15 +16,14 @@ class CaltechData(Data):
     def __init__(self, general_config,
                  train_dirs: [str],
                  validation_dir: [str],
-                 batch_queue_capacity=1000,
+                 buffer_size=1000,
                  image_height=227,
                  image_width=227):
 
         """ Downloads the data if necessary. """
         print("Loading Caltech data...")
         my_caltech = DirectoryReader(train_dirs, validation_dir, general_config.train_mode)
-        super().__init__(general_config, my_caltech, image_height, image_width)
-        self.batch_queue_capacity = batch_queue_capacity + 3 * self.curr_config.batch_size
+        super().__init__(general_config, my_caltech, image_height, image_width, buffer_size=buffer_size)
         self.data_reader.check_if_data_exists()
 
     def _build_generic_data_tensor(self, reader_data, shuffle, augmentation, testing, skip_count=0):

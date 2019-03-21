@@ -16,14 +16,13 @@ class CifarData(Data):
     def __init__(self, general_config,
                  train_dirs: [str],
                  validation_dir: str,
-                 batch_queue_capacity=60000,
+                 buffer_size=60000,
                  image_height=32,
                  image_width=32):
-        print("Loading Cifar-10 data...")
+        print("Loading CIFAR-10 data...")
         my_cifar = TFRecordsReader(train_dirs, validation_dir, general_config.train_mode)
-        super().__init__(general_config, my_cifar, image_height, image_width)
+        super().__init__(general_config, my_cifar, image_height, image_width, buffer_size=buffer_size)
         self.data_reader.check_if_data_exists()
-        self.batch_queue_capacity = batch_queue_capacity
 
     def _build_generic_data_tensor(self, reader_data, shuffle, augmentation, testing, skip_count=0):
         """

@@ -28,7 +28,6 @@ print(target_batch.shape)
 import tensorflow as tf
 
 from etl.data import Data
-import utils.constants as const
 from etl.reader.directory_reader import DirectoryReader
 
 
@@ -54,13 +53,12 @@ class ImagenetData(Data):
     def __init__(self, general_config,
                  train_dirs: [str],
                  validation_dir: str,
-                 batch_queue_capacity=1000,
+                 buffer_size=1000,
                  image_height=256,
                  image_width=256):
         print("Loading imagenet data")
         my_imagenet = DirectoryReader(train_dirs, validation_dir, general_config.train_mode)
-        super().__init__(general_config, my_imagenet, image_height, image_width)
-        self.batch_queue_capacity = batch_queue_capacity + 3 * self.curr_config.batch_size
+        super().__init__(general_config, my_imagenet, image_height, image_width, buffer_size=buffer_size)
         self.data_reader.check_if_data_exists()
 
     def _build_generic_data_tensor(self, reader_data, shuffle, augmentation, testing, skip_count=0):
@@ -109,7 +107,7 @@ class ImagenetData(Data):
                 distorted_image = tf.image.random_contrast(distorted_image,
                                                            lower=0.2, upper=1.8)
                 # Subtract off the mean and divide by the variance of the pixels.
-                # image = tf.image.per_image_standardization(distorted_image)
+                image = tf.image.per_image_standardization(distorted_image)
 
                 # Set the shapes of tensors.
                 image.set_shape([self.image_height, self.image_width, 3])

@@ -6,7 +6,6 @@ import tensorflow as tf
 
 from etl.reader.directory_reader import DirectoryReader
 from etl.data import Data
-import utils.constants as const
 
 
 class Caltech256Data(Data):
@@ -17,14 +16,13 @@ class Caltech256Data(Data):
     def __init__(self, general_config,
                  train_dirs: [str],
                  validation_dir: [str],
-                 batch_queue_capacity=1000,
+                 buffer_size=1000,
                  image_height=224,
                  image_width=224):
 
         print("Loading caltech data...")
         my_caltech = DirectoryReader(train_dirs, validation_dir, general_config.train_mode)
-        super().__init__(general_config, my_caltech, image_height, image_width)
-        self.batch_queue_capacity = batch_queue_capacity + 3 * self.curr_config.batch_size
+        super().__init__(general_config, my_caltech, image_height, image_width, buffer_size=buffer_size)
         self.data_reader.check_if_data_exists()
 
     def _build_generic_data_tensor(self, reader_data, shuffle, augmentation, testing, skip_count=0):

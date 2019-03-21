@@ -16,13 +16,12 @@ class FashionMnistData(Data):
     def __init__(self, general_config,
                  train_dirs: [str],
                  validation_dir: str,
-                 batch_queue_capacity=60000,
+                 buffer_size=60000,
                  image_height=28,
                  image_width=28):
         print("Loading fashion mnist data...")
         my_f_mnist = TFRecordsReader(train_dirs, validation_dir, general_config.train_mode)
-        super().__init__(general_config, my_f_mnist, image_height, image_width)
-        self.batch_queue_capacity = batch_queue_capacity
+        super().__init__(general_config, my_f_mnist, image_height, image_width, buffer_size=buffer_size)
         self.data_reader.check_if_data_exists()
 
     def _build_generic_data_tensor(self, reader_data, shuffle, augmentation, testing, skip_count=0):
