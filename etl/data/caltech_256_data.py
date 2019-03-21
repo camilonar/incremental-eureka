@@ -27,16 +27,7 @@ class Caltech256Data(Data):
         self.batch_queue_capacity = batch_queue_capacity + 3 * self.curr_config.batch_size
         self.data_reader.check_if_data_exists()
 
-    def build_train_data_tensor(self, shuffle=True, augmentation=False, skip_count=0):
-        img_path, cls = self.data_reader.load_training_data()
-        return self.__build_generic_data_tensor(img_path, cls, shuffle, augmentation, testing=False,
-                                                skip_count=skip_count)
-
-    def build_test_data_tensor(self, shuffle=False, augmentation=False):
-        img_path, cls = self.data_reader.load_test_data()
-        return self.__build_generic_data_tensor(img_path, cls, shuffle, augmentation, testing=True)
-
-    def __build_generic_data_tensor(self, all_img_paths, all_targets, shuffle, augmentation, testing, skip_count=0):
+    def _build_generic_data_tensor(self, reader_data, shuffle, augmentation, testing, skip_count=0):
         """
         Creates the input pipeline and performs some preprocessing.
         The full dataset needs to fit into memory for this version.
@@ -79,22 +70,13 @@ class Caltech256Data(Data):
             return single_image, single_target
 
         # Creates the dataset
-        filenames = tf.constant(all_img_paths)
-        labels = tf.constant(all_targets)
+        filenames = tf.constant(reader_data[0])
+        labels = tf.constant(reader_data[1])
 
         dataset = tf.data.Dataset.from_tensor_slices((filenames, labels))
         dataset = dataset.map(load_images, num_parallel_calls=8)
-
-        if shuffle:
-            dataset = dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=const.SEED)
-        dataset = dataset.batch(self.curr_config.batch_size)
-        dataset = dataset.prefetch(self.batch_queue_capacity)
-
-        # Only does multiple epochs if the dataset is going to be used for training
-        if not testing:
-            dataset = dataset.repeat(self.curr_config.epochs)
-
-        dataset.skip(skip_count)
+        # The dataset is not shuffled here, but in Reader
+        dataset = self.prepare_basic_dataset(dataset, repeat=testing, skip_count=skip_count)
 
         iterator = dataset.make_initializable_iterator()
         images_batch, target_batch = iterator.get_next()

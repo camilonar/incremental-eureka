@@ -16,7 +16,7 @@ class CifarData(Data):
     def __init__(self, general_config,
                  train_dirs: [str],
                  validation_dir: str,
-                 batch_queue_capacity=10000,
+                 batch_queue_capacity=60000,
                  image_height=32,
                  image_width=32):
         print("Loading Cifar-10 data...")
@@ -25,16 +25,7 @@ class CifarData(Data):
         self.data_reader.check_if_data_exists()
         self.batch_queue_capacity = batch_queue_capacity
 
-    def build_train_data_tensor(self, shuffle=True, augmentation=False, skip_count=0):
-        filename, _ = self.data_reader.load_training_data()
-        return self.__build_generic_data_tensor(filename, shuffle, augmentation, testing=False,
-                                                skip_count=skip_count)
-
-    def build_test_data_tensor(self, shuffle=False, augmentation=False):
-        filename, _ = self.data_reader.load_test_data()
-        return self.__build_generic_data_tensor(filename, shuffle, augmentation, testing=True)
-
-    def __build_generic_data_tensor(self, filename, shuffle, augmentations, testing, skip_count=0):
+    def _build_generic_data_tensor(self, reader_data, shuffle, augmentation, testing, skip_count=0):
         """
         Creates the input pipeline and performs some preprocessing.
         """
@@ -70,7 +61,7 @@ class CifarData(Data):
                                                  dtype=tf.float32,
                                                  saturate=True) * (1 / 255.0)
             # Data Augmentation
-            if augmentations:
+            if augmentation:
                 distorted_image = tf.random_crop(image, [image_height, image_width, 3])
                 # Randomly flip the image horizontally.
                 distorted_image = tf.image.random_flip_left_right(distorted_image)
@@ -96,20 +87,11 @@ class CifarData(Data):
             return image, label
 
         # Creates the dataset
-        dataset = tf.data.TFRecordDataset(filename, num_parallel_reads=len(self.general_config.train_configurations))
+        filenames = reader_data[0]
+        dataset = tf.data.TFRecordDataset(filenames, num_parallel_reads=len(self.general_config.train_configurations))
         dataset = dataset.map(parser, num_parallel_calls=8)
-        dataset = dataset.cache()
-
-        if shuffle:
-            dataset = dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=const.SEED)
-
-        dataset = dataset.batch(self.curr_config.batch_size)
-        dataset = dataset.prefetch(self.batch_queue_capacity)
-        # Only does multiple epochs if the dataset is going to be used for training
-        if not testing:
-            dataset = dataset.repeat(self.curr_config.epochs)
-
-        dataset.skip(skip_count)
+        dataset = self.prepare_basic_dataset(dataset, shuffle=shuffle, cache=True, repeat=testing,
+                                             skip_count=skip_count, shuffle_seed=const.SEED)
 
         iterator = dataset.make_initializable_iterator()
         images_batch, target_batch = iterator.get_next()

@@ -20,7 +20,7 @@ class Data(ABC):
     """
 
     def __init__(self, general_config: GeneralConfig, data_reader: Reader,
-                 image_height: int, image_width: int):
+                 image_height: int, image_width: int, buffer_size = 100):
         """
         Creates a Data pipeline object for a dataset composed of images. It also sets the current configuration for
         training as the configuration for the first mega-batch.
@@ -31,15 +31,16 @@ class Data(ABC):
         :param data_reader: the corresponding Reader of the data of the dataset
         :param image_height: the height at which the images are going to be rescaled
         :param image_width: the width at which the images are going to be rescaled
+        :param buffer_size: the size of the buffer for various operations (such as shuffling)
         """
         self.general_config = general_config
         self.curr_config = self.general_config.train_configurations[0]
         self.data_reader = data_reader
         self.image_height = image_height
         self.image_width = image_width
+        self.buffer_size = 100
 
-    @abstractmethod
-    def build_train_data_tensor(self, shuffle=False, augmentation=False, skip_count=0):
+    def build_train_data_tensor(self, shuffle=True, augmentation=False, skip_count=0):
         """
         Builds the training data tensor
 
@@ -53,21 +54,42 @@ class Data(ABC):
             corresponding labels of the data. NOTE: the Iterator must be initialized before the training and label data
             tensors can be used to feed data into a model
         """
-        raise NotImplementedError("The subclass hasn't implemented the build_train_data_tensor method")
+        reader_data = self.data_reader.load_training_data()
+        return self._build_generic_data_tensor(reader_data, shuffle, augmentation, testing=False,
+                                               skip_count=skip_count)
 
-    @abstractmethod
     def build_test_data_tensor(self, shuffle=False, augmentation=False):
         """
         Builds the test data tensor
 
         :param shuffle: specifies whether the data is going to be randomly shuffled or not
         :param augmentation: specifies if there is going to be performed a data augmentation process
-        :return:  a tuple of an Iterator and two Tensors, where the first value is an Iterator for the
+        :return: a tuple of an Iterator and two Tensors, where the first value is an Iterator for the
             data, the second value is the tensor of test data and the third value is the tensor with the corresponding
             labels of the data. NOTE: the Iterator must be initialized before the testing and label data tensors can be
             used to feed data into a model
         """
-        raise NotImplementedError("The subclass hasn't implemented the build_test_data_tensor method")
+        reader_data = self.data_reader.load_test_data()
+        return self._build_generic_data_tensor(reader_data, shuffle, augmentation, testing=True)
+
+    @abstractmethod
+    def _build_generic_data_tensor(self, reader_data, shuffle, augmentation, testing, skip_count=0):
+        """
+        It creates a generic data tensor with its respective iterator
+
+        :param reader_data: a tuple containing the data obtained from the Reader
+        :param shuffle: specifies whether the data is going to be randomly shuffled or not
+        :param augmentation: specifies if there is going to be performed a data augmentation process
+        :param testing: indicates if the data is for testing or not
+        :param skip_count: number of elements to be skipped from the Dataset. If the dataset.batch is applied, then each
+            batch is treated as 1 element, so in that case, skip_count is the number of batches to be skipped from the
+            Dataset.
+        :return: a tuple of an Iterator and two Tensors, where the first value is an Iterator for the
+            data, the second value is the tensor of test data and the third value is the tensor with the corresponding
+            labels of the data. NOTE: the Iterator must be initialized before the testing and label data tensors can be
+            used to feed data into a model
+        """
+        raise NotImplementedError("The subclass hasn't implemented the _build_generic_data_tensor method")
 
     def change_dataset_part(self, index: int):
         """
@@ -84,6 +106,40 @@ class Data(ABC):
             self.close()
         else:
             print("The dataset megabatch hasn't been changed because the requested megabatch is the current megabatch")
+
+    def prepare_basic_dataset(self, dataset, cache=False, shuffle=False, batch=True, repeat=False, skip_count=0,
+                              shuffle_seed=None):
+        """
+        Helper function that applies simple and common operations over a dataset such as shuffling, batching (according
+        to the current MegabatchConfig), repeating (for multiple epochs), skipping data and using cache
+
+        :param dataset: the dataset to be transformed
+        :param cache: whether or not the dataset should be cached in RAM
+        :param shuffle: whether or not the dataset should be shuffled
+        :param batch: wheter or not the dataset should be batched
+        :param repeat: whether or not multiple epochs should be used. If True, the dataset is repeated according to
+                as specified in the current MegabatchConfig
+        :param skip_count: number of elements to be skipped from the Dataset. If batch=True, then each
+            batch is treated as 1 element, so in that case, skip_count is the number of batches to be skipped from the
+            Dataset.
+        :param shuffle_seed: the seed for the shuffling operation
+        :return: a processed dataset
+        :rtype: tf.Dataset
+        """
+        if cache:
+            dataset = dataset.cache()
+
+        if shuffle:
+            dataset = dataset.shuffle(buffer_size=self.buffer_size, seed=shuffle_seed)
+
+        if batch:
+            dataset = dataset.batch(self.curr_config.batch_size)
+
+        if not repeat:
+            dataset = dataset.repeat(self.curr_config.epochs)
+        print("Skipping {} data".format(skip_count))
+        dataset = dataset.skip(skip_count)
+        return dataset
 
     def __del__(self):
         """

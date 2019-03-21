@@ -1,9 +1,6 @@
 """
 IoC container for the Experiment objects
 """
-import dependency_injector.containers as containers
-import dependency_injector.providers as providers
-
 import utils.constants as const
 from experiments.caltech256.caltech_256_exp_rms import Caltech256ExperimentRMSProp
 from experiments.caltech101.caltech_exp_dcgan import CaltechExperimentDCGAN
@@ -26,7 +23,7 @@ from experiments.mnist.mnist_exp_rep import MnistExperimentRep
 from experiments.mnist.mnist_exp_rms import MnistExperimentRMSProp
 
 
-class Experiments(containers.DeclarativeContainer):
+class Experiments(object):
     """
     IoC container for the basic experiments included in the framework, which corresponds to datasets:
 
@@ -40,23 +37,23 @@ class Experiments(containers.DeclarativeContainer):
 
     """
     # TODO agregar los otros testers
-    testers = {const.TR_BASE: {const.DATA_CALTECH_101: providers.Factory(CaltechExperimentRMSProp),
-                               const.DATA_CIFAR_10: providers.Factory(CifarExperimentRMSProp),
-                               const.DATA_TINY_IMAGENET: providers.Factory(ImagenetExperimentRMSProp),
-                               const.DATA_MNIST: providers.Factory(MnistExperimentRMSProp),
-                               const.DATA_CALTECH_256: providers.Factory(Caltech256ExperimentRMSProp),
-                               const.DATA_CIFAR_100: providers.Factory(Cifar100ExperimentRMSProp),
-                               const.DATA_FASHION_MNIST: providers.Factory(FashionMnistExperimentRMSProp)
+    testers = {const.TR_BASE: {const.DATA_CALTECH_101: CaltechExperimentRMSProp,
+                               const.DATA_CIFAR_10: CifarExperimentRMSProp,
+                               const.DATA_TINY_IMAGENET: ImagenetExperimentRMSProp,
+                               const.DATA_MNIST: MnistExperimentRMSProp,
+                               const.DATA_CALTECH_256: Caltech256ExperimentRMSProp,
+                               const.DATA_CIFAR_100: Cifar100ExperimentRMSProp,
+                               const.DATA_FASHION_MNIST: FashionMnistExperimentRMSProp
                                },
-               const.TR_DCGAN: {const.DATA_CALTECH_101: providers.Factory(CaltechExperimentDCGAN),
-                                const.DATA_CIFAR_10: providers.Factory(CifarExperimentDCGAN),
-                                const.DATA_TINY_IMAGENET: providers.Factory(ImagenetExperimentDCGAN),
-                                const.DATA_MNIST: providers.Factory(MnistExperimentDCGAN)},
-               const.TR_REP: {const.DATA_CALTECH_101: providers.Factory(CaltechExperimentRep),
-                              const.DATA_CIFAR_10: providers.Factory(CifarExperimentRep),
-                              const.DATA_TINY_IMAGENET: providers.Factory(ImagenetExperimentRep),
-                              const.DATA_MNIST: providers.Factory(MnistExperimentRep),
-                              const.DATA_FASHION_MNIST: providers.Factory(FashionMnistExperimentRep)}
+               const.TR_DCGAN: {const.DATA_CALTECH_101: CaltechExperimentDCGAN,
+                                const.DATA_CIFAR_10: CifarExperimentDCGAN,
+                                const.DATA_TINY_IMAGENET: ImagenetExperimentDCGAN,
+                                const.DATA_MNIST: MnistExperimentDCGAN},
+               const.TR_REP: {const.DATA_CALTECH_101: CaltechExperimentRep,
+                              const.DATA_CIFAR_10: CifarExperimentRep,
+                              const.DATA_TINY_IMAGENET: ImagenetExperimentRep,
+                              const.DATA_MNIST: MnistExperimentRep,
+                              const.DATA_FASHION_MNIST: FashionMnistExperimentRep}
                }
 
     @classmethod

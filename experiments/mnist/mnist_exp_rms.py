@@ -30,10 +30,10 @@ class MnistExperimentRMSProp(MnistExperiment):
         # Creates configuration for 5 mega-batches
         if train_mode == TrainMode.INCREMENTAL:
             for i in range(5):
-                train_conf = MegabatchConfig(20, batch_size=128)
+                train_conf = MegabatchConfig(25, batch_size=128)
                 self.general_config.add_train_conf(train_conf)
         elif train_mode == TrainMode.ACUMULATIVE:
-            train_confs = [MegabatchConfig(20, batch_size=128), MegabatchConfig(20, batch_size=128),
+            train_confs = [MegabatchConfig(25, batch_size=128), MegabatchConfig(20, batch_size=128),
                            MegabatchConfig(20, batch_size=128), MegabatchConfig(15, batch_size=128),
                            MegabatchConfig(15, batch_size=128)]
             self.general_config.train_configurations = train_confs

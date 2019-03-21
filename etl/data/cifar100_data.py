@@ -25,16 +25,7 @@ class Cifar100Data(Data):
         self.data_reader.check_if_data_exists()
         self.batch_queue_capacity = batch_queue_capacity
 
-    def build_train_data_tensor(self, shuffle=False, augmentation=True, skip_count=0):
-        filename, _ = self.data_reader.load_training_data()
-        return self.__build_generic_data_tensor(filename, shuffle, augmentation, testing=False,
-                                                skip_count=skip_count)
-
-    def build_test_data_tensor(self, shuffle=False, augmentation=False):
-        filename, _ = self.data_reader.load_test_data()
-        return self.__build_generic_data_tensor(filename, shuffle, augmentation, testing=True)
-
-    def __build_generic_data_tensor(self, filename, shuffle, augmentations, testing, skip_count=0):
+    def _build_generic_data_tensor(self, reader_data, shuffle, augmentations, testing, skip_count=0):
         """
         Creates the input pipeline and performs some preprocessing.
         """
@@ -97,19 +88,11 @@ class Cifar100Data(Data):
             return image, label
 
         # Creates the dataset
-        dataset = tf.data.TFRecordDataset(filename)
+        filenames = reader_data[0]
+        dataset = tf.data.TFRecordDataset(filenames)
         dataset = dataset.map(parser, num_parallel_calls=8)
-
-        if shuffle:
-            dataset = dataset.shuffle(buffer_size=self.batch_queue_capacity, seed=const.SEED)
-
-        dataset = dataset.prefetch(self.batch_queue_capacity)
-        dataset = dataset.batch(self.curr_config.batch_size)
-        # Only does multiple epochs if the dataset is going to be used for training
-        if not testing:
-            dataset = dataset.repeat(self.curr_config.epochs)
-
-        dataset.skip(skip_count)
+        dataset = self.prepare_basic_dataset(dataset, shuffle=shuffle, cache=True, repeat=testing,
+                                             skip_count=skip_count, shuffle_seed=const.SEED)
 
         iterator = dataset.make_initializable_iterator()
         images_batch, target_batch = iterator.get_next()
