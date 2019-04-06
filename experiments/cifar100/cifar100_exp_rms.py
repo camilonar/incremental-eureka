@@ -15,6 +15,7 @@ class Cifar100ExperimentRMSProp(Cifar100Experiment):
     """
     Performs experiments over Cifar-100 dataset using RMSProp
     """
+    optimizer_name = const.TR_BASE
     general_config = None
     trainer = None
 

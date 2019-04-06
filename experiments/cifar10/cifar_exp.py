@@ -18,8 +18,6 @@ class CifarExperiment(Experiment, ABC):
     dataset_name = const.DATA_CIFAR_10
     data_input = None
     neural_net = None
-    input_tensor = None
-    output_tensor = None
 
     def _prepare_data_pipeline(self):
         self.data_input = CifarData(self.general_config, self.train_dirs, self.validation_dir)

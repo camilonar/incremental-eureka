@@ -18,8 +18,6 @@ class FashionMnistExperiment(Experiment, ABC):
     dataset_name = const.DATA_FASHION_MNIST
     data_input = None
     neural_net = None
-    input_tensor = None
-    output_tensor = None
 
     def _prepare_data_pipeline(self):
         self.data_input = FashionMnistData(self.general_config, self.train_dirs, self.validation_dir)

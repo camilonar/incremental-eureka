@@ -18,8 +18,6 @@ class ImagenetExperiment(Experiment, ABC):
     dataset_name = const.DATA_TINY_IMAGENET
     data_input = None
     neural_net = None
-    input_tensor = None
-    output_tensor = None
 
     def _prepare_data_pipeline(self):
         self.data_input = ImagenetData(self.general_config, self.train_dirs, self.validation_dir)
