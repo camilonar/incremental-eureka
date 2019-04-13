@@ -30,7 +30,6 @@ class RepresentativesTrainer(Trainer):
 
         # TODO temporal placeholders for tests
         test = 1
-        self.random = False
         # Test for random with minimum values (1%)
         if test == 1:
             self.random = True
@@ -48,7 +47,7 @@ class RepresentativesTrainer(Trainer):
                 self.rep_per_class = 50  # Maximum number of representatives per class
 
         # Tests for random maximum values (10%)
-        if test == 2:
+        elif test == 2:
             self.random = True
             if self.config.model_name == 'FASHION-MNIST':
                 self.presel = 40  # Number of preselected samples
@@ -62,6 +61,12 @@ class RepresentativesTrainer(Trainer):
                 self.presel = 20  # Number of preselected samples
                 self.rep_per_batch = 20  # Number of representatives that are passed in each batch
                 self.rep_per_class = 500  # Maximum number of representatives per class
+
+        else:
+            self.random = False
+            self.presel = 20  # Number of preselected samples
+            self.rep_per_batch = 20  # Number of representatives that are passed in each batch
+            self.rep_per_class = 50  # Maximum number of representatives per class
 
     def _create_loss(self, tensor_y: tf.Tensor, net_output: tf.Tensor):
         return tf.losses.softmax_cross_entropy(tf.multiply(tensor_y, self.mask_tensor),
@@ -97,17 +102,19 @@ class RepresentativesTrainer(Trainer):
         # Modifies the list of representatives (random)
         if self.random:
             if n_reps == 0:
-                self.__random_buffer(image_batch, target_batch, outputs, total_it)
+                self.__random_buffer(image_batch, target_batch, outputs, total_it, megabatch)
             else:
-                self.__random_buffer(image_batch[:-n_reps], target_batch[:-n_reps], outputs[:-n_reps], total_it)
+                self.__random_buffer(image_batch[:-n_reps], target_batch[:-n_reps], outputs[:-n_reps], total_it,
+                                     megabatch)
             if total_it % self.buffer == 0:
                 self.__random_modify_representatives(self.buffered_reps)
                 self.__clear_buffer()
         else:
             if n_reps == 0:
-                self.__buffer_samples(image_batch, target_batch, outputs, total_it)
+                self.__buffer_samples(image_batch, target_batch, outputs, total_it, megabatch)
             else:
-                self.__buffer_samples(image_batch[:-n_reps], target_batch[:-n_reps], outputs[:-n_reps], total_it)
+                self.__buffer_samples(image_batch[:-n_reps], target_batch[:-n_reps], outputs[:-n_reps], total_it,
+                                      megabatch)
             if total_it % self.buffer == 0:
                 self.__modify_representatives(self.buffered_reps)
                 self.__clear_buffer()
@@ -129,13 +136,16 @@ class RepresentativesTrainer(Trainer):
         else:
             return []
 
-    def __buffer_samples(self, image_batch, target_batch, outputs, iteration):
+    def __buffer_samples(self, image_batch, target_batch, outputs, iteration, megabatch):
         """
         Adds samples to the buffer. This version buffers all the original images from a batch
+
         :param image_batch: the list of images of a batch
         :param target_batch: the list of one hot labels of a batch
         :param outputs: output probabilities of the neural network
         :param iteration: current iteration of training
+        :param megabatch: current megabatch
+
         :return: None
         """
         scores_ranking = np.argsort(outputs)  # Allows knowing the ranking of each class probability
@@ -149,12 +159,12 @@ class RepresentativesTrainer(Trainer):
         outputs = outputs[sort_indices]
 
         x = 0
-        initial_index = max(math.floor(len(image_batch)/2 - self.presel/2) - x, 0)
-        end_index = min(math.floor(len(image_batch)/2 + self.presel/2) - x, len(image_batch))
+        initial_index = max(math.floor(len(image_batch) / 2 - self.presel / 2) - x, 0)
+        end_index = min(math.floor(len(image_batch) / 2 + self.presel / 2) - x, len(image_batch))
 
         for i in range(initial_index, end_index):
             self.buffered_reps.append(
-                Representative(image_batch[i].copy(), target_batch[i].copy(), difs[i].copy(), iteration,
+                Representative(image_batch[i].copy(), target_batch[i].copy(), difs[i].copy(), iteration, megabatch,
                                outputs[i].copy()))
 
     def __modify_representatives(self, candidate_representatives):
@@ -180,7 +190,7 @@ class RepresentativesTrainer(Trainer):
 
         self.__recalculate_weights(self.representatives)
 
-    def __random_buffer(self, image_batch, target_batch, outputs, iteration):
+    def __random_buffer(self, image_batch, target_batch, outputs, iteration, megabatch):
         """
         Creates a buffer based in random sampling
 
@@ -188,6 +198,7 @@ class RepresentativesTrainer(Trainer):
         :param target_batch: the list of one hot labels of a batch
         :param outputs: output probabilities of the neural network
         :param iteration: current iteration of training
+        :param megabatch: current megabatch
         :return: None
         """
         rand_indices = np.random.permutation(len(outputs))
@@ -197,7 +208,7 @@ class RepresentativesTrainer(Trainer):
         target_batch = np.asarray(target_batch)[rand_indices]
         for i in range(min(self.presel, len(image_batch))):
             self.buffered_reps.append(
-                Representative(image_batch[i].copy(), target_batch[i].copy(), difs[i], iteration,
+                Representative(image_batch[i].copy(), target_batch[i].copy(), difs[i], iteration, megabatch,
                                outputs[i].copy()))
 
     def __random_modify_representatives(self, candidate_representatives):
@@ -250,17 +261,17 @@ class RepresentativesTrainer(Trainer):
                 continue
             # Travels each 'objective'
             # TODO: no necesariamente clase REAL == Best. Es posible que la red clasifique mal al representante
-            for i in range(len(cls[0].reduced_rep)):
+            for i in range(len(cls[0].net_output)):
 
                 def sort(x):
-                    return x.reduced_rep[i]
+                    return x.net_output[i]
 
                 cls.sort(key=sort)
                 # Calculates crowd distance for the i-th objective.
                 # cls[0].crowd_distance, cls[-1].crowd_distance = math.inf, math.inf
                 for j in range(1, len(cls) - 1):
-                    cls[j].crowd_distance += cls[j].reduced_rep[i] - cls[j - 1].reduced_rep[i]
-                    cls[j].crowd_distance += cls[j + 1].reduced_rep[i] - cls[j].reduced_rep[i]
+                    cls[j].crowd_distance += cls[j].net_output[i] - cls[j - 1].net_output[i]
+                    cls[j].crowd_distance += cls[j + 1].net_output[i] - cls[j].net_output[i]
 
     def __recalculate_weights(self, representatives):
         """
@@ -294,22 +305,7 @@ class RepresentativesTrainer(Trainer):
         difs = np.array([i[-1] - i[-2] for i in aux_outputs])  # Best vs. Second Best
         for i in range(len(aux_rep)):
             aux_rep[i].metric = difs[i]
-            aux_rep[i].reduced_rep = outputs[i]
-
-    def _post_process_megabatch(self, megabatch):
-        representatives = self.representatives
-        reps_to_update = []
-        values_reps = []
-        for reps_class in representatives:
-            for rep in reps_class:
-                if rep.increment == megabatch:
-                    reps_to_update.append(rep)
-                    values_reps.append(rep.value)
-        values_reps = np.asarray(values_reps)
-        outs = self.sess.run([self.model.get_output()], feed_dict={self.tensor_x: values_reps,
-                                                                   self.model.use_dropout: 0.0})
-        for i, rep in enumerate(reps_to_update):
-            rep.label = outs[i]
+            aux_rep[i].net_output = outputs[i]
 
 
 class Representative(object):
@@ -317,13 +313,14 @@ class Representative(object):
     Representative sample of the algorithm
     """
 
-    def __init__(self, value, label, metric, iteration, increment, net_output=None, crowd_distance=None):
+    def __init__(self, value, label, metric, iteration, megabatch, net_output=None, crowd_distance=None):
         """
         Creates a Representative object
         :param value: the value of the representative (i.e. the image)
         :param label: the expected ground truth label (in one-hot format)
         :param metric: the value of the metric
         :param iteration: the iteration at which the sample was selected as representative
+        :param megabatch: the current megabatch
         :param net_output: the output that the neural network gives to the sample
         :param crowd_distance: a measure of distance to the other representatives of the same cluster (e.g. same class)
         """
@@ -333,7 +330,7 @@ class Representative(object):
         self.iteration = iteration
         self.net_output = net_output
         self.crowd_distance = crowd_distance
-        self.increment = increment
+        self.megabatch = megabatch
         self.weight = 3.0
 
     def __eq__(self, other):

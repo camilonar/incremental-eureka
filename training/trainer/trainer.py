@@ -121,7 +121,7 @@ class Trainer(ABC):
             iteration = self.train_megabatch(i, skip_count, iteration, start_time,
                                              self.config.train_configurations[i].ttime,
                                              self.config, writer, data_x, data_y)
-            self._post_process_megabatch()
+            self._post_process_megabatch(i)
             # Reestablishes time and skip_count to zero after the first mega-batch (useful when a checkpoint is loaded)
             start_time, skip_count = 0, 0
             print("Finished training of megabatch {}...".format(i))
@@ -250,12 +250,13 @@ class Trainer(ABC):
         """
         raise NotImplementedError("The subclass hasn't implemented the _create_optimizer method")
 
-    def _post_process_megabatch(self):
+    def _post_process_megabatch(self, megabatch):
         """
         Does some post processing after the training of a megabatch is completed. It isn't implemented in the base
         version, but may be overridden by a subclass that needs to perform changes to a variable or any kind of process
         after the training.
 
+        :param megabatch: the megabatch number
         :return: None
         """
         pass
