@@ -26,11 +26,42 @@ class RepresentativesTrainer(Trainer):
         self.weights = tf.placeholder(tf.float32, [None])
 
         self.buffered_reps = []
+        self.buffer = 1  # Number of buffer iterations. Interval at which the representatives will be updated
 
-        self.presel = 20  # Number of preselected samples
-        self.rep_per_batch = 20  # Number of representatives that are passed in each batch
-        self.rep_per_class = 60  # Maximum number of representatives per class
-        self.buffer = 10  # Number of buffer iterations. Interval at which the representatives will be updated
+        # TODO temporal placeholders for tests
+        test = 1
+        self.random = False
+        # Test for random with minimum values (1%)
+        if test == 1:
+            self.random = True
+            if self.config.model_name == 'FASHION-MNIST':
+                self.presel = 40  # Number of preselected samples
+                self.rep_per_batch = 40  # Number of representatives that are passed in each batch
+                self.rep_per_class = 50  # Maximum number of representatives per class
+            elif self.config.model_name == 'CALTECH-101':
+                self.presel = 20  # Number of preselected samples
+                self.rep_per_batch = 20  # Number of representatives that are passed in each batch
+                self.rep_per_class = 1  # Maximum number of representatives per class
+            else:
+                self.presel = 20  # Number of preselected samples
+                self.rep_per_batch = 20  # Number of representatives that are passed in each batch
+                self.rep_per_class = 50  # Maximum number of representatives per class
+
+        # Tests for random maximum values (10%)
+        if test == 2:
+            self.random = True
+            if self.config.model_name == 'FASHION-MNIST':
+                self.presel = 40  # Number of preselected samples
+                self.rep_per_batch = 40  # Number of representatives that are passed in each batch
+                self.rep_per_class = 500  # Maximum number of representatives per class
+            elif self.config.model_name == 'CALTECH-101':
+                self.presel = 20  # Number of preselected samples
+                self.rep_per_batch = 20  # Number of representatives that are passed in each batch
+                self.rep_per_class = 10  # Maximum number of representatives per class
+            else:
+                self.presel = 20  # Number of preselected samples
+                self.rep_per_batch = 20  # Number of representatives that are passed in each batch
+                self.rep_per_class = 500  # Maximum number of representatives per class
 
     def _create_loss(self, tensor_y: tf.Tensor, net_output: tf.Tensor):
         return tf.losses.softmax_cross_entropy(tf.multiply(tensor_y, self.mask_tensor),
@@ -40,7 +71,7 @@ class RepresentativesTrainer(Trainer):
         return tf.train.RMSPropOptimizer(config.learn_rate).minimize(loss, var_list=var_list)
 
     def _train_batch(self, sess, image_batch, target_batch, tensor_x: tf.Tensor, tensor_y: tf.Tensor,
-                     train_step: tf.Operation, loss: tf.Tensor, increment: int, iteration: int, total_it: int):
+                     train_step: tf.Operation, loss: tf.Tensor, megabatch: int, iteration: int, total_it: int):
         # Gets the representatives
         reps = self.__get_representatives()
         n_reps = len(reps)
@@ -63,14 +94,24 @@ class RepresentativesTrainer(Trainer):
                                                      self.weights: weights_values,
                                                      self.mask_tensor: self.mask_value})
 
-        # Modifies the list of representatives
-        if n_reps == 0:
-            self.__buffer_samples(image_batch, target_batch, outputs, total_it)
+        # Modifies the list of representatives (random)
+        if self.random:
+            if n_reps == 0:
+                self.__random_buffer(image_batch, target_batch, outputs, total_it)
+            else:
+                self.__random_buffer(image_batch[:-n_reps], target_batch[:-n_reps], outputs[:-n_reps], total_it)
+            if total_it % self.buffer == 0:
+                self.__random_modify_representatives(self.buffered_reps)
+                self.__clear_buffer()
         else:
-            self.__buffer_samples(image_batch[:-n_reps], target_batch[:-n_reps], outputs[:-n_reps], total_it)
-        if total_it % self.buffer == 0:
-            self.__modify_representatives(self.buffered_reps)
-            self.__clear_buffer()
+            if n_reps == 0:
+                self.__buffer_samples(image_batch, target_batch, outputs, total_it)
+            else:
+                self.__buffer_samples(image_batch[:-n_reps], target_batch[:-n_reps], outputs[:-n_reps], total_it)
+            if total_it % self.buffer == 0:
+                self.__modify_representatives(self.buffered_reps)
+                self.__clear_buffer()
+
         return ts, loss
 
     def __get_representatives(self):
@@ -87,6 +128,34 @@ class RepresentativesTrainer(Trainer):
             return samples
         else:
             return []
+
+    def __buffer_samples(self, image_batch, target_batch, outputs, iteration):
+        """
+        Adds samples to the buffer. This version buffers all the original images from a batch
+        :param image_batch: the list of images of a batch
+        :param target_batch: the list of one hot labels of a batch
+        :param outputs: output probabilities of the neural network
+        :param iteration: current iteration of training
+        :return: None
+        """
+        scores_ranking = np.argsort(outputs)  # Allows knowing the ranking of each class probability
+        sorted_outputs = np.sort(outputs)  # Aux. for outputs sorted by probability
+        difs = np.array([i[-1] - i[-2] for i in sorted_outputs])  # Best vs. Second Best
+        sort_indices = np.argsort(difs)  # Order indices (from lowest dif. to highest dif.)
+        difs = difs[sort_indices]
+        image_batch = np.asarray(image_batch)[sort_indices]  # The data is ordered according to the indices
+        target_batch = np.asarray(target_batch)[sort_indices]  # The data labels are ordered according to the indices
+        scores_ranking = scores_ranking[sort_indices]
+        outputs = outputs[sort_indices]
+
+        x = 0
+        initial_index = max(math.floor(len(image_batch)/2 - self.presel/2) - x, 0)
+        end_index = min(math.floor(len(image_batch)/2 + self.presel/2) - x, len(image_batch))
+
+        for i in range(initial_index, end_index):
+            self.buffered_reps.append(
+                Representative(image_batch[i].copy(), target_batch[i].copy(), difs[i].copy(), iteration,
+                               outputs[i].copy()))
 
     def __modify_representatives(self, candidate_representatives):
         """
@@ -109,31 +178,49 @@ class RepresentativesTrainer(Trainer):
             #                             reverse=True)
             self.representatives[i] = self.representatives[i][-min(self.rep_per_class, len(self.representatives[i])):]
 
-        # self.__recalculate_weights(self.representatives)
+        self.__recalculate_weights(self.representatives)
 
-    def __buffer_samples(self, image_batch, target_batch, outputs, iteration):
+    def __random_buffer(self, image_batch, target_batch, outputs, iteration):
         """
-        Adds samples to the buffer. This version buffers all the original images from a batch
+        Creates a buffer based in random sampling
+
         :param image_batch: the list of images of a batch
         :param target_batch: the list of one hot labels of a batch
         :param outputs: output probabilities of the neural network
         :param iteration: current iteration of training
         :return: None
         """
-        scores_ranking = np.argsort(outputs)  # Allows knowing the ranking of each class probability
-        sorted_outputs = np.sort(outputs)  # Aux. for outputs sorted by probability
-        difs = np.array([i[-1] - i[-2] for i in sorted_outputs])  # Best vs. Second Best
-        sort_indices = np.argsort(difs)  # Order indices (from lowest dif. to highest dif.)
-        difs = difs[sort_indices]
-        image_batch = np.asarray(image_batch)[sort_indices]  # The data is ordered according to the indices
-        target_batch = np.asarray(target_batch)[sort_indices]  # The data labels are ordered according to the indices
-        scores_ranking = scores_ranking[sort_indices]
-        outputs = outputs[sort_indices]
-
+        rand_indices = np.random.permutation(len(outputs))
+        outputs = outputs[rand_indices]
+        difs = [0 for _ in outputs]
+        image_batch = np.asarray(image_batch)[rand_indices]  # The data is ordered according to the indices
+        target_batch = np.asarray(target_batch)[rand_indices]
         for i in range(min(self.presel, len(image_batch))):
             self.buffered_reps.append(
-                Representative(image_batch[i].copy(), target_batch[i].copy(), difs[i].copy(), iteration,
+                Representative(image_batch[i].copy(), target_batch[i].copy(), difs[i], iteration,
                                outputs[i].copy()))
+
+    def __random_modify_representatives(self, candidate_representatives):
+        """
+            Modifies the representatives list according to the new data by selecting representatives randomly from the
+            buffer and the current list of representatives
+
+            param candidate_representatives: the preselected representatives from the buffer
+            :return: None
+        """
+        for i, _ in enumerate(candidate_representatives):
+            nclass = int(np.argmax(candidate_representatives[i].label))
+            self.representatives[nclass].append(candidate_representatives[i])
+            self.class_count[nclass] += 1
+
+        for i in range(len(self.representatives)):
+            rand_indices = np.random.permutation(len(self.representatives[i]))
+            self.representatives[i] = [self.representatives[i][j] for j in rand_indices]
+            # self.representatives[i].sort(key=lambda x: x.metric * (1 + min(1, (total_it - x.iteration) / 10000)),
+            #                             reverse=True)
+            self.representatives[i] = self.representatives[i][-min(self.rep_per_class, len(self.representatives[i])):]
+
+        self.__recalculate_weights(self.representatives)
 
     def __clear_buffer(self):
         """
@@ -209,28 +296,44 @@ class RepresentativesTrainer(Trainer):
             aux_rep[i].metric = difs[i]
             aux_rep[i].reduced_rep = outputs[i]
 
+    def _post_process_megabatch(self, megabatch):
+        representatives = self.representatives
+        reps_to_update = []
+        values_reps = []
+        for reps_class in representatives:
+            for rep in reps_class:
+                if rep.increment == megabatch:
+                    reps_to_update.append(rep)
+                    values_reps.append(rep.value)
+        values_reps = np.asarray(values_reps)
+        outs = self.sess.run([self.model.get_output()], feed_dict={self.tensor_x: values_reps,
+                                                                   self.model.use_dropout: 0.0})
+        for i, rep in enumerate(reps_to_update):
+            rep.label = outs[i]
+
 
 class Representative(object):
     """
     Representative sample of the algorithm
     """
 
-    def __init__(self, value, label, metric, iteration, reduced_rep=None, crowd_distance=None):
+    def __init__(self, value, label, metric, iteration, increment, net_output=None, crowd_distance=None):
         """
         Creates a Representative object
         :param value: the value of the representative (i.e. the image)
         :param label: the expected ground truth label (in one-hot format)
         :param metric: the value of the metric
         :param iteration: the iteration at which the sample was selected as representative
-        :param reduced_rep: some kind of reduced representation of the representative (e.g. Best and Second Best class)
+        :param net_output: the output that the neural network gives to the sample
         :param crowd_distance: a measure of distance to the other representatives of the same cluster (e.g. same class)
         """
         self.value = value
         self.label = label
         self.metric = metric
         self.iteration = iteration
-        self.reduced_rep = reduced_rep
+        self.net_output = net_output
         self.crowd_distance = crowd_distance
+        self.increment = increment
         self.weight = 3.0
 
     def __eq__(self, other):
