@@ -3,22 +3,18 @@ IoC container for the Experiment objects
 """
 import utils.constants as const
 from experiments.caltech256.caltech_256_exp_rms import Caltech256ExperimentRMSProp
-from experiments.caltech101.caltech_exp_dcgan import CaltechExperimentDCGAN
 from experiments.caltech101.caltech_exp_rep import CaltechExperimentRep
 from experiments.caltech101.caltech_exp_rms import CaltechExperimentRMSProp
 from experiments.cifar100.cifar100_exp_rms import Cifar100ExperimentRMSProp
 
-from experiments.cifar10.cifar_exp_dcgan import CifarExperimentDCGAN
 from experiments.cifar10.cifar_exp_rep import CifarExperimentRep
 from experiments.cifar10.cifar_exp_rms import CifarExperimentRMSProp
 from experiments.fashion_mnist.fashion_mnist_exp_rep import FashionMnistExperimentRep
 from experiments.fashion_mnist.fashion_mnist_exp_rms import FashionMnistExperimentRMSProp
 
-from experiments.imagenet.imagenet__exp_dcgan import ImagenetExperimentDCGAN
 from experiments.imagenet.imagenet_exp_rep import ImagenetExperimentRep
 from experiments.imagenet.imagenet_exp_rms import ImagenetExperimentRMSProp
 
-from experiments.mnist.mnist_exp_dcgan import MnistExperimentDCGAN
 from experiments.mnist.mnist_exp_rep import MnistExperimentRep
 from experiments.mnist.mnist_exp_rms import MnistExperimentRMSProp
 
@@ -36,7 +32,6 @@ class Experiments(object):
         - Fashion MNIST
 
     """
-    # TODO agregar los otros testers
     testers = {const.TR_BASE: {const.DATA_CALTECH_101: CaltechExperimentRMSProp,
                                const.DATA_CIFAR_10: CifarExperimentRMSProp,
                                const.DATA_TINY_IMAGENET: ImagenetExperimentRMSProp,
@@ -45,10 +40,6 @@ class Experiments(object):
                                const.DATA_CIFAR_100: Cifar100ExperimentRMSProp,
                                const.DATA_FASHION_MNIST: FashionMnistExperimentRMSProp
                                },
-               const.TR_DCGAN: {const.DATA_CALTECH_101: CaltechExperimentDCGAN,
-                                const.DATA_CIFAR_10: CifarExperimentDCGAN,
-                                const.DATA_TINY_IMAGENET: ImagenetExperimentDCGAN,
-                                const.DATA_MNIST: MnistExperimentDCGAN},
                const.TR_REP: {const.DATA_CALTECH_101: CaltechExperimentRep,
                               const.DATA_CIFAR_10: CifarExperimentRep,
                               const.DATA_TINY_IMAGENET: ImagenetExperimentRep,

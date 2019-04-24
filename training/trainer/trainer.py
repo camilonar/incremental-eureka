@@ -170,7 +170,7 @@ class Trainer(ABC):
                 interval = curr_time - start_time
                 self.tester.save_loss(self.sess, loss, i, writer)
 
-                if self.tester and i % config.summary_interval == 0 and not i == 0:
+                if self.tester and i % config.summary_interval == 0 and not i == total_iteration:
                     print("Performing validation at iteration: {}. Loss is: {}. "
                           "Time is: {}".format(i, loss, interval))
                     self.tester.perform_validation(self.sess, i, writer)

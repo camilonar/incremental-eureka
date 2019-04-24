@@ -17,15 +17,15 @@ from errors import OptionNotSupportedError
 # -------------Default locations for datasets------------
 
 __DATASET_PATH = os.path.join("..", "datasets")
-MNIST_PATH = os.path.join(__DATASET_PATH, "MNIST_UNBALANCED")
+MNIST_PATH = os.path.join(__DATASET_PATH, "MNIST_EXTRA")
 """
 Default path for the directory where MNIST is stored
 """
-FASHION_MNIST_PATH = os.path.join(__DATASET_PATH, "FASHION-MNIST_UNBALANCED")
+FASHION_MNIST_PATH = os.path.join(__DATASET_PATH, "FASHION-MNIST_EXTRA")
 """
 Default path for the directory where Fashion MNIST is stored
 """
-CIFAR_10_PATH = os.path.join(__DATASET_PATH, "CIFAR10_UNBALANCED")
+CIFAR_10_PATH = os.path.join(__DATASET_PATH, "CIFAR10_EXTRA")
 """
 Default path for the directory where CIFAR-10 is stored
 """
@@ -33,7 +33,7 @@ CIFAR_100_PATH = os.path.join(__DATASET_PATH, "cifar-100")
 """
 Default path for the directory where CIFAR-100 is stored
 """
-CALTECH_101_PATH = os.path.join(__DATASET_PATH, "101_ObjectCategories_UNBALANCED")
+CALTECH_101_PATH = os.path.join(__DATASET_PATH, "101_ObjectCategories_EXTRA")
 """
 Default path for the directory where Caltech 101 is stored
 """
@@ -47,7 +47,6 @@ Default path for the directory where Caltech 256 is stored
 """
 
 
-# TODO revisar todos los paths para asegurar que funcione adecuadamente
 def get_alexnet_weights_path():
     """
     It gives the default path of the weights of an AlexNet network previously trained over Imagenet

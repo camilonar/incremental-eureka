@@ -139,16 +139,12 @@ def configure_optimizer(curr_optimizer: str):
     print("----------------------------Configure the Optimizer----------------------------")
 
     while True:
-        # TODO cambiar nuestro algoritmo a un nombre más apropiado, y remover -NOT SUPPORTED YET-
         print("[B] Simple RMSProp (Base optimizer)")
-        print("[D] Artificial Sampling with DCGAN -NOT SUPPORTED YET-")
-        print("[R] Incremental Representative Sampling (The proposed method) -NOT SUPPORTED YET-")
+        print("[R] Incremental Random Representative Sampling")
         print("[X] Cancel Operation and return to Main Menu")
         response = input("Select an optimizer: ").upper()
         if response == 'B':
             response = const.TR_BASE
-        elif response == 'D':
-            response = const.TR_DCGAN
         elif response == 'R':
             response = const.TR_REP
         elif response == 'X':
@@ -341,7 +337,6 @@ def configure_seed(curr_seed: int):
             print("Invalid value for the seed. Must be a float")
 
 
-# TODO permitir que el usuario escoja los paths para el dataset
 def main():
     """
     Executes the program

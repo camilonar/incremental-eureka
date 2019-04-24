@@ -31,7 +31,7 @@ def print_config(dataset: str, optimizer: str, checkpoint_key: str, s_interval: 
     print("-Summary interval: {} iterations".format(s_interval))
     print("-Checkpoint interval: {} iterations".format(ckp_interval))
     print("-Seed: {}".format(seed))
-    print("-The test is {}".format("INCREMENTAL" if train_mode == TrainMode.INCREMENTAL else "NOT INCREMENTAL"))
+    print("-The test mode is {}".format(train_mode))
     print("-Training data directories: \n\t{}".format(train_dirs))
     print("-Validation data directory: \n\t{}".format(validation_dir))
     print("--------------------------------------------------------\n")

@@ -1,4 +1,4 @@
-# DILF: Deep Incremental Learning Framework
+﻿# DILF: Deep Incremental Learning Framework
 
 DILF is a simple framework built over TensorFlow specifically designed to facilitate the implementation and testing of Incremental Learning algorithms that make use of Neural Networks.
 
@@ -27,7 +27,11 @@ pip install -r requirements.txt
 Be mindful that this will install tensorflow-gpu version, which requires CUDA and CuDNN. You can see a guide on the requirements [here](https://www.tensorflow.org/install/gpu).
 Alternatively, you can also install Tensorflow CPU version, which doesn't include GPU usage or acceleration.
 #### Usage
-You can execute the prepackaged Experiments by executing ```program_shell.py```. An example execution might look like this:
+You can execute the prepackaged Experiments by executing ```program_menu.py``` for a simple menu interface, or ```program_shell.py``` to have full control of the execution. You can execute ```program_menu.py``` with the following command, and then you can follow the instructions that appear in the window:
+```sh
+python program_menu.py
+```
+An example execution of ```program_shell.py``` might look like this:
 ```sh
 python program_shell.py --dataset=MNIST --optimizer=TR_BASE --checkpoint_key=0-2000 --summaries_interval=600 --checkpoints_interval=2000 --seed=123 --train_mode=INCREMENTAL --dataset_path=../datasets/MNIST
 ```

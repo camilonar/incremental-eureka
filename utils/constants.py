@@ -40,22 +40,18 @@ TR_BASE = "TR_BASE"
 """
 Name for the trainer that uses RMSProp
 """
-TR_DCGAN = "TR_DCGAN"
-"""
-Name for the trainer that uses DCGAN for artificial sampling
-"""
 TR_REP = "TR_REP"
 """
-Name for the trainer that uses our proposed algorithm
+Name for the trainer that uses Representatives for training
 """
 
 # -------------Names for the experiments------------
 
-SUMMARY_INTERVAL = 500
+SUMMARY_INTERVAL = 200
 """
 Default value for the interval (Number of iterations) at which validation/testing are performed
 """
-CKP_INTERVAL = 2000
+CKP_INTERVAL = 5000
 """
 Default value for the interval (Number of iterations) at which checkpoints are being saved
 """
