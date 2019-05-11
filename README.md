@@ -33,7 +33,7 @@ python program_menu.py
 ```
 An example execution of ```program_shell.py``` might look like this:
 ```sh
-python program_shell.py --dataset=MNIST --optimizer=TR_BASE --checkpoint_key=0-2000 --summaries_interval=600 --checkpoints_interval=2000 --seed=123 --train_mode=INCREMENTAL --dataset_path=../datasets/MNIST
+python program_shell.py --dataset=MNIST --optimizer=TR_BASE --checkpoint_key=0-2000 --summaries_interval=600 --checkpoints_interval=2000 --seed=123 --train_mode=INCREMENTAL --dataset_path=../datasets/MNIST --testing_scenario=0
 ```
 You can see the purpouse of each flag with:
 ```sh
@@ -42,6 +42,7 @@ python program_shell.py -h
 However, the most important arguments are:
 - ```dataset```: with this, you set which dataset is going to be used. Currently supported datasets are: CIFAR (CIFAR-10), MNIST, FASHION_MNIST and CALTECH (Caltech 101)
 - ```optimizer```: with this, you set which training algorithm is going to be used. Currently supported algorithms are: TR_BASE (RMSProp) and TR_REP (Training with Representatives)
+- ```testing_scenario```: an Experiment may have multiple testing scenarios, which are predefined tests with fixed parameters under the same structure (e.g. RMSProp with lr=0.001, or lr=0.1). You can specify which scenario you want to execute (By default is scenario 0). You can inspect the code of each Experiment for details on its scenarios (a functionality to easily access scenarios descriptions will be added in the future)
 
 You can also use ```utils/read_tensorbooard.py``` to create a TensorBoard folder with the average results of multiple tests. This is useful for investigation, since the average of multiple runs is used when reporting results. To use this function, you can use a command like this:
 ```sh
@@ -127,7 +128,7 @@ It is important to note that if, for example, you desire to execute an experimen
 To execute the Experiment, first it's required to have a folder with the data that is going to be used for training and testing (i.e. the Dataset). Then, an instance of the class must be created, and then the methods *prepare_all* and *execute_experiment* must be executed, like this:
 ```py
 exp = MnistRMSPropExperiment(train_dirs, validation_dir, summaries_interval, ckp_interval, ckp_key)
-exp.prepare_all(train_mode)
+exp.prepare_all(train_mode, training_scenario)
 exp.execute_experiment()
 ```
 While an Experiment is executed, the results of the training are stored in real time in log files that can be accesed by using TensorBoard, like this:

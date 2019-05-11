@@ -32,28 +32,6 @@ class CRILTrainer(Trainer, ABC):
         self.n_candidates = config.n_candidates
         self.buffer_size = config.buffer_size
 
-        # TODO temporal placeholders for tests
-        test = 1
-        # Test for random with minimum values (1%)
-        if test == 1:
-            print("Test 1%")
-            if self.config.model_name == 'FASHION-MNIST':
-                self.memory_size = 50  # Maximum number of representatives per class
-            elif self.config.model_name == 'CALTECH-101':
-                self.memory_size = 1  # Maximum number of representatives per class
-            else:
-                self.memory_size = 50  # Maximum number of representatives per class
-
-        # Tests for random maximum values (10%)
-        elif test == 2:
-            print("Test 10%")
-            if self.config.model_name == 'FASHION-MNIST':
-                self.memory_size = 500  # Maximum number of representatives per class
-            elif self.config.model_name == 'CALTECH-101':
-                self.memory_size = 10  # Maximum number of representatives per class
-            else:
-                self.memory_size = 500  # Maximum number of representatives per class
-
     def _create_loss(self, tensor_y: tf.Tensor, net_output: tf.Tensor):
         return tf.losses.softmax_cross_entropy(tf.multiply(tensor_y, self.mask_tensor),
                                                tf.multiply(net_output, self.mask_tensor), weights=self.weights)

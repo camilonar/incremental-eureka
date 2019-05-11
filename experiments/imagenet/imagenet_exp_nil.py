@@ -1,6 +1,8 @@
 """
 Experiment for Tiny Imagenet dataset using the proposed representative-selection algorithm NIL
 """
+import copy
+
 from errors import OptionNotSupportedError
 from experiments.imagenet.imagenet_exp import ImagenetExperiment
 from experiments.tester import Tester
@@ -36,3 +38,11 @@ class ImagenetExperimentNIL(ImagenetExperiment):
         else:
             raise OptionNotSupportedError("The requested Experiment class: {} doesn't support the requested training"
                                           " mode: {}".format(self.__class__, train_mode))
+
+    def _prepare_scenarios(self, base_config):
+        scenarios = None
+        scenarios = self._add_scenario(scenarios, base_config, 'Test with 1% of data stored as representatives')
+        scenario = copy.copy(base_config)
+        scenario.memory_size = 500
+        scenarios = self._add_scenario(scenarios, scenario, 'Test with 10% of data stored as representatives')
+        return scenarios
