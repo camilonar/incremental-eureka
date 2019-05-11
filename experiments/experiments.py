@@ -2,20 +2,25 @@
 IoC container for the Experiment objects
 """
 import utils.constants as const
+from experiments.caltech101.caltech_exp_rilbc import CaltechExperimentRILBC
 from experiments.caltech256.caltech_256_exp_rms import Caltech256ExperimentRMSProp
-from experiments.caltech101.caltech_exp_rep import CaltechExperimentRep
+from experiments.caltech101.caltech_exp_nil import CaltechExperimentNIL
 from experiments.caltech101.caltech_exp_rms import CaltechExperimentRMSProp
+from experiments.cifar10.cifar_exp_rilbc import CifarExperimentRILBC
 from experiments.cifar100.cifar100_exp_rms import Cifar100ExperimentRMSProp
 
-from experiments.cifar10.cifar_exp_rep import CifarExperimentRep
+from experiments.cifar10.cifar_exp_nil import CifarExperimentNIL
 from experiments.cifar10.cifar_exp_rms import CifarExperimentRMSProp
-from experiments.fashion_mnist.fashion_mnist_exp_rep import FashionMnistExperimentRep
+from experiments.fashion_mnist.fashion_mnist_exp_nil import FashionMnistExperimentNIL
+from experiments.fashion_mnist.fashion_mnist_exp_rilbc import FashionMnistExperimentRILBC
 from experiments.fashion_mnist.fashion_mnist_exp_rms import FashionMnistExperimentRMSProp
 
-from experiments.imagenet.imagenet_exp_rep import ImagenetExperimentRep
+from experiments.imagenet.imagenet_exp_nil import ImagenetExperimentNIL
+from experiments.imagenet.imagenet_exp_rilbc import ImagenetExperimentRILBC
 from experiments.imagenet.imagenet_exp_rms import ImagenetExperimentRMSProp
 
-from experiments.mnist.mnist_exp_rep import MnistExperimentRep
+from experiments.mnist.mnist_exp_nil import MnistExperimentNIL
+from experiments.mnist.mnist_exp_rilbc import MnistExperimentRILBC
 from experiments.mnist.mnist_exp_rms import MnistExperimentRMSProp
 
 
@@ -40,11 +45,16 @@ class Experiments(object):
                                const.DATA_CIFAR_100: Cifar100ExperimentRMSProp,
                                const.DATA_FASHION_MNIST: FashionMnistExperimentRMSProp
                                },
-               const.TR_REP: {const.DATA_CALTECH_101: CaltechExperimentRep,
-                              const.DATA_CIFAR_10: CifarExperimentRep,
-                              const.DATA_TINY_IMAGENET: ImagenetExperimentRep,
-                              const.DATA_MNIST: MnistExperimentRep,
-                              const.DATA_FASHION_MNIST: FashionMnistExperimentRep}
+               const.TR_NIL: {const.DATA_CALTECH_101: CaltechExperimentNIL,
+                              const.DATA_CIFAR_10: CifarExperimentNIL,
+                              const.DATA_TINY_IMAGENET: ImagenetExperimentNIL,
+                              const.DATA_MNIST: MnistExperimentNIL,
+                              const.DATA_FASHION_MNIST: FashionMnistExperimentNIL},
+               const.TR_RILBC: {const.DATA_CALTECH_101: CaltechExperimentRILBC,
+                                const.DATA_CIFAR_10: CifarExperimentRILBC,
+                                const.DATA_TINY_IMAGENET: ImagenetExperimentRILBC,
+                                const.DATA_MNIST: MnistExperimentRILBC,
+                                const.DATA_FASHION_MNIST: FashionMnistExperimentRILBC}
                }
 
     @classmethod

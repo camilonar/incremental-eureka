@@ -20,11 +20,13 @@ class Saver(object):
         self.iteration, self.mega_batch, self.it_from_start, self.time, self.aux_tensor = None, None, None, None, None
         self.saver = None
 
-    def prepare(self):
+    def prepare(self, var_list=None):
         """
         Prepares all tensors and variables needed for proper checkpoint saving and loading. This method only prepares
         the variables used for the basic version of checkpoint loading
 
+        :param var_list: optional list of variables that this Saver is going to keep track of. If None, all variables
+        are saved when the save_model operation is used
         :return: None
         """
         self.iteration_variable = tf.get_variable("iteration", shape=[1], initializer=tf.zeros_initializer)
@@ -39,7 +41,7 @@ class Saver(object):
 
         self._custom_prepare()
 
-        self.saver = tf.train.Saver()
+        self.saver = tf.train.Saver(var_list)
 
     def maybe_load_model(self, sess, ckp_path: str):
         """

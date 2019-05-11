@@ -40,9 +40,13 @@ TR_BASE = "TR_BASE"
 """
 Name for the trainer that uses RMSProp
 """
-TR_REP = "TR_REP"
+TR_NIL = "TR_NIL"
 """
-Name for the trainer that uses Representatives for training
+Name for the NIL algorithm
+"""
+TR_RILBC = "TR_RILBC"
+"""
+Name for the RILBC algorithm
 """
 
 # -------------Names for the experiments------------

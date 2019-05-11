@@ -140,13 +140,16 @@ def configure_optimizer(curr_optimizer: str):
 
     while True:
         print("[B] Simple RMSProp (Base optimizer)")
-        print("[R] Incremental Random Representative Sampling")
+        print("[N] Incremental Random Representative Sampling (NIL)")
+        print("[R] Incremental Representative Sampling with BvSB and Crowding Distance (RILBC)")
         print("[X] Cancel Operation and return to Main Menu")
         response = input("Select an optimizer: ").upper()
         if response == 'B':
             response = const.TR_BASE
+        elif response == 'N':
+            response = const.TR_NIL
         elif response == 'R':
-            response = const.TR_REP
+            response = const.TR_RILBC
         elif response == 'X':
             break
         else:
