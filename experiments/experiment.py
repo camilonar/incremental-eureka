@@ -179,7 +179,6 @@ class Experiment(ABC):
         try:
             print("Scenario description: {}".format(scenarios[testing_scenario][1]))
             self.general_config.__dict__.update(scenarios[testing_scenario][0].__dict__)
-            print(self.general_config.memory_size)
         except IndexError:
             raise IndexError("The Testing Scenario with ID {} is not defined in the Experiment {}".format(
                 testing_scenario, self.__class__))

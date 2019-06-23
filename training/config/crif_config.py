@@ -1,20 +1,20 @@
 """
 Module for the configuration of training that is going to be used.
-This configuration is specifically tailored for CRIL algorithm.
+This configuration is specifically tailored for CRIF algorithm.
 """
 from training.config.general_config import GeneralConfig
 from utils.train_modes import TrainMode
 
 
-class CRILConfig(GeneralConfig):
+class CRIFConfig(GeneralConfig):
     """
-    General configuration that it's used for the whole training. For the **CRIL** algorithm
+    General configuration that it's used for the whole training. For the **CRIF** algorithm
     """
     def __init__(self, train_mode: TrainMode, learning_rate: float,
                  summary_interval=100, check_interval=200, config_name='default', model_name='dataset_default',
                  memory_size=10, n_candidates=10, buffer_size=1, ):
         """
-        Creates a CRILConfig object
+        Creates a CRIFConfig object
 
         :param train_mode: Indicates the training mode that is going to be used
         :param learning_rate: the learning rate to be used in the training

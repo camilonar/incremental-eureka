@@ -6,7 +6,7 @@ import copy
 from errors import OptionNotSupportedError
 from experiments.caltech101.caltech_exp import CaltechExperiment
 from experiments.tester import Tester
-from training.config.cril_config import CRILConfig
+from training.config.crif_config import CRIFConfig
 from training.config.megabatch_config import MegabatchConfig
 from training.trainer.rilbc_trainer import RILBCTrainer
 from utils.train_modes import TrainMode
@@ -28,7 +28,7 @@ class CaltechExperimentRILBC(CaltechExperiment):
                                     tester=tester, checkpoint=self.ckp_path)
 
     def _prepare_config(self, str_optimizer: str, train_mode: TrainMode):
-        self.general_config = CRILConfig(train_mode, 0.0001, self.summary_interval, self.ckp_interval,
+        self.general_config = CRIFConfig(train_mode, 0.0001, self.summary_interval, self.ckp_interval,
                                          config_name=str_optimizer, model_name=self.dataset_name,
                                          n_candidates=20, memory_size=1, buffer_size=1)
         # Creates configuration for 5 mega-batches

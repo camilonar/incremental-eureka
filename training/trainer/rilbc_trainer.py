@@ -4,10 +4,10 @@ A proposed instantiation of the CRIL algorithm: Representatives Incremental Lear
 """
 import math
 import numpy as np
-from training.trainer.cril_trainer import CRILTrainer, Representative
+from training.trainer.crif_trainer import CRIFTrainer, Representative
 
 
-class RILBCTrainer(CRILTrainer):
+class RILBCTrainer(CRIFTrainer):
     """
     Trains with the proposed algorithm that uses RMSProp, BvSB and Crowding distance for incremental learning
     """

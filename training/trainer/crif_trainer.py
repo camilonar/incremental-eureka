@@ -1,5 +1,5 @@
 """
-The proposed algorithm that uses RMSProp and representatives selection for incremental learning (CRIL)
+The proposed algorithm that uses RMSProp and representatives selection for incremental learning (CRIF)
 """
 from abc import ABC, abstractmethod
 
@@ -9,17 +9,17 @@ import numpy as np
 
 from etl.data import Data
 from libs.caffe_tensorflow.network import Network
-from training.config.cril_config import CRILConfig
+from training.config.crif_config import CRIFConfig
 from experiments.tester import Tester
 from training.trainer.trainer import Trainer
 
 
-class CRILTrainer(Trainer, ABC):
+class CRIFTrainer(Trainer, ABC):
     """
     Trains with the proposed algorithm that uses RMSProp and representatives selection for incremental learning
     """
 
-    def __init__(self, config: CRILConfig, model: Network, pipeline: Data, tensor_x: tf.Tensor, tensor_y: tf.Tensor,
+    def __init__(self, config: CRIFConfig, model: Network, pipeline: Data, tensor_x: tf.Tensor, tensor_y: tf.Tensor,
                  tester: Tester = None, checkpoint: str = None):
         super().__init__(config, model, pipeline, tensor_x, tensor_y, tester=tester, checkpoint=checkpoint)
 
@@ -36,7 +36,7 @@ class CRILTrainer(Trainer, ABC):
         return tf.losses.softmax_cross_entropy(tf.multiply(tensor_y, self.mask_tensor),
                                                tf.multiply(net_output, self.mask_tensor), weights=self.weights)
 
-    def _create_optimizer(self, config: CRILConfig, loss: tf.Tensor, var_list=None):
+    def _create_optimizer(self, config: CRIFConfig, loss: tf.Tensor, var_list=None):
         return tf.train.RMSPropOptimizer(config.learn_rate).minimize(loss, var_list=var_list)
 
     def _train_batch(self, sess, image_batch, target_batch, tensor_x: tf.Tensor, tensor_y: tf.Tensor,

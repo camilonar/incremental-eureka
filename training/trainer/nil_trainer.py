@@ -3,10 +3,10 @@ A proposed instantiation of the CRIL algorithm: Naive Incremental Learning (NIL)
 competition between representatives
 """
 import numpy as np
-from training.trainer.cril_trainer import CRILTrainer, Representative
+from training.trainer.crif_trainer import CRIFTrainer, Representative
 
 
-class NILTrainer(CRILTrainer):
+class NILTrainer(CRIFTrainer):
     """
     Trains with the proposed algorithm that uses RMSProp and random representatives selection for incremental
     learning
