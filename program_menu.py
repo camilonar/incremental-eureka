@@ -284,7 +284,7 @@ def configure_intervals(curr_s_interval: int, curr_ckp_interval: int):
         except ValueError:
             print("Invalid value for the summary interval. Must be an int")
 
-    print("The summary inxterval hasn't been changed and the current configured value is {}".format(curr_s_interval))
+    print("The summary interval hasn't been changed and the current configured value is {}".format(curr_s_interval))
     print(
         "The checkpoint interval hasn't been changed and the current configured value is {}".format(curr_ckp_interval))
     return curr_s_interval, curr_ckp_interval

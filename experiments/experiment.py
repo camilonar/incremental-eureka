@@ -75,6 +75,7 @@ class Experiment(ABC):
 
         :return: None
         """
+        raise NotImplementedError("The subclass hasn't implemented the _prepare_trainer method")
 
     @abstractmethod
     def _prepare_config(self, str_optimizer: str, train_mode: TrainMode):
