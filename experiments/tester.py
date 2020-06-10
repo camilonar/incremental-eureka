@@ -3,6 +3,7 @@ Module for performing testing/validation of a model
 """
 import os
 import tensorflow as tf
+from sklearn import metrics
 from tensorflow.python.framework.errors_impl import OutOfRangeError
 from tensorflow.python.framework import ops
 
@@ -10,6 +11,7 @@ from etl.data import Data
 from libs.caffe_tensorflow.network import Network
 
 
+# TODO refactor and put the additional metrics into a subclass of Tester
 class Tester(object):
     """
     Class for performing and saving tests of a model, with various metrics (e.g. accuracy)
@@ -35,7 +37,7 @@ class Tester(object):
         self.test_iterator = None
         self.test_x, self.test_y = None, None
         self.scalar_tensors, self.update_tensors = list(), list()
-        self.aux_tensors = dict()
+        self.aux_tensors, self.external_tensors = dict(), dict()
 
     @staticmethod
     def create_writer(summaries_path: str, identifier: int):
@@ -63,6 +65,7 @@ class Tester(object):
         self._create_recall_metric()
         self._create_fscore_metric()
         self._create_gmean_metric()
+        self._create_auc_metric()
         self._create_loss_metric()
 
         self.test_iterator, self.test_x, self.test_y = self.pipeline.build_test_data_tensor()
@@ -135,7 +138,7 @@ class Tester(object):
         """
         tp_total = self.aux_tensors["TP_TOTAL"]
         fp_total = self.aux_tensors["FP_TOTAL"]
-        precision = tf.divide(tp_total, self.__add_non_zero(tp_total, fp_total))
+        precision = tf.divide(tp_total, self._add_non_zero(tp_total, fp_total))
         precision_scalar = tf.reduce_mean(precision)
 
         self.scalar_tensors.append(tf.summary.scalar('precision', precision_scalar))
@@ -149,7 +152,7 @@ class Tester(object):
         """
         tp_total = self.aux_tensors["TP_TOTAL"]
         fn_total = self.aux_tensors["FN_TOTAL"]
-        recall = tf.divide(tp_total, self.__add_non_zero(tp_total, fn_total))
+        recall = tf.divide(tp_total, self._add_non_zero(tp_total, fn_total))
         recall_scalar = tf.reduce_mean(recall)
 
         self.scalar_tensors.append(tf.summary.scalar('recall', recall_scalar))
@@ -164,7 +167,7 @@ class Tester(object):
         """
         precision = self.aux_tensors["PRECISION"]
         recall = self.aux_tensors["RECALL"]
-        fscore = tf.divide(tf.multiply(precision, recall), self.__add_non_zero(precision, recall))
+        fscore = tf.divide(tf.multiply(precision, recall), self._add_non_zero(precision, recall))
         fscore_scalar = tf.reduce_mean(fscore) * 2
         self.scalar_tensors.append(tf.summary.scalar('fscore', fscore_scalar))
 
@@ -176,8 +179,19 @@ class Tester(object):
         :return: None
         """
         recall = self.aux_tensors["RECALL"]
-        gmean_scalar = tf.pow(tf.reduce_prod(recall), tf.cast(1/tf.shape(recall)[0], tf.float32))
+        gmean_scalar = tf.pow(tf.reduce_prod(recall), tf.cast(1 / tf.shape(recall)[0], tf.float32))
         self.scalar_tensors.append(tf.summary.scalar('gmean', gmean_scalar))
+
+    def _create_auc_metric(self):
+        """
+        Creates the AUC metric and its auxiliary tensors and adds them to the local tester graph.
+        It uses an external library
+
+        :return: None
+        """
+        auc_scalar = tf.placeholder(dtype=tf.float32, shape=(), name='auc_tensor')
+        self.aux_tensors["AUC_AUX"] = auc_scalar
+        self.external_tensors["AUC"] = tf.summary.scalar('auc', auc_scalar)
 
     @staticmethod
     def _create_loss_metric():
@@ -200,25 +214,29 @@ class Tester(object):
         :param writer: a FileWriter properly configured
         :return: None
         """
-        update_tensors = self.update_tensors
-        scalar_tensors = self.scalar_tensors
-
         sess.run(self.test_iterator.initializer)
         sess.run(tf.variables_initializer(tf.get_default_graph().get_collection(tf.GraphKeys.METRIC_VARIABLES)))
+        op_list = [self.model.get_output()]
+        op_list.extend(self.update_tensors)
+        true_labels = []
+        predicted = []
         while True:
             try:
                 test_images, test_target = sess.run([self.test_x, self.test_y])
-                sess.run(update_tensors,
-                         feed_dict={self.tensor_x: test_images,
-                                    self.tensor_y: test_target,
-                                    self.model.use_dropout: 0.0})
+                results = sess.run(op_list,
+                                   feed_dict={self.tensor_x: test_images,
+                                              self.tensor_y: test_target,
+                                              self.model.use_dropout: 0.0})
+                true_labels.extend(test_target)
+                predicted.extend(results[0])
             except OutOfRangeError:
                 print("Finished validation of iteration {}...".format(iteration))
                 break
 
-        for tensor in scalar_tensors:
+        for tensor in self.scalar_tensors:
             summary = sess.run(tensor)
             writer.add_summary(summary, iteration)
+        self._calculate_external_metrics(sess, iteration, writer, true_labels, predicted)
 
     @staticmethod
     def save_loss(sess, loss, iteration: int, writer: tf.summary.FileWriter):
@@ -236,7 +254,8 @@ class Tester(object):
         summary = sess.run(loss_scalar, feed_dict={loss_tensor: loss})
         writer.add_summary(summary, iteration)
 
-    def __add_non_zero(self, first_tensor: tf.Tensor, second_tensor: tf.Tensor):
+    @staticmethod
+    def _add_non_zero(first_tensor: tf.Tensor, second_tensor: tf.Tensor):
         """
         Adds two tensors and an additional auxiliary tensor to make sure that the resulting
         value is always greater than zer if both first_tensor and second_tensor contain only positive values
@@ -247,3 +266,21 @@ class Tester(object):
         """
         return tf.add(tf.add(first_tensor, second_tensor),
                       tf.fill(tf.shape(first_tensor), 0.001))
+
+    def _calculate_external_metrics(self, sess, iteration: int, writer: tf.summary.FileWriter, true_labels,
+                                    predictions):
+        """
+        Calculates the metrics that make use of external libraries. It also saves the results
+        on TensorBoard
+
+        :param sess: the current session
+        :param iteration: the current iteration number over the training data
+        :param writer: a FileWriter properly configured
+        :param true_labels: array-like structure with the true labels
+        :param predictions: array-like structure with the predicted labels. Must be between 0 and 1
+        :return: a list containing the calculated values of each metric
+        """
+        auc = metrics.roc_auc_score(true_labels, predictions, average='macro')
+        auc_summary = self.external_tensors["AUC"]
+        summary = sess.run(auc_summary, feed_dict={self.aux_tensors["AUC_AUX"]: auc})
+        writer.add_summary(summary, iteration)
