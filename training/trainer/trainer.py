@@ -157,7 +157,7 @@ class Trainer(ABC):
         print("Starting training of megabatch {}...".format(megabatch))
         start_time = time.time()
         i = total_iteration  # Iteration counting from the start of the training
-        self.tester.perform_validation(self.sess, i, writer)  # Performs validation at the beginning
+        self.tester.perform_validation(self.sess, i, writer, self.summaries_dir)  # Performs validation at the beginning
 
         while True:
             try:
@@ -173,7 +173,7 @@ class Trainer(ABC):
                 if self.tester and i % config.summary_interval == 0 and not i == total_iteration:
                     print("Performing validation at iteration: {}. Loss is: {}. "
                           "Time is: {}".format(i, loss, interval))
-                    self.tester.perform_validation(self.sess, i, writer)
+                    self.tester.perform_validation(self.sess, i, writer, self.summaries_dir)
                 if i % config.check_interval == 0:
                     self.saver.save_model(self.sess, self.ckp_dir, iteration, i, megabatch, interval)
                 if ttime and interval > ttime:

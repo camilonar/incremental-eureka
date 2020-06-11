@@ -2,6 +2,7 @@
 Module for performing testing/validation of a model
 """
 import os
+import numpy as np
 import tensorflow as tf
 from sklearn import metrics
 from tensorflow.python.framework.errors_impl import OutOfRangeError
@@ -79,7 +80,7 @@ class Tester(object):
 
         :return: None
         """
-        num_classes = tf.shape(self.tensor_y)[1]
+        num_classes = self.model.get_output().shape[1]
         one_hot_preds = tf.one_hot(tf.argmax(self.model.get_output(), 1), num_classes)
         correct_prediction = tf.logical_and(tf.cast(self.tensor_y, tf.bool), tf.cast(one_hot_preds, tf.bool))
         true_positives = tf.reduce_sum(tf.cast(correct_prediction, tf.float32), 0)
@@ -138,7 +139,7 @@ class Tester(object):
         """
         tp_total = self.aux_tensors["TP_TOTAL"]
         fp_total = self.aux_tensors["FP_TOTAL"]
-        precision = tf.divide(tp_total, self._add_non_zero(tp_total, fp_total))
+        precision = tf.divide(tp_total, self._replace_zeroes(tf.add(tp_total, fp_total)))
         precision_scalar = tf.reduce_mean(precision)
 
         self.scalar_tensors.append(tf.summary.scalar('precision', precision_scalar))
@@ -152,7 +153,7 @@ class Tester(object):
         """
         tp_total = self.aux_tensors["TP_TOTAL"]
         fn_total = self.aux_tensors["FN_TOTAL"]
-        recall = tf.divide(tp_total, self._add_non_zero(tp_total, fn_total))
+        recall = tf.divide(tp_total, self._replace_zeroes(tf.add(tp_total, fn_total)))
         recall_scalar = tf.reduce_mean(recall)
 
         self.scalar_tensors.append(tf.summary.scalar('recall', recall_scalar))
@@ -167,7 +168,7 @@ class Tester(object):
         """
         precision = self.aux_tensors["PRECISION"]
         recall = self.aux_tensors["RECALL"]
-        fscore = tf.divide(tf.multiply(precision, recall), self._add_non_zero(precision, recall))
+        fscore = tf.divide(tf.multiply(precision, recall), self._replace_zeroes(tf.add(precision, recall)))
         fscore_scalar = tf.reduce_mean(fscore) * 2
         self.scalar_tensors.append(tf.summary.scalar('fscore', fscore_scalar))
 
@@ -179,7 +180,8 @@ class Tester(object):
         :return: None
         """
         recall = self.aux_tensors["RECALL"]
-        gmean_scalar = tf.pow(tf.reduce_prod(recall), tf.cast(1 / tf.shape(recall)[0], tf.float32))
+        gmean_scalar = tf.pow(tf.reduce_prod(self._replace_zeroes(recall)),
+                              tf.cast(1 / tf.shape(recall)[0], tf.float32))
         self.scalar_tensors.append(tf.summary.scalar('gmean', gmean_scalar))
 
     def _create_auc_metric(self):
@@ -203,7 +205,7 @@ class Tester(object):
         loss_tensor = tf.placeholder(dtype=tf.float32, shape=(), name='loss_tensor')
         tf.summary.scalar('loss', loss_tensor)
 
-    def perform_validation(self, sess, iteration: int, writer: tf.summary.FileWriter):
+    def perform_validation(self, sess, iteration: int, writer: tf.summary.FileWriter, results_dir: str = None):
         """
         Performs validation over the test data and register the results in the form of summaries that can be interpreted
         by Tensorboard. The prepare method must have been called at least once before using this method, otherwise,
@@ -212,6 +214,10 @@ class Tester(object):
         :param sess: the current session
         :param iteration: the current iteration number over the training data
         :param writer: a FileWriter properly configured
+        :param results_dir: (Optional) the directory where the predicted labels (i.e. the results of the model) should
+        be saved. This can be useful for analysing the detailed results after the training is complete.
+        If the parameter is not provided then the labels are not stored. If provided, they will be stored in:
+        results_dir/predictions/{iteration}.npy as a numpy array
         :return: None
         """
         sess.run(self.test_iterator.initializer)
@@ -238,6 +244,8 @@ class Tester(object):
             writer.add_summary(summary, iteration)
         self._calculate_external_metrics(sess, iteration, writer, true_labels, predicted)
 
+        Tester.save_predictions(iteration, results_dir, predicted)
+
     @staticmethod
     def save_loss(sess, loss, iteration: int, writer: tf.summary.FileWriter):
         """
@@ -255,17 +263,15 @@ class Tester(object):
         writer.add_summary(summary, iteration)
 
     @staticmethod
-    def _add_non_zero(first_tensor: tf.Tensor, second_tensor: tf.Tensor):
+    def _replace_zeroes(tensor: tf.Tensor, correction=0.001):
         """
-        Adds two tensors and an additional auxiliary tensor to make sure that the resulting
-        value is always greater than zer if both first_tensor and second_tensor contain only positive values
+        Replaces a tensor zero-values with a correction value
 
-        :param first_tensor: the first tensor to be added
-        :param second_tensor: the second tensor to be added
-        :return: a tensor with the sum of first_tensor and second_tensor
+        :param tensor: the tensor to be masked
+        :param correction: the correction to be performed when an element is zero
+        :return: a tensor that replaces zero values with the correction
         """
-        return tf.add(tf.add(first_tensor, second_tensor),
-                      tf.fill(tf.shape(first_tensor), 0.001))
+        return tf.where(tf.equal(tensor, 0), tf.fill(tf.shape(tensor), correction), tensor)
 
     def _calculate_external_metrics(self, sess, iteration: int, writer: tf.summary.FileWriter, true_labels,
                                     predictions):
@@ -284,3 +290,20 @@ class Tester(object):
         auc_summary = self.external_tensors["AUC"]
         summary = sess.run(auc_summary, feed_dict={self.aux_tensors["AUC_AUX"]: auc})
         writer.add_summary(summary, iteration)
+
+    @staticmethod
+    def save_predictions(iteration: int, results_dir: str, predicted):
+        """
+        Saves the predictions into a file as a numpy array. They will be saved in
+        results_dir/predictions/{iteration}.npy
+
+        :param iteration: the current iteration number over the training data
+        :param results_dir: the folder where the predictions should be stored. If None then the results are not stored
+        :param predicted: the predicted labels of the model
+        :return: None
+        """
+        if results_dir is not None:
+            summaries_path = os.path.join(results_dir, 'predictions')
+            if not os.path.isdir(summaries_path):
+                os.makedirs(summaries_path)
+            np.save(os.path.join(summaries_path, f'{iteration}.npy'), predicted)
