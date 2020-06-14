@@ -44,6 +44,6 @@ class CaltechExperimentRILBC(CaltechExperiment):
         scenarios = None
         scenarios = self._add_scenario(scenarios, base_config, 'Test with 1% of data stored as representatives')
         scenario = copy.copy(base_config)
-        scenario.memory_size = 10
-        scenarios = self._add_scenario(scenarios, scenario, 'Test with 10% of data stored as representatives')
+        scenario.memory_size = 5
+        scenarios = self._add_scenario(scenarios, scenario, 'Test with 5% of data stored as representatives')
         return scenarios
