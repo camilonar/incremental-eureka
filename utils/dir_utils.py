@@ -26,7 +26,8 @@ def prepare_directories(config: GeneralConfig):
     :return: a tuple containing a path for a checkpoint directory and a path for a summaries directory
     """
     ckpt_path = os.path.join('checkpoints', config.model_name, config.config_name)
-    summaries_path = os.path.join('summaries', config.model_name, config.config_name, get_unique_logdir())
+    directory_name = config.config_name + '_' + str(config.train_mode).split('.')[-1] + '_' + str(config.scenario_id)
+    summaries_path = os.path.join('summaries', config.model_name, directory_name, get_unique_logdir())
     print("\nTo create a session of Tensorboard to visualize the data of this training use the following command: ")
     print("tensorboard --logdir=\"{}\" --host=127.0.0.1\n".format(os.path.abspath(summaries_path)))
 
