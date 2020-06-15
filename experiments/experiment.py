@@ -138,6 +138,7 @@ class Experiment(ABC):
         """
         if current_scenarios is None or len(current_scenarios) == 0:
             return [[new_scenario, scenario_desc]]
+        new_scenario.scenario_id = len(current_scenarios)
         current_scenarios.append([new_scenario, scenario_desc])
         return current_scenarios
 
