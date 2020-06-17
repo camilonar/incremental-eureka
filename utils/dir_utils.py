@@ -20,14 +20,17 @@ def get_unique_logdir():
 
 def prepare_directories(config: GeneralConfig):
     """
-    Creates and prepares the directories of checkpoints and summaries for TensorBoard
+    Creates and prepares the directories of checkpoints, summaries and predictions for TensorBoard
 
     :param config: the configuration that is going to be used in the whole training
-    :return: a tuple containing a path for a checkpoint directory and a path for a summaries directory
+    :return: a tuple containing a path for a checkpoint directory, a path for a summaries directory and a path where
+    the predictions of the network for the validation dataset will be stored if additional analysis is required
     """
     ckpt_path = os.path.join('checkpoints', config.model_name, config.config_name)
     directory_name = config.config_name + '_' + str(config.train_mode).split('.')[-1] + '_' + str(config.scenario_id)
-    summaries_path = os.path.join('summaries', config.model_name, directory_name, get_unique_logdir())
+    unique_logdir = get_unique_logdir()
+    summaries_path = os.path.join('summaries', config.model_name, directory_name, unique_logdir)
+    predictions_path = os.path.join('predictions', config.model_name, directory_name, unique_logdir)
     print("\nTo create a session of Tensorboard to visualize the data of this training use the following command: ")
     print("tensorboard --logdir=\"{}\" --host=127.0.0.1\n".format(os.path.abspath(summaries_path)))
 
@@ -37,7 +40,10 @@ def prepare_directories(config: GeneralConfig):
     if not os.path.isdir(summaries_path):
         os.makedirs(summaries_path)
 
-    return ckpt_path, summaries_path
+    if not os.path.isdir(predictions_path):
+        os.makedirs(predictions_path)
+
+    return ckpt_path, summaries_path, predictions_path
 
 
 def create_full_checkpoint_path(model_name: str, config_name: str, inc_ckp_path: str, root='checkpoints', ext='.ckpt'):

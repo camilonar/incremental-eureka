@@ -56,7 +56,7 @@ class Trainer(ABC):
 
         # Creation of additional attributes for training
         self.sess = None
-        self.ckp_dir, self.summaries_dir = None, None
+        self.ckp_dir, self.summaries_dir, self.predictions_dir = None, None, None
         self.loss, self.train_step = None, None
 
         # Creation of the mask for incremental learning
@@ -75,7 +75,7 @@ class Trainer(ABC):
 
         :return: None
         """
-        self.ckp_dir, self.summaries_dir = utils.prepare_directories(self.config)
+        self.ckp_dir, self.summaries_dir, self.predictions_dir = utils.prepare_directories(self.config)
         print("Preparing training...")
 
         # Creates the session
@@ -173,7 +173,7 @@ class Trainer(ABC):
                 if self.tester and i % config.summary_interval == 0 and not i == total_iteration:
                     print("Performing validation at iteration: {}. Loss is: {}. "
                           "Time is: {}".format(i, loss, interval))
-                    self.tester.perform_validation(self.sess, i, writer, self.summaries_dir)
+                    self.tester.perform_validation(self.sess, i, writer, self.predictions_dir)
                 if i % config.check_interval == 0:
                     self.saver.save_model(self.sess, self.ckp_dir, iteration, i, megabatch, interval)
                 if ttime and interval > ttime:

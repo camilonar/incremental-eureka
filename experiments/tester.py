@@ -295,7 +295,7 @@ class Tester(object):
     def save_predictions(iteration: int, results_dir: str, predicted):
         """
         Saves the predictions into a file as a numpy array. They will be saved in
-        results_dir/predictions/{iteration}.npy
+        results_dir/{iteration}.npy
 
         :param iteration: the current iteration number over the training data
         :param results_dir: the folder where the predictions should be stored. If None then the results are not stored
@@ -303,7 +303,4 @@ class Tester(object):
         :return: None
         """
         if results_dir is not None:
-            summaries_path = os.path.join(results_dir, 'predictions')
-            if not os.path.isdir(summaries_path):
-                os.makedirs(summaries_path)
-            np.save(os.path.join(summaries_path, f'{iteration}.npy'), predicted)
+            np.save(os.path.join(results_dir, f'{iteration}.npy'), predicted)
