@@ -114,8 +114,7 @@ class Network(ABC):
         '''Verifies that the padding is one of the supported ones.'''
         assert padding in ('SAME', 'VALID')
 
-    @layer
-    def conv(self,
+    def conv_layer(self,
              input,
              k_h,
              k_w,
@@ -156,6 +155,21 @@ class Network(ABC):
                 # ReLU non-linearity
                 output = tf.nn.relu(output, name=scope.name)
             return output
+
+    @layer
+    def conv(self,
+             input,
+             k_h,
+             k_w,
+             c_o,
+             s_h,
+             s_w,
+             name,
+             relu=True,
+             padding=DEFAULT_PADDING,
+             group=1,
+             biased=True):
+        return self.conv_layer(input, k_h, k_w, c_o, s_h, s_w, name, relu, padding, group, biased)
 
     @layer
     def relu(self, input, name):
@@ -220,12 +234,32 @@ class Network(ABC):
         if len(input_shape) > 2:
             # For certain models (like NiN), the singleton spatial dimensions
             # need to be explicitly squeezed, since they're not broadcast-able
-            # in TensorFlow's NHWC ordering (unlike Caffe's NCHW)            
+            # in TensorFlow's NHWC ordering (unlike Caffe's NCHW)
             if input_shape[1] == 1 and input_shape[2] == 1:
                 input = tf.squeeze(input, squeeze_dims=[1, 2])
             else:
                 raise ValueError('Rank 2 tensor input expected for softmax!')
         return tf.nn.softmax(input, name=name)
+
+    @layer
+    def inception_layer(self, input, conv_1_size, conv_3_reduce_size,
+                        conv_3_size, conv_5_reduce_size,
+                        conv_5_size, pool_proj_size,
+                        name='inception'):
+        """ Create an Inception Layer """
+        with tf.variable_scope(name):
+            conv_1 = self.conv_layer(input, 1, 1, conv_1_size, 1, 1, name='{}_1x1'.format(name))
+            conv_3_reduce = self.conv_layer(input, 1, 1, conv_3_reduce_size, 1, 1, name='{}_3x3_reduce'.format(name))
+            conv_3 = self.conv_layer(conv_3_reduce, 3, 3, conv_3_size, 1, 1, name='{}_3x3'.format(name))
+            conv_5_reduce = self.conv_layer(input, 1, 1, conv_5_reduce_size, 1, 1, name='{}_5x5_reduce'.format(name))
+            conv_5 = self.conv_layer(conv_5_reduce, 5, 5, conv_5_size, 1, 1, name='{}_5x5'.format(name))
+            pool = tf.nn.max_pool(input, ksize=[1, 1, 1, 1],
+                                  strides=[1, 1, 1, 1],
+                                  padding='SAME',
+                                  name='{}_pool'.format(name))
+            pool_proj = self.conv_layer(pool, 1, 1, pool_proj_size, 1, 1, name='{}_pool_proj'.format(name))
+
+            return tf.concat([conv_1, conv_3, conv_5, pool_proj], axis=3, name='{}_concat'.format(name))
 
     @layer
     def batch_normalization(self, input, name, scale_offset=True, relu=False, v_e=1e-5):

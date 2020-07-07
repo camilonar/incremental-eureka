@@ -9,6 +9,7 @@ from experiments.experiment import Experiment
 from networks.caffe_net import CaffeNet
 from etl.data.imagenet_data import ImagenetData
 import utils.constants as const
+from networks.google_net import GoogleNet
 
 
 class ImagenetExperiment(Experiment, ABC):
@@ -23,4 +24,4 @@ class ImagenetExperiment(Experiment, ABC):
         self.data_input = ImagenetData(self.general_config, self.train_dirs, self.validation_dir)
 
     def _prepare_neural_network(self):
-        self.neural_net = CaffeNet({'data': self.input_tensor})
+        self.neural_net = GoogleNet({'data': self.input_tensor})

@@ -157,7 +157,7 @@ class Trainer(ABC):
         print("Starting training of megabatch {}...".format(megabatch))
         start_time = time.time()
         i = total_iteration  # Iteration counting from the start of the training
-        self.tester.perform_validation(self.sess, i, writer, self.summaries_dir)  # Performs validation at the beginning
+        self.tester.perform_validation(self.sess, i, writer, self.predictions_dir)  # Performs validation at the beginning
 
         while True:
             try:

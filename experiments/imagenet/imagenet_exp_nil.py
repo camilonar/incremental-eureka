@@ -33,7 +33,7 @@ class ImagenetExperimentNIL(ImagenetExperiment):
         # Creates configuration for 5 mega-batches
         if train_mode == TrainMode.INCREMENTAL or train_mode == TrainMode.ACUMULATIVE:
             for i in range(5):
-                train_conf = MegabatchConfig(100, batch_size=100)
+                train_conf = MegabatchConfig(1, batch_size=128)
                 self.general_config.add_train_conf(train_conf)
         else:
             raise OptionNotSupportedError("The requested Experiment class: {} doesn't support the requested training"

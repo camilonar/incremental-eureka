@@ -91,7 +91,7 @@ def configure_dataset_and_neural_net(curr_dataset: str):
     print()
     print("----------------------------Configure the Dataset----------------------------")
     print("\n**Note** The dataset is associated with a fixed neural network. For example, if you choose Tiny \n"
-          "Imagenet Dataset then CaffeNet will be automatically selected as Model for the training.\n")
+          "Imagenet Dataset then GoogleNet will be automatically selected as Model for the training.\n")
 
     while True:
         print("[M] MNIST (uses LeNet)")
@@ -99,7 +99,7 @@ def configure_dataset_and_neural_net(curr_dataset: str):
         print("[C] CIFAR-10 (uses TFModel)")
         print("[D] CIFAR-100 (uses NiN)")
         print("[L] CALTECH-101 (uses AlexNet)")
-        print("[I] TINY IMAGENET (uses CaffeNet)")
+        print("[I] TINY IMAGENET (uses GoogleNet)")
         print("[X] Cancel Operation and return to Main Menu")
         response = input("Select a dataset: ").upper()
         if response == 'M':

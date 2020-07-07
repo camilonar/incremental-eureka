@@ -58,7 +58,7 @@ class Experiment(ABC):
     def _prepare_neural_network(self):
         """
         It creates and stores the proper neural network according to the assigned dataset of the tester.
-        E.g. if the Experiment performs experiments over ImageNet then it should create a CaffeNet, but if
+        E.g. if the Experiment performs experiments over ImageNet then it should create a GooglesNet, but if
         the experiments are over MNIST then it should create a LeNet.
         This method is expected to be executed right after _prepare_placeholders
 

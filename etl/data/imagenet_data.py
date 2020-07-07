@@ -54,8 +54,8 @@ class ImagenetData(Data):
                  train_dirs: [str],
                  validation_dir: str,
                  buffer_size=1000,
-                 image_height=256,
-                 image_width=256):
+                 image_height=224,
+                 image_width=224):
         print("Loading imagenet data")
         my_imagenet = DirectoryReader(train_dirs, validation_dir, general_config.train_mode)
         super().__init__(general_config, my_imagenet, (image_height, image_width, 3), buffer_size=buffer_size)
@@ -79,7 +79,7 @@ class ImagenetData(Data):
                 the label.
             """
             # one hot encode the target
-            single_target = tf.cast(tf.subtract(single_target, tf.constant(1)), tf.int32)
+            single_target = tf.cast(single_target, tf.int32)
             single_target = tf.one_hot(single_target, depth=number_of_classes)
 
             # load the jpg image according to path
