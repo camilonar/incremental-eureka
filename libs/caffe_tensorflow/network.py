@@ -37,7 +37,7 @@ def layer(op):
 
 class Network(ABC):
 
-    def __init__(self, inputs, trainable=True):
+    def __init__(self, inputs, num_outputs, trainable=True):
         # The input nodes for this network
         self.inputs = inputs
         # The current list of terminal nodes
@@ -50,9 +50,9 @@ class Network(ABC):
         self.use_dropout = tf.placeholder_with_default(tf.constant(1.0),
                                                        shape=[],
                                                        name='use_dropout')
-        self.setup()
+        self.setup(num_outputs)
 
-    def setup(self):
+    def setup(self, num_outputs):
         '''Construct the network. '''
         raise NotImplementedError('Must be implemented by the subclass.')
 

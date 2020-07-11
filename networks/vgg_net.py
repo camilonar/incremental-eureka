@@ -3,7 +3,7 @@ from utils import default_paths as paths
 
 
 class VGGNet(Network):
-    def setup(self):
+    def setup(self, num_outputs):
         """
         Creates a Neural Net with a VGG16 architecture. The input data must have been previously set in
          the constructor of the object as 'data'.
@@ -32,7 +32,7 @@ class VGGNet(Network):
          .conv(3, 3, 512, 1, 1, padding='SAME', name='conv5_3')
          .max_pool(2, 2, 2, 2, padding='SAME', name='pool5')
          .fc(256, name='fc7')
-         .fc(101, name='fc8'))
+         .fc(num_outputs, name='fc8'))
 
     @property
     def data_path(self):

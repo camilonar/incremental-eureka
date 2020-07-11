@@ -2,7 +2,7 @@ from libs.caffe_tensorflow.network import Network
 
 
 class CaffeNet(Network):
-    def setup(self):
+    def setup(self, num_outputs ):
         """
          Creates a Neural Net with a simplified CaffeNet architecture. The input data must have been previously set in
          the constructor of the object as 'data'.
@@ -22,4 +22,4 @@ class CaffeNet(Network):
          .max_pool(3, 3, 2, 2, padding='VALID', name='pool5')
          .fc(512, name='fc6')
          .dropout(0.5, name='drop6')
-         .fc(200, relu=False, name='fc8'))
+         .fc(num_outputs, relu=False, name='fc8'))

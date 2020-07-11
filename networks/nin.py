@@ -4,7 +4,7 @@ from libs.caffe_tensorflow.network import Network
 
 
 class NiN(Network):
-    def setup(self):
+    def setup(self, num_outputs):
         """
         Creates a Neural Net with NiN architecture. The input data must have been previously set in
         the constructor of the object as 'data'.
@@ -30,7 +30,7 @@ class NiN(Network):
          .max_pool(3, 3, 2, 2, padding='VALID', name='pool3')
          .conv(3, 3, 1024, 1, 1, name='conv4')
          .conv(1, 1, 1024, 1, 1, name='mlp7')
-         .conv(1, 1, 100, 1, 1, name='mlp8')
+         .conv(1, 1, num_outputs, 1, 1, name='mlp8')
          .avg_pool(6, 6, 1, 1, padding='VALID', name='pool4'))
 
     def get_output(self):

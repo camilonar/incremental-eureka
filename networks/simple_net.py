@@ -2,7 +2,7 @@ from libs.caffe_tensorflow.network import Network
 
 
 class SimpleNet(Network):
-    def setup(self):
+    def setup(self, num_outputs):
         """
         Creates a SimpleNet
 
@@ -69,4 +69,4 @@ class SimpleNet(Network):
          .max_pool(2, 2, 2, 2, name='pool5')
          .dropout(0.1, name='drop5')
 
-         .fc(100, relu=False, name='fc3'))
+         .fc(num_outputs, relu=False, name='fc3'))

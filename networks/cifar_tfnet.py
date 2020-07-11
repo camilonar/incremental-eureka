@@ -2,7 +2,7 @@ from libs.caffe_tensorflow.network import Network
 
 
 class CifarTFNet(Network):
-    def setup(self):
+    def setup(self, num_outputs):
         """
          Architecture taken from:
             https://www.tensorflow.org/tutorials/images/deep_cnn#model_training
@@ -18,4 +18,4 @@ class CifarTFNet(Network):
          .fc(384, name='fc3')
          .dropout(0.6, name="drop4")
          .fc(192, name='fc5')
-         .fc(10, relu=False, name='fc6'))
+         .fc(num_outputs, relu=False, name='fc6'))

@@ -3,7 +3,7 @@ from utils import default_paths as paths
 
 
 class AlexNet(Network):
-    def setup(self):
+    def setup(self, num_outputs):
         """
         Creates a Neural Net with a AlexNet architecture. The input data must have been previously set in
          the constructor of the object as 'data'.
@@ -29,7 +29,7 @@ class AlexNet(Network):
          .dropout(keep_prob=0.5, name="dp1")
          .fc(1024, name='fc7')
          .dropout(keep_prob=0.5, name="dp2")
-         .fc(101, relu=False, name='fc8'))
+         .fc(num_outputs, relu=False, name='fc8'))
 
     @property
     def data_path(self):

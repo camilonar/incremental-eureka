@@ -2,7 +2,7 @@ from libs.caffe_tensorflow.network import Network
 
 
 class LeNet(Network):
-    def setup(self):
+    def setup(self, num_outputs):
         """
         Creates a Neural Net with LeNet-5 architecture. The input shape of the tensor must follow the shape
         [None,32,32,C], where C is the number of color channels of the images, and C>=1. If the images are grayscale
@@ -22,4 +22,4 @@ class LeNet(Network):
          .max_pool(2, 2, 2, 2, padding='VALID', name='pool2')
          .fc(120, name='fc1')
          .fc(84, name='fc2')
-         .fc(10, relu=False, name='fc3'))
+         .fc(num_outputs, relu=False, name='fc3'))

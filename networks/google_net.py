@@ -2,7 +2,7 @@ from libs.caffe_tensorflow.network import Network
 
 
 class GoogleNet(Network):
-    def setup(self):
+    def setup(self, num_outputs):
         """
         Creates a Neural Net with GoogleNet architecture. The input must have been previously set in the constructor of
         the object as 'data'. E.g.:
@@ -58,4 +58,4 @@ class GoogleNet(Network):
          .inception_layer(192, 96, 192, 24, 64, 64, name="inception5b")
          .avg_pool(7, 7, 1, 1, padding='VALID', name='pool5')
          .dropout(keep_prob=0.4, name="dp1")
-         .fc(200, relu=False, name='fc1'))
+         .fc(num_outputs, relu=False, name='fc1'))

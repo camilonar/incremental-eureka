@@ -23,4 +23,4 @@ class FashionMnistExperiment(Experiment, ABC):
         self.data_input = FashionMnistData(self.general_config, self.train_dirs, self.validation_dir)
 
     def _prepare_neural_network(self):
-        self.neural_net = FashionMnistNet({'data': self.input_tensor})
+        self.neural_net = FashionMnistNet({'data': self.input_tensor}, 10)

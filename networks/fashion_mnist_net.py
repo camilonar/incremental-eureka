@@ -2,7 +2,7 @@ from libs.caffe_tensorflow.network import Network
 
 
 class FashionMnistNet(Network):
-    def setup(self):
+    def setup(self, num_outputs):
         """
         Network to be used with Fashion MNIST dataset
 
@@ -20,4 +20,4 @@ class FashionMnistNet(Network):
          .dropout(0.3, name="dp1")
          .fc(256, name='fc1')
          .dropout(0.5, name="dp2")
-         .fc(10, relu=False, name='fc3'))
+         .fc(num_outputs, relu=False, name='fc3'))
