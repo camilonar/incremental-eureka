@@ -28,12 +28,12 @@ class ImagenetExperimentNIL(ImagenetExperiment):
                                   tester=tester, checkpoint=self.ckp_path)
 
     def _prepare_config(self, str_optimizer: str, train_mode: TrainMode):
-        self.general_config = CRIFConfig(train_mode, 0.0001, self.summary_interval, self.ckp_interval,
+        self.general_config = CRIFConfig(train_mode, 0.01, self.summary_interval, self.ckp_interval,
                                          config_name=str_optimizer, model_name=self.dataset_name)
         # Creates configuration for 5 mega-batches
         if train_mode == TrainMode.INCREMENTAL or train_mode == TrainMode.ACUMULATIVE:
             for i in range(5):
-                train_conf = MegabatchConfig(1, batch_size=128)
+                train_conf = MegabatchConfig(10, batch_size=256)
                 self.general_config.add_train_conf(train_conf)
         else:
             raise OptionNotSupportedError("The requested Experiment class: {} doesn't support the requested training"
