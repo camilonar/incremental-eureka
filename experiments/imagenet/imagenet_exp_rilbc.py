@@ -29,7 +29,8 @@ class ImagenetExperimentRILBC(ImagenetExperiment):
 
     def _prepare_config(self, str_optimizer: str, train_mode: TrainMode):
         self.general_config = CRIFConfig(train_mode, 0.01, self.summary_interval, self.ckp_interval,
-                                         config_name=str_optimizer, model_name=self.dataset_name)
+                                         config_name=str_optimizer, model_name=self.dataset_name,
+                                         n_candidates=40, memory_size=5, buffer_size=1)
         # Creates configuration for 5 mega-batches
         if train_mode == TrainMode.INCREMENTAL or train_mode == TrainMode.ACUMULATIVE:
             for i in range(5):
@@ -43,6 +44,6 @@ class ImagenetExperimentRILBC(ImagenetExperiment):
         scenarios = None
         scenarios = self._add_scenario(scenarios, base_config, 'Test with 1% of data stored as representatives')
         scenario = copy.copy(base_config)
-        scenario.memory_size = 250
+        scenario.memory_size = 25
         scenarios = self._add_scenario(scenarios, scenario, 'Test with 5% of data stored as representatives')
         return scenarios
