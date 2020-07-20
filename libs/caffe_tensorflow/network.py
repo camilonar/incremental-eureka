@@ -4,6 +4,7 @@ From https://github.com/ethereon/caffe-tensorflow/tree/master/kaffe/tensorflow
 """
 from abc import ABC
 
+import math
 import numpy as np
 import tensorflow as tf
 
@@ -106,9 +107,9 @@ class Network(ABC):
         ident = sum(t.startswith(prefix) for t, _ in self.layers.items()) + 1
         return '%s_%d' % (prefix, ident)
 
-    def make_var(self, name, shape):
+    def make_var(self, name, shape, initializer=None):
         '''Creates a new TensorFlow variable.'''
-        return tf.get_variable(name, shape, trainable=self.trainable)
+        return tf.get_variable(name, shape, trainable=self.trainable, initializer=initializer)
 
     def validate_padding(self, padding):
         '''Verifies that the padding is one of the supported ones.'''
@@ -136,7 +137,8 @@ class Network(ABC):
         # Convolution for a given input and kernel
         convolve = lambda i, k: tf.nn.conv2d(i, k, [1, s_h, s_w, 1], padding=padding)
         with tf.variable_scope(name) as scope:
-            kernel = self.make_var('weights', shape=[k_h, k_w, int(c_i) / group, c_o])
+            init_range = math.sqrt(6.0 / (int(c_i) + c_o))
+            kernel = self.make_var('weights', shape=[k_h, k_w, int(c_i) / group, c_o], initializer=tf.random_uniform_initializer(-init_range, init_range))
             if group == 1:
                 # This is the common-case. Convolve the input without any further complications.
                 output = convolve(input, kernel)
@@ -222,7 +224,8 @@ class Network(ABC):
                 feed_in = tf.reshape(input, [-1, dim])
             else:
                 feed_in, dim = (input, input_shape[-1].value)
-            weights = self.make_var('weights', shape=[dim, num_out])
+            init_range = math.sqrt(6.0 / (dim + num_out))
+            weights = self.make_var('weights', shape=[dim, num_out], initializer=tf.random_uniform_initializer(-init_range, init_range))
             biases = self.make_var('biases', [num_out])
             op = tf.nn.relu_layer if relu else tf.nn.xw_plus_b
             fc = op(feed_in, weights, biases, name=scope.name)
@@ -357,3 +360,15 @@ class Network(ABC):
         :rtype: bool
         """
         return False
+
+    def create_loss(self, loss_function, tensor_y, output_modifier, **kwargs):
+        """
+        Creates a loss Tensor
+
+        :param loss_function: a callable that corresponds to a loss function
+        :param tensor_y: the tensor containing the true labels of the samples
+        :param output_modifier: a callable that receives a single tensor. Used to modify the
+            output of the network before applying the loss function
+        :return: a Tensor containing the loss
+        """
+        return loss_function(output_modifier(tensor_y), output_modifier(self.get_output()), **kwargs)

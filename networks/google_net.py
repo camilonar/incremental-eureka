@@ -51,11 +51,41 @@ class GoogleNet(Network):
          .inception_layer(96, 48, 104, 8, 24, 32, name="inception4a")
          .inception_layer(80, 56, 112, 12, 32, 32, name="inception4b")
          .inception_layer(64, 64, 128, 12, 32, 32, name="inception4c")
-         .inception_layer(56, 72, 144, 16, 32, 32, name="inception3d")
+         .inception_layer(56, 72, 144, 16, 32, 32, name="inception4d")
          .inception_layer(128, 80, 160, 16, 64, 64, name="inception4e")
          .max_pool(3, 3, 2, 2, padding='SAME', name='pool4')
          .inception_layer(128, 80, 160, 16, 64, 64, name="inception5a")
          .inception_layer(192, 96, 192, 24, 64, 64, name="inception5b")
          .avg_pool(7, 7, 1, 1, padding='VALID', name='pool5')
-         .dropout(keep_prob=0.4, name="dp1")
+         .dropout(keep_prob=0.6, name="dp1")
          .fc(num_outputs, relu=False, name='fc1'))
+        self.stem1 = self.auxiliary_classifier('inception4a', num_outputs, 'aux1')
+        self.stem2 = self.auxiliary_classifier('inception4d', num_outputs, 'aux2')
+        self.feed('fc1')
+
+    def auxiliary_classifier(self, input, num_outputs, name):
+        """
+        Creates an auxiliary classifier for GoogleNet
+
+        :param input: the input layer for the auxiliary classifier. Can be a name, or the
+            layer itself
+        :param num_outputs: number of outputs of the auxiliary classifier
+        :param name: the name of the auxiliary_classifier
+        :return: the output of the auxiliary classifier
+        """
+        (self.feed(input)
+         .avg_pool(5, 5, 3, 3, padding='SAME', name='{}_pool1'.format(name))
+         .conv(1, 1, 64, 1, 1, padding='SAME', name='{}_conv1'.format(name))
+         .fc(512, relu=True, name='{}_fc1'.format(name))
+         .dropout(keep_prob=0.7, name='{}_dp1'.format(name))
+         .fc(num_outputs, relu=False, name='{}_fc2'.format(name)))
+        return self.get_output()
+
+    def create_loss(self, loss_function, tensor_y, output_modifier, **kwargs):
+        def loss(output):
+            return loss_function(output_modifier(tensor_y), output_modifier(output), **kwargs)
+            
+        ls1 = loss(self.get_output())
+        ls2 = loss(self.stem1)
+        ls3 = loss(self.stem2)
+        return ls1 + 0.3 * ls2 + 0.3 * ls3

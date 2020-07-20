@@ -18,9 +18,8 @@ class RMSPropTrainer(Trainer):
                         feed_dict={tensor_x: image_batch, tensor_y: target_batch,
                                    self.mask_tensor: self.mask_value})
 
-    def _create_loss(self, tensor_y: tf.Tensor, net_output: tf.Tensor):
-        return tf.losses.softmax_cross_entropy(tf.multiply(tensor_y, self.mask_tensor),
-                                               tf.multiply(net_output, self.mask_tensor))
+    def _precreate_loss(self):
+        return tf.losses.softmax_cross_entropy, {}
 
     def _create_optimizer(self, config: GeneralConfig, loss: tf.Tensor, var_list=None):
         return tf.train.RMSPropOptimizer(config.learn_rate).minimize(loss, var_list=var_list)

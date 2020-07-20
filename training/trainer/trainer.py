@@ -87,7 +87,7 @@ class Trainer(ABC):
 
         # Creates loss function and optimizer
         self.mask_value, self.mask_tensor = self._create_mask(self.model.get_output())
-        self.loss = self._create_loss(self.tensor_y, self.model.get_output())
+        self.loss = self._create_loss(self.tensor_y)
         self.train_step = self._create_optimizer(self.config, self.loss, self.model.trainable_variables)
 
         # Prepares checkpoints and initializes variables
@@ -227,14 +227,34 @@ class Trainer(ABC):
                 if c > 0:
                     mask[i] = 1
 
+    def _create_loss(self, tensor_y: tf.Tensor):
+        """
+        Creates a loss function taking the function and parameters returned from the _precreate_loss method and the 
+        loss defined in the current Network
+
+        :param tensor_y: the tensor corresponding to the output of a training
+        :return: a Tensor containing the loss
+        """
+        def apply_mask(tensor: tf.Tensor):
+            """
+            Applies the defined mask to the tensor
+
+            :param tensor: the tensor which the mask is going to be applied
+            :return: a Tensor with the masked values
+            """
+            return tf.multiply(tensor, self.mask_tensor)
+        
+        loss, kargs = self._precreate_loss()
+        return self.model.create_loss(loss, tensor_y, apply_mask, **kargs)
+
     @abstractmethod
-    def _create_loss(self, tensor_y: tf.Tensor, net_output: tf.Tensor):
+    def _precreate_loss(self):
         """
         Creates a loss function
 
-        :param tensor_y: the tensor corresponding to the output of a training
-        :param net_output: a tensor corresponding to the last layer of a neural network
-        :return: a Tensor corresponding to the loss function
+        :return: a tuple. The first value must correspond to a loss function (i.e. a callable),
+        and the second one must be a dictionary with the arguments for that loss function not
+        including the labels and logits
         """
         raise NotImplementedError("The subclass hasn't implemented the _create_loss method")
 

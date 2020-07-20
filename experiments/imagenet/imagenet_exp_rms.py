@@ -25,7 +25,7 @@ class ImagenetExperimentRMSProp(ImagenetExperiment):
                                       self.input_tensor, self.output_tensor, tester=tester, checkpoint=self.ckp_path)
 
     def _prepare_config(self, str_optimizer: str, train_mode: TrainMode):
-        self.general_config = GeneralConfig(train_mode, 0.01, self.summary_interval, self.ckp_interval,
+        self.general_config = GeneralConfig(train_mode, 0.001, self.summary_interval, self.ckp_interval,
                                             config_name=str_optimizer, model_name=self.dataset_name)
         # Creates configuration for 5 mega-batches
         if train_mode == TrainMode.INCREMENTAL:

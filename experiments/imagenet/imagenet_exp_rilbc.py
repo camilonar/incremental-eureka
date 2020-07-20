@@ -28,7 +28,7 @@ class ImagenetExperimentRILBC(ImagenetExperiment):
                                     tester=tester, checkpoint=self.ckp_path)
 
     def _prepare_config(self, str_optimizer: str, train_mode: TrainMode):
-        self.general_config = CRIFConfig(train_mode, 0.01, self.summary_interval, self.ckp_interval,
+        self.general_config = CRIFConfig(train_mode, 0.001, self.summary_interval, self.ckp_interval,
                                          config_name=str_optimizer, model_name=self.dataset_name,
                                          n_candidates=40, memory_size=5, buffer_size=1)
         # Creates configuration for 5 mega-batches

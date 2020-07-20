@@ -32,9 +32,8 @@ class CRIFTrainer(Trainer, ABC):
         self.n_candidates = config.n_candidates
         self.buffer_size = config.buffer_size
 
-    def _create_loss(self, tensor_y: tf.Tensor, net_output: tf.Tensor):
-        return tf.losses.softmax_cross_entropy(tf.multiply(tensor_y, self.mask_tensor),
-                                               tf.multiply(net_output, self.mask_tensor), weights=self.weights)
+    def _precreate_loss(self):
+        return tf.losses.softmax_cross_entropy, {"weights": self.weights}
 
     def _create_optimizer(self, config: CRIFConfig, loss: tf.Tensor, var_list=None):
         return tf.train.RMSPropOptimizer(config.learn_rate).minimize(loss, var_list=var_list)
