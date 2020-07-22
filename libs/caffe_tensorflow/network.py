@@ -196,6 +196,16 @@ class Network(ABC):
                               name=name)
 
     @layer
+    def adaptive_avg_pool(self, input, s_h, s_w, name, padding=DEFAULT_PADDING):
+        self.validate_padding(padding)
+        _, H, W, _ = input.shape
+        return tf.nn.avg_pool(input,
+                              ksize=[1, H, W, 1],
+                              strides=[1, s_h, s_w, 1],
+                              padding=padding,
+                              name=name)
+
+    @layer
     def lrn(self, input, radius, alpha, beta, name, bias=1.0):
         return tf.nn.local_response_normalization(input,
                                                   depth_radius=radius,
@@ -263,9 +273,31 @@ class Network(ABC):
             pool_proj = self.conv_layer(pool, 1, 1, pool_proj_size, 1, 1, name='{}_pool_proj'.format(name))
 
             return tf.concat([conv_1, conv_3, conv_5, pool_proj], axis=3, name='{}_concat'.format(name))
+    
+    @layer
+    def residual_layer(self, input, filters, stride=1, name='residual'):
+        """ Create a Residual Layer """
+        with tf.variable_scope(name):
+            conv_1 = self.conv_layer(input, 3, 3, filters, stride, stride, padding='SAME', name='{}_conv1'.format(name))
+            norm_1 = self.batch_norm_layer(conv_1, relu=True, name='{}_norm1'.format(name))
+            conv_2 = self.conv_layer(norm_1, 3, 3, filters, 1, 1, padding='SAME', name='{}_conv2'.format(name))
+            norm_2 = self.batch_norm_layer(conv_2, name='{}_norm2'.format(name))
+            
+            if stride != 1:
+                input = tf.nn.max_pool(input, ksize=[1, stride, stride, 1],
+                                    strides=[1, stride, stride, 1],
+                                    padding='SAME',
+                                    name='{}_pool'.format(name))
+                input = self.conv_layer(input, 1, 1, filters, 1, 1, padding='SAME', name='{}_conv3'.format(name))
+
+            output = norm_2 + input
+            return tf.nn.relu(output, name='{}_relu'.format(name))
 
     @layer
     def batch_normalization(self, input, name, scale_offset=True, relu=False, v_e=1e-5):
+        return self.batch_norm_layer(input, name, scale_offset, relu, v_e)
+
+    def batch_norm_layer(self, input, name, scale_offset=True, relu=False, v_e=1e-5):
         # NOTE: Currently, only inference is supported
         with tf.variable_scope(name) as scope:
             shape = [input.get_shape()[-1]]

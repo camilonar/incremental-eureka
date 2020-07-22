@@ -37,7 +37,7 @@ CALTECH_101_PATH = os.path.join(__DATASET_PATH, "101_ObjectCategories_EXTRA")
 """
 Default path for the directory where Caltech 101 is stored
 """
-TINY_IMAGENET_PATH = os.path.join(__DATASET_PATH, "tiny-imagenet-200")
+TINY_IMAGENET_PATH = os.path.join(__DATASET_PATH, "TINY_IMAGENET_EXTRA")
 """
 Default path for the directory where Tiny Imagenet is stored
 """
