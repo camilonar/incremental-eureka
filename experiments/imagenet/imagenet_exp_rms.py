@@ -33,9 +33,9 @@ class ImagenetExperimentRMSProp(ImagenetExperiment):
                 train_conf = MegabatchConfig(10, batch_size=256)
                 self.general_config.add_train_conf(train_conf)
         elif train_mode == TrainMode.ACUMULATIVE:
-            train_confs = [MegabatchConfig(10, batch_size=256), MegabatchConfig(5, batch_size=256),
-                           MegabatchConfig(3, batch_size=256), MegabatchConfig(3, batch_size=256),
-                           MegabatchConfig(3, batch_size=256)]
+            train_confs = [MegabatchConfig(15, batch_size=256), MegabatchConfig(10, batch_size=256),
+                           MegabatchConfig(8, batch_size=256), MegabatchConfig(5, batch_size=256),
+                           MegabatchConfig(7, batch_size=256)]
             self.general_config.train_configurations = train_confs
         else:
             raise OptionNotSupportedError("The requested Experiment class: {} doesn't support the requested training"

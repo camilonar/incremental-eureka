@@ -54,8 +54,8 @@ class ImagenetData(Data):
                  train_dirs: [str],
                  validation_dir: str,
                  buffer_size=1000,
-                 image_height=224,
-                 image_width=224):
+                 image_height=64,
+                 image_width=64):
         print("Loading imagenet data")
         my_imagenet = DirectoryReader(train_dirs, validation_dir, general_config.train_mode)
         super().__init__(general_config, my_imagenet, (image_height, image_width, 3), buffer_size=buffer_size)

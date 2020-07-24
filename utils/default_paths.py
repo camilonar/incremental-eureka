@@ -179,7 +179,7 @@ def __get_tiny_imagenet_paths(base_folder: str = TINY_IMAGENET_PATH):
     :return: a tuple, where the first value is an array of strings corresponding to the paths of each one of the
         mega-batches for training, and the second value is a string corresponding to the path of the testing data
     """
-    base = os.path.join(base_folder, "train_split")
+    base = os.path.join(base_folder, "train")
     train_dirs = [os.path.join(base, "Lote{}".format(x)) for x in range(0, 5)]
 
     validation_dir = os.path.join(base_folder, "val")

@@ -69,7 +69,7 @@ class Network(ABC):
         print("Loading networks weights for transfer learning from {}".format(data_path))
         if not train_layers:
             train_layers = []
-        data_dict = np.load(data_path, encoding='bytes').item()
+        data_dict = np.load(data_path, encoding='bytes', allow_pickle=True).item()
         for op_name in data_dict:
             if op_name not in train_layers:
                 with tf.variable_scope(op_name, reuse=True):
@@ -266,7 +266,7 @@ class Network(ABC):
             conv_3 = self.conv_layer(conv_3_reduce, 3, 3, conv_3_size, 1, 1, name='{}_3x3'.format(name))
             conv_5_reduce = self.conv_layer(input, 1, 1, conv_5_reduce_size, 1, 1, name='{}_5x5_reduce'.format(name))
             conv_5 = self.conv_layer(conv_5_reduce, 5, 5, conv_5_size, 1, 1, name='{}_5x5'.format(name))
-            pool = tf.nn.max_pool(input, ksize=[1, 1, 1, 1],
+            pool = tf.nn.max_pool(input, ksize=[1, 3, 3, 1],
                                   strides=[1, 1, 1, 1],
                                   padding='SAME',
                                   name='{}_pool'.format(name))

@@ -41,6 +41,10 @@ class DirectoryReader(Reader):
         elif self.train_mode == TrainMode.ACUMULATIVE:
             self.train_filenames.extend(tr_filenames)
             self.train_labels.extend(tr_labels)
+            shuffled_index = list(range(len(self.train_filenames)))
+            random.shuffle(shuffled_index)
+            self.train_filenames = [self.train_filenames[i] for i in shuffled_index]
+            self.train_labels = [self.train_labels[i] for i in shuffled_index]
         else:
             raise OptionNotSupportedError("The requested Reader class: {} doesn't support the requested training"
                                           " mode: {}".format(self.__class__, self.train_mode))
